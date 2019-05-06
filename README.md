@@ -52,8 +52,36 @@ jf.simulation.spherical_contraction('test.msh', 'simu', 100, jf.materials.collag
 More detailed information about the output files of a simulation can be found the [Wiki of the SAENO project](https://github.com/Tschaul/SAENO/wiki). The file `parameters.txt` contains all parameters used int he simulation. Note that `jointforces` provides functions that read in the resulting files of material simulations again to facilitate a comparison of simulated and measured deformation fields, as detailed below.
 
 #### Material parameters
+`jointforces` provides "pre-configured" material types for collagen gels of three different concentrations (0.6, 1.2, and 2.4mg/ml). Detailed protocols for reproducing these gels can be found in [Steinwachs et al. (2016)](https://www.nature.com/articles/nmeth.3685) and [Condor et al. (2017)](https://currentprotocols.onlinelibrary.wiley.com/doi/abs/10.1002/cpcb.24). Furthermore, one can define a linear elastic material with a specified `stiffness` (in Pa) with:
+
+```
+jf.materials.linear(stiffness)
+```
+
+To define a non-linear elastic material, use the `custom` material type:
+
+```
+jf.materials.custom(K_0, D_0, L_S, D_S)
+```
+
+Non-linear materials are characterized by four parameters:
+- `K_0`: the linear stiffness (in Pa)
+- `D_0`: the rate of stiffness variation during fiber buckling
+- `L_S`: the onset strain for strain stiffening
+- `D_S`: the rate of stiffness variation during strain stiffening
+A full description of the non-linear material model and the parameters can be found in [Steinwachs et al. (2016)](https://www.nature.com/articles/nmeth.3685)
 
 #### Running simulations in parallel
+To be able to estimate the contractility of a multicellular aggregate by relating the measured deformation field to simulated ones, we need to execute a set of simulations that cover a wide range of contractile pressures. To speed up this process, `jointforces` provides a parallelization method that distributes individual instances of the `SAENO` optimizer across different CPU cores. The following code snippet runs 100 simulations ranging from pressure values of 0.1Pa to 1000Pa (logarithmically spaced):
+
+```
+jf.simulation.distribute('jf.simulation.spherical_contraction',
+                         const_args={'meshfile': 'spherical-contraction.msh', 'outfolder': 'simu',
+                         'material': jf.materials.collagen12},
+                         var_arg='pressure', start=0.1, end=1000, n=100, log_scaling=True)
+```
+
+The method automatically creates subfolders within the output-folder `simu`, called `simulation000000`, `simulation000001`, and so on, plus a file `pressure-values.txt` that contains the list of pressure values used in the simulations.
 
 ### 4. Pressure lookup tables
 
