@@ -74,7 +74,7 @@ A full description of the non-linear material model and the parameters can be fo
 #### Running simulations in parallel
 To be able to estimate the contractility of a multicellular aggregate by relating the measured deformation field to simulated ones, we need to execute a set of simulations that cover a wide range of contractile pressures. To speed up this process, `jointforces` provides a parallelization method that distributes individual instances of the `SAENO` optimizer across different CPU cores. The following code snippet runs 100 simulations ranging from pressure values of 0.1Pa to 1000Pa (logarithmically spaced):
 
-```
+```python
 jf.simulation.distribute('jf.simulation.spherical_contraction',
                          const_args={'meshfile': 'spherical-contraction.msh', 'outfolder': 'simu',
                          'material': jf.materials.collagen12},
