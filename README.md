@@ -5,10 +5,14 @@
 A Python package for conducting 3D traction force microscopy on multicellular aggregates (so-called *spheroids*). `jointforces` provides high-level interfaces to the open-source finite element mesh generator [`Gmsh`](http://gmsh.info/) and to the network optimizer [`SAENO`](https://github.com/Tschaul/SAENO), facilitating material simulations of contracting multicellular aggregates in highly non-linear biopolymer gels such as collagen. Additionally, `jointforces` provides an easy-to-use API for analyzing time-lapse images of contracting multicellular aggregates using the particle image velocimetry framework `OpenPIV`.
 
 ## Installation
-TODO
+The current version of this package can be downloaded as a zip file [here](https://github.com/christophmark/bayesloop/zipball/master), or by cloning this repository. After unzipping, run the following command within the unzipped folder: `pip install -e .`. This will automatically download and install all other required packages.
+
+`jointforces` relies on the Python bindings of the mesh generator [`Gmsh`](http://gmsh.info/) to create finite element geometries. These Python bindings are available in the `Gmsh SDK` that can be downloaded [here](http://gmsh.info/#Download), or by running the following command: `pip install --upgrade gmsh-sdk`.
+
+`jointforces` uses [`SAENO`](https://github.com/Tschaul/SAENO) to find equilibrium configurations in material simulations. We provide precompiled binary executables of `SAENO` for 64bit Windows systems [here](https://github.com/christophmark/jointforces/tree/master/docs/bin). The source code for building SAENO on other platforms can be found [here](https://github.com/Tschaul/SAENO).
 
 ## Documentation
-This section details a complete walk-through of the analysis of a 3D traction force microscopy experiment. The data we use in this example can be downloaded here (TODO). The data consists of XXX consecutive images of a MCF7 tumor spheroid contracting for 12h within a 1.2mg/ml collagen gel. The contractility of a multicellular aggregate is estimated by comparing the measured deformation field induced by the contracting cells to a set of simulated deformation fields of varying contractility. While we provide precompiled simulation for various materials, this documentation not only covers the force reconstruction step, but also the material simulations.
+This section details a complete walk-through of the analysis of a 3D traction force microscopy experiment. The data we use in this example can be downloaded [here](https://github.com/christophmark/jointforces/tree/master/docs/data). The data consists of 145 consecutive images of a MCF7 tumor spheroid contracting for 12h within a 1.2mg/ml collagen gel. The contractility of a multicellular aggregate is estimated by comparing the measured deformation field induced by the contracting cells to a set of simulated deformation fields of varying contractility. While we provide precompiled simulations for various materials, this documentation not only covers the force reconstruction step, but also the material simulations.
 
 The module is imported in Python as:
 
@@ -17,7 +21,7 @@ import jointforces as jf
 ```
 
 ### 1. Setting up interfaces
-The first step is to tell `jointforces` where `Gmsh` and `SAENO` are stored. This only has to be done once, or again whenever one of the programs os moved/re-installed.
+The first step is to tell `jointforces` where `Gmsh` and `SAENO` are stored. This only has to be done once, or again whenever one of the programs os moved/re-installed. Note that the path to `Gmsh` does not have to be set if the `Gmsh SDK` has been installed via `pip` (see installation instructions above).
 
 ```python
 jf.set_gmsh_path(r'C:\Software\gmsh-4.3.0-Windows64-sdk')
