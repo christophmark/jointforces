@@ -119,11 +119,34 @@ jf.piv.compute_displacement_series('MCF7-time-lapse', '*.tif', 'MCF7-piv',
                                    window_size=70, cutoff=700)
 ```
 
-The command performs PIV on all `*.tif` files in the the folder `MCF7-time-lapse`, the results are saved int he folder `MCF7-piv`. The window size of teh PIV algorithm should be chosen as small as possible to increase spatial resolution, but also large enough to contain multiple fiducial markers for an accurate detection of local material deformations.
+The command performs PIV on all `*.tif` files in the the folder `MCF7-time-lapse`, the results are saved int he folder `MCF7-piv`. The window size of the PIV algorithm should be chosen as small as possible to increase spatial resolution, but also large enough to contain multiple fiducial markers for an accurate detection of local material deformations. The `cutoff` parameter can be used to disregard all displacements that are detected further away from the center than the set value (e.g. because an optical coupler is visible in the corners of the image).
 
 ![Loading GIF...](https://raw.githubusercontent.com/christophmark/jointforces/master/docs/gifs/mcf7-piv.gif)
 
 ### 6. Force reconstruction
+
+Finally, we may use the lookup functions we have created above and use them to assign the best-fit pressure - and thus the best-fit contractility - to each time step of the image series. The output is a [`Pandas`](https://pandas.pydata.org/) Dataframe containing mean values and standard deviation of both pressure and contractility. If a filename is provided, the results are also saved as an Excel file:
+
+```python
+res = jf.force.reconstruct('MCF7-piv', 'lookup.pkl', 6.45/5, 'MCF7-recon.xlsx')
+
+t = np.arange(len(res))*5/60
+mu = res['Mean Contractility (µN)']
+std = res['St.dev. Contractility (µN)']
+
+plt.figure(figsize=(6, 3))
+plt.plot(t, mu, lw=2, c='C0')
+plt.fill_between(t, mu-std, mu+std, facecolor='C0', lw=0, alpha=0.5)
+plt.grid()
+plt.xlabel('Time (h)')
+plt.ylabel('Contractility (µN)')
+plt.tight_layout()
+plt.show()
+```
+
+![Plot](https://raw.githubusercontent.com/christophmark/jointforces/master/docs/images/mcf7-recon.png)
+
+![Table](https://raw.githubusercontent.com/christophmark/jointforces/master/docs/images/mcf7-excel.png)
 
 ## Dependencies
 *jointforces* is tested on Python 3.7 and a Windows 10 64bit system. It depends on ... All except ... are already included in the [Anaconda distribution](https://www.continuum.io/downloads) of Python. Windows users may also take advantage of pre-compiled binaries for all dependencies, which can be found at [Christoph Gohlke's page](http://www.lfd.uci.edu/~gohlke/pythonlibs/).
