@@ -159,8 +159,8 @@ def save_displacement_plot(filename, img, segmentation, displacements, quiver_sc
 
 
 def compute_displacement_series(folder, filter, outfolder, n_max=None, enhance=True,
-                                window_size=40, cutoff=None, drift_correction=True,
-                                plot=True, quiver_scale=1, color_norm=75.):
+                                window_size=70, cutoff=None, drift_correction=True,
+                                plot=True, quiver_scale=10, color_norm=500.):
     img_files = natsorted(glob(folder+'/'+filter))
 
     if n_max is not None:
