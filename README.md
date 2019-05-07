@@ -21,7 +21,7 @@ import jointforces as jf
 ```
 
 ### 1. Setting up interfaces
-The first step is to tell `jointforces` where `Gmsh` and `SAENO` are stored. This only has to be done once, or again whenever one of the programs os moved/re-installed. Note that the path to `Gmsh` does not have to be set if the `Gmsh SDK` has been installed via `pip` (see installation instructions above).
+The first step is to tell `jointforces` where `Gmsh` and `SAENO` are stored. This only has to be done once, or again whenever one of the programs is moved/re-installed. Note that the path to `Gmsh` does not have to be set if the `Gmsh SDK` has been installed via `pip` (see installation instructions above).
 
 ```python
 jf.set_gmsh_path(r'C:\Software\gmsh-4.3.0-Windows64-sdk')
