@@ -125,7 +125,7 @@ The command performs PIV on all `*.tif` files in the the folder `MCF7-time-lapse
 
 ### 6. Force reconstruction
 
-Finally, we may use the lookup functions we have created above and use them to assign the best-fit pressure - and thus the best-fit contractility - to each time step of the image series. The output is a [`Pandas`](https://pandas.pydata.org/) Dataframe containing mean values and standard deviation of both pressure and contractility. If a filename is provided, the results are also saved as an Excel file:
+Finally, we may use the lookup functions we have created above and use them to assign the best-fit pressure to each time step of the image series. Additionally, the user supplies the size of one pixel in the image in micrometers. With this information, the surface are of the spheroid is calculated to obtain the total contractility. The output is a [`Pandas`](https://pandas.pydata.org/) Dataframe containing mean values and standard deviation of both pressure and contractility. If a filename is provided, the results are also saved as an Excel file:
 
 ```python
 res = jf.force.reconstruct('MCF7-piv', 'lookup.pkl', 6.45/5, 'MCF7-recon.xlsx')
