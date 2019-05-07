@@ -149,7 +149,7 @@ plt.show()
 ![Table](https://raw.githubusercontent.com/christophmark/jointforces/master/docs/images/mcf7-excel.png)
 
 ## Dependencies
-*jointforces* is tested on Python 3.7 and a Windows 10 64bit system. It depends on ... All except ... are already included in the [Anaconda distribution](https://www.continuum.io/downloads) of Python. Windows users may also take advantage of pre-compiled binaries for all dependencies, which can be found at [Christoph Gohlke's page](http://www.lfd.uci.edu/~gohlke/pythonlibs/).
+*jointforces* is tested on Python 3.7 and a Windows 10 64bit system. It depends on `numpy`, `pandas`, `matplotlib`, `scipy`, `scikit-image`, `openpiv`, `tqdm`, `natsort`, and `dill`. We recommend using the [Anaconda distribution](https://www.continuum.io/downloads) of Python. Windows users may also take advantage of pre-compiled binaries for all dependencies, which can be found at [Christoph Gohlke's page](http://www.lfd.uci.edu/~gohlke/pythonlibs/).
 
 ## License
 The `jointforces` package itself is licensed under the [MIT License](https://github.com/christophmark/jointforces/blob/master/LICENSE). The [exemplary data](https://github.com/christophmark/jointforces/tree/master/docs/data) and the [precompiled binaries](https://github.com/christophmark/jointforces/tree/master/docs/bin) of SAENO are provided "as is", without any warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement.
