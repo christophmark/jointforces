@@ -1,6 +1,6 @@
 # jointforces
 
-![MCF7-raw](https://raw.githubusercontent.com/christophmark/jointforces/master/docs/gifs/mcf7-raw.gif)
+![Loading GIF...](https://raw.githubusercontent.com/christophmark/jointforces/master/docs/gifs/mcf7-raw.gif)
 
 A Python package for conducting 3D traction force microscopy on multicellular aggregates (so-called *spheroids*). `jointforces` provides high-level interfaces to the open-source finite element mesh generator [`Gmsh`](http://gmsh.info/) and to the network optimizer [`SAENO`](https://github.com/Tschaul/SAENO), facilitating material simulations of contracting multicellular aggregates in highly non-linear biopolymer gels such as collagen. Additionally, `jointforces` provides an easy-to-use API for analyzing time-lapse images of contracting multicellular aggregates using the particle image velocimetry framework `OpenPIV`.
 
@@ -84,8 +84,44 @@ jf.simulation.distribute('jf.simulation.spherical_contraction',
 The method automatically creates subfolders within the output-folder `simu`, called `simulation000000`, `simulation000001`, and so on, plus a file `pressure-values.txt` that contains the list of pressure values used in the simulations.
 
 ### 4. Pressure lookup tables
+To compare a measured deformation field to a set of simulated ones, we need to create a lookup table that output the expected pressure for a given strain at a given distance from the spheroid (or the expected strain for a given pressure at a given distance). First, we convert the 3D displacement fields into a set of radial displacement curves:
+
+```python
+lookup_table = jf.simulation.create_lookup_table('simu')
+```
+
+Now we can interpolate between individual simulations to create lookup functions for pressure values and strain values:
+
+```python
+get_displacement, get_pressure = jf.simulation.create_lookup_functions(lookup_table)
+```
+
+Finally, we may save these functions to file, e.g. to load them again in another script:
+
+```python
+jf.simulation.save_lookup_functions(get_displacement, get_pressure, 'lookup.pkl')
+get_displacement, get_pressure = jf.simulation.load_lookup_functions('lookup.pkl')
+```
+
+For example, we may now ask for the estimated pressure of a spheroid with radius `r` that induces a deformation of `0.2*r` at a distance of `2*r`:
+
+```python
+print(get_pressure(2, 0.2))
+>>> 120.56001018487754
+```
 
 ### 5. Particle image velocimetry
+
+Up to this point, we have only covered material simulations, but not the analysis of measured time-lapse image series. To detect deformations in the material surrounding the spheroid, `jointforces` uses the [Particle Image Velocimetry](https://en.wikipedia.org/wiki/Particle_image_velocimetry) algorithm of the [`OpenPIV`](http://www.openpiv.net/openpiv-python/) package. The following command automatically reads in all image files that match a filterstring within a given folder, and computes the deformation fields between subsequent images, and saves overlay plots of the deformation fields:
+
+```python
+jf.piv.compute_displacement_series('MCF7-time-lapse', '*.tif', 'MCF7-piv', 
+                                   window_size=70, cutoff=700)
+```
+
+The command performs PIV on all `*.tif` files in the the folder `MCF7-time-lapse`, the results are saved int he folder `MCF7-piv`. The window size of teh PIV algorithm should be chosen as small as possible to increase spatial resolution, but also large enough to contain multiple fiducial markers for an accurate detection of local material deformations.
+
+![Loading GIF...](https://raw.githubusercontent.com/christophmark/jointforces/master/docs/gifs/mcf7-piv.gif)
 
 ### 6. Force reconstruction
 
@@ -93,4 +129,4 @@ The method automatically creates subfolders within the output-folder `simu`, cal
 *jointforces* is tested on Python 3.7 and a Windows 10 64bit system. It depends on ... All except ... are already included in the [Anaconda distribution](https://www.continuum.io/downloads) of Python. Windows users may also take advantage of pre-compiled binaries for all dependencies, which can be found at [Christoph Gohlke's page](http://www.lfd.uci.edu/~gohlke/pythonlibs/).
 
 ## License
-[The MIT License (MIT)](https://github.com/christophmark/jointforces/blob/master/LICENSE)
+The `jointforces` package itself is licensed under the [MIT License](https://github.com/christophmark/jointforces/blob/master/LICENSE). The [exemplary data](https://github.com/christophmark/jointforces/tree/master/docs/data) and the [precompiled binaries](https://github.com/christophmark/jointforces/tree/master/docs/bin) of SAENO are provided "as is", without any warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement.
