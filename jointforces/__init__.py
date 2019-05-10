@@ -16,5 +16,4 @@ from . import materials
 from . import simulation
 from . import piv
 from . import force
-from . import experiment
 from .utils import set_gmsh_path, set_saeno_path, load
