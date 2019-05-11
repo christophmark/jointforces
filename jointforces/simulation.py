@@ -37,6 +37,10 @@ def spherical_contraction(meshfile, outfolder, pressure, material, r_inner=None,
             raise ValueError('r_inner not defined')
         if r_outer is None:
             raise ValueError('r_outer not defined')
+    
+    # scale radii to meter
+    r_inner *= 10**-6
+    r_outer *= 10**-6
 
     # read in material parameters
     K_0 = material['K_0']
