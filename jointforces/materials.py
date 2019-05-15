@@ -1,9 +1,9 @@
 def linear(stiffness):
     """
-    Defines the material properties for a linear elastic material (Youngsmodulus equals K_0/6).
+    Defines the stiffness for a linear elastic material.
     
     Args:
-        K_0(float) : Bulk modulus of the material in Pascal for SAENO Simulation (see [Steinwachs,2015])
+        stiffness(float) : Bulk modulus of the material in Pascal for SAENO Simulation (see [Steinwachs,2015])
     """
     return {'K_0': stiffness, 'D_0': 1e30, 'L_S': 1e30, 'D_S': 1e30}
 
