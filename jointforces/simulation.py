@@ -78,6 +78,21 @@ def spherical_contraction(meshfile, outfolder, pressure, material, r_inner=None,
     mask_inner = distance < r_inner * 1.001
     mask_outer = distance > r_outer * 0.999
 
+    # Save Node Density at inner and outer sphere
+    # Area per inner node
+    A_node_inner = (np.pi*4*(r_inner)**2)/np.sum(mask_inner) 
+    # simple sqrt as spacing
+    inner_spacing = np.sqrt(A_node_inner)    
+    
+    # Area per outer node
+    A_node_outer = (np.pi*4*(r_outer)**2)/np.sum(mask_outer)   
+    # simple sqrt as spacing
+    outer_spacing = np.sqrt(A_node_outer)
+    
+    print ('Inner node spacing: '+str(inner_spacing*1e6)+'µm')
+    print ('Outer node spacing: '+str(outer_spacing*1e6)+'µm')
+
+
     bcond = np.zeros((len(coords), 4))
     bcond[:, 3] = 1.
 
@@ -122,10 +137,12 @@ L_S = {}
 D_S = {}
 PRESSURE = {}
 FORCE_PER_SURFACE_NODE = {}
-INNER_RADIUS = {}
-OUTER_RADIUS = {}
+INNER_RADIUS = {} µm
+OUTER_RADIUS = {} µm
+INNER_NODE_SPACING = {} µm
+OUTER_NODE_SPACING = {} µm
 SURFACE_NODES = {}
-TOTAL_NODES = {}""".format(K_0, D_0, L_S, D_S, pressure, force_per_node, r_inner, r_outer, np.sum(mask_inner), len(coords))
+TOTAL_NODES = {}""".format(K_0, D_0, L_S, D_S, pressure, force_per_node, r_inner*1e6 , r_outer*1e6 , inner_spacing*1e6, outer_spacing*1e6, np.sum(mask_inner), len(coords))
 
     with open(outfolder + "/parameters.txt", "w") as f:
         f.write(parameters)
