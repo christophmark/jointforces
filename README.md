@@ -5,7 +5,7 @@ A Python package for conducting 3D traction force microscopy on multicellular ag
 ![Loading GIF...](https://raw.githubusercontent.com/christophmark/jointforces/master/docs/gifs/mcf7-raw.gif)
 
 ## Installation
-The current version of this package can be downloaded as a zip file [here](https://github.com/christophmark/bayesloop/zipball/master), or by cloning this repository. After unzipping, run the following command within the unzipped folder: `pip install -e .`. This will automatically download and install all other required packages.
+The current version of this package can be downloaded as a zip file [here](https://github.com/christophmark/jointforces/zipball/master), or by cloning this repository. After unzipping, run the following command within the unzipped folder: `pip install -e .`. This will automatically download and install all other required packages.
 
 `jointforces` relies on the Python bindings of the mesh generator [`Gmsh`](http://gmsh.info/) to create finite element geometries. These Python bindings are available in the `Gmsh SDK` that can be downloaded [here](http://gmsh.info/#Download), or by running the following command: `pip install --upgrade gmsh-sdk`.
 
