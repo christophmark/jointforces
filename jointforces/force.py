@@ -21,6 +21,9 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2):
     # initialize result dictionary
     results = {'pressure_mean': [], 'pressure_std': [], 'contractility_mean': [], 'contractility_std': []}
 
+    u_sum = None
+    v_sum = None
+
     # loop over series of PIV results
     for (dis_file, seg_file) in tqdm(zip(dis_files, seg_files)):
         dis = load(dis_file)
@@ -29,12 +32,16 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2):
         x_rav = np.ravel(dis['x'])
         y_rav = np.ravel(dis['y'])
 
-        u_rav = np.ravel(dis['u'])
-        v_rav = np.ravel(dis['v'])
+        try:
+            u_sum += np.ravel(dis['u'])
+            v_sum += np.ravel(dis['v'])
+        except:
+            u_sum = np.ravel(dis['u'])
+            v_sum = np.ravel(dis['v'])
 
         cx, cy = seg['centroid']
 
-        distance, displacement, pressure = infer_pressure(x_rav, y_rav, u_rav, v_rav, cx, cy, r0, get_pressure)
+        distance, displacement, pressure = infer_pressure(x_rav, y_rav, u_sum, v_sum, cx, cy, r0, get_pressure)
 
         mask = distance > r_min
 

@@ -1,5 +1,6 @@
 import warnings
 import os
+import gc
 import numpy as np
 import scipy.ndimage.morphology as scipy_morph
 import scipy.ndimage.measurements as scipy_meas
@@ -125,7 +126,7 @@ def save_displacement_plot(filename, img, segmentation, displacements, quiver_sc
     mask = segmentation['mask']
     cx, cy = segmentation['centroid']
 
-    plt.figure(figsize=(10 * (width / height), 10))
+    fig = plt.figure(figsize=(10 * (width / height), 10))
     plt.imshow(img, cmap='Greys_r', extent=[0, width, height, 0], origin='lower')
 
     d = (u ** 2 + v ** 2) ** 0.5
@@ -155,12 +156,13 @@ def save_displacement_plot(filename, img, segmentation, displacements, quiver_sc
     plt.gca().get_yaxis().set_visible(False)
 
     plt.savefig(filename, bbox_inches='tight', pad_inches=0, dpi=150)
-    plt.close('all')
+    plt.clf()
+    plt.close(fig)
 
 
 def compute_displacement_series(folder, filter, outfolder, n_max=None, enhance=True,
                                 window_size=70, cutoff=None, drift_correction=True,
-                                plot=True, quiver_scale=10, color_norm=500.):
+                                plot=True, quiver_scale=1, color_norm=75.):
     img_files = natsorted(glob(folder+'/'+filter))
 
     if n_max is not None:
@@ -179,7 +181,7 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, enhance=T
 
     for i in tqdm(range(1, len(img_files))):
         img1 = plt.imread(img_files[i])
-        seg1 = segment_spheroid(img1, enhance=False)
+        seg1 = segment_spheroid(img1, enhance=enhance)
 
         dis = compute_displacements(window_size, img0, img1, mask1=seg1['mask'],
                                     cutoff=cutoff, drift_correction=drift_correction)
@@ -199,3 +201,5 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, enhance=T
 
             save_displacement_plot(outfolder+'/plot'+str(i).zfill(6)+'.png', img1, seg1, dis_sum,
                                    quiver_scale=quiver_scale, color_norm=color_norm)
+
+        img0 = img1.copy()
