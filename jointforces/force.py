@@ -19,7 +19,8 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2):
     A0 = 4 * np.pi * (r0 * (10 ** -6)) ** 2
 
     # initialize result dictionary
-    results = {'pressure_mean': [], 'pressure_std': [], 'contractility_mean': [], 'contractility_std': []}
+    results = {'pressure_mean': [], 'pressure_median': [], 'pressure_std': [],
+               'contractility_mean': [], 'contractility_median': [], 'contractility_std': []}
 
     u_sum = None
     v_sum = None
@@ -46,21 +47,27 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2):
         mask = distance > r_min
 
         pressure_mean = np.nanmean(pressure[mask])
+        pressure_median = np.nanmedian(pressure[mask])
         pressure_std = np.nanstd(pressure[mask], ddof=1)
 
         contractility_mean = pressure_mean*A0*(muperpixel**2.)*(10**6)  # unit: µN
+        contractility_median = pressure_median*A0*(muperpixel**2.)*(10**6)  # unit: µN
         contractility_std = pressure_std*A0*(muperpixel**2.)*(10**6)  # unit: µN
 
         results['pressure_mean'].append(pressure_mean)
+        results['pressure_median'].append(pressure_median)
         results['pressure_std'].append(pressure_std)
 
         results['contractility_mean'].append(contractility_mean)
+        results['contractility_median'].append(contractility_median)
         results['contractility_std'].append(contractility_std)
 
     df = pd.DataFrame.from_dict(results)
     df.columns = ['Mean Pressure (Pa)',
+                  'Median Pressure (Pa)',
                   'St.dev. Pressure (Pa)',
                   'Mean Contractility (µN)',
+                  'Median Contractility (µN)',
                   'St.dev. Contractility (µN)']
 
     if outfile is not None:
