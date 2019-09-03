@@ -2,7 +2,7 @@ import numpy as np
 from time import sleep
 
 
-def spherical_inclusion(outfile, r_inner=100, r_outer=20000, length_factor=0.2):
+def spherical_inclusion(outfile, r_inner=100, r_outer=10000, length_factor=0.05):
     """
     Creates a spherical bulk mesh with a centered spherical inclusion.
     
