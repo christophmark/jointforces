@@ -4,13 +4,14 @@ import numpy as np
 from glob import glob
 from subprocess import call
 from subprocess import Popen
+from subprocess import PIPE
 from time import sleep
 from tqdm import tqdm
 from scipy.interpolate import LinearNDInterpolator
 from jointforces import SAENOPATH
 
 
-def spherical_contraction(meshfile, outfolder, pressure, material, r_inner=None, r_outer=None):
+def spherical_contraction(meshfile, outfolder, pressure, material, r_inner=None, r_outer=None, logfile = False):
     # open mesh file
     with open(meshfile, 'r') as f:
         lines = f.readlines()
@@ -145,7 +146,27 @@ TOTAL_NODES = {}""".format(K_0, D_0, L_S, D_S, pressure, force_per_node, r_inner
 
     with open(outfolder + "/parameters.txt", "w") as f:
         f.write(parameters)
-    call(SAENOPATH+"/saeno CONFIG {}/config.txt".format(os.path.abspath(outfolder)))
+        
+        
+     # Create log file if activated
+    if logfile == True:
+        
+        # create log file with system output
+        logfile = open(outfolder + "/saeno_log.txt", 'w')
+        cmd = Popen(SAENOPATH+"/saeno CONFIG {}/config.txt".format(os.path.abspath(outfolder)), stdout=PIPE , universal_newlines=True, shell=False)
+        # print and save a reduced version of saeno log
+        for line in cmd.stdout:
+            if not '%' in line:
+                print (line, end='')
+                logfile.write(str(line))
+        # close again to avoid loops            
+        cmd.stdout.close()            
+        
+    # if false just show the non reduced system output    
+    else:
+        cmd = call(SAENOPATH+"/saeno CONFIG {}/config.txt".format(os.path.abspath(outfolder)))     
+        
+
 
 
 def distribute(func, const_args, var_arg='pressure', start=0.1, end=1000, n=120, log_scaling=True, n_cores=None):
