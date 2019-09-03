@@ -117,7 +117,7 @@ def compute_displacements(window_size, img0, img1, mask1=None, cutoff=None, drif
     return {'x': x, 'y': y, 'u': ut, 'v': vt}
 
 
-def save_displacement_plot(filename, img, segmentation, displacements, quiver_scale=1, color_norm=75.):
+def displacement_plot(img, segmentation, displacements, quiver_scale=1, color_norm=75., cmap=cm.jet, s=50, **kwargs):
     # get image size
     height = img.shape[0]
     width = img.shape[1]
@@ -126,18 +126,25 @@ def save_displacement_plot(filename, img, segmentation, displacements, quiver_sc
     mask = segmentation['mask']
     cx, cy = segmentation['centroid']
 
-    fig = plt.figure(figsize=(10 * (width / height), 10))
     plt.imshow(img, cmap='Greys_r', extent=[0, width, height, 0], origin='lower')
 
-    d = (u ** 2 + v ** 2) ** 0.5
-
-    p = plt.quiver(x, y, u, v, d,
-                   clim=[0, color_norm],
-                   cmap=cm.jet,
-                   alpha=0.8,
-                   scale=quiver_scale,
-                   units='xy',
-                   pivot='mid')
+    if cmap is None:
+        p = plt.quiver(x, y, u, v,
+                       alpha=0.8,
+                       scale=quiver_scale,
+                       units='xy',
+                       pivot='mid',
+                       **kwargs)
+    else:
+        d = (u ** 2 + v ** 2) ** 0.5
+        p = plt.quiver(x, y, u, v, d,
+                       clim=[0, color_norm],
+                       cmap=cmap,
+                       alpha=0.8,
+                       scale=quiver_scale,
+                       units='xy',
+                       pivot='mid',
+                       **kwargs)
 
     overlay = mask.astype(int) - scipy_morph.binary_erosion(mask, iterations=4).astype(int)
     overlay = np.array([overlay.T,
@@ -146,7 +153,7 @@ def save_displacement_plot(filename, img, segmentation, displacements, quiver_sc
                         overlay.T]).T
 
     plt.imshow(overlay.astype(np.float), extent=[0, width, height, 0], zorder=1000)
-    plt.scatter([cx], [cy], s=50, lw=1, edgecolors='k', c='r')
+    plt.scatter([cx], [cy], lw=1, edgecolors='k', c='r', s=s)
 
     plt.xlim((0, width))
     plt.ylim((0, height))
@@ -154,6 +161,15 @@ def save_displacement_plot(filename, img, segmentation, displacements, quiver_sc
     plt.axis('off')
     plt.gca().get_xaxis().set_visible(False)
     plt.gca().get_yaxis().set_visible(False)
+
+
+def save_displacement_plot(filename, img, segmentation, displacements, quiver_scale=1, color_norm=75., cmap=cm.jet,
+                           s=50, **kwargs):
+    height = img.shape[0]
+    width = img.shape[1]
+    fig = plt.figure(figsize=(10 * (width / height), 10))
+
+    displacement_plot(img, segmentation, displacements, quiver_scale, color_norm, cmap, **kwargs)
 
     plt.savefig(filename, bbox_inches='tight', pad_inches=0, dpi=150)
     plt.clf()
@@ -203,3 +219,30 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, enhance=T
                                    quiver_scale=quiver_scale, color_norm=color_norm)
 
         img0 = img1.copy()
+
+
+def compute_noise_level(folder, filter, n_max=10, enhance=True,
+                        window_size=70, cutoff=None, drift_correction=True):
+
+    img_files = natsorted(glob(folder + '/' + filter))
+
+    if n_max is not None:
+        img_files = img_files[:n_max+1]
+
+    img0 = plt.imread(img_files[0])
+    mask = np.zeros_like(img0).astype(np.bool)
+
+    displ = []
+
+    for i in tqdm(range(1, len(img_files))):
+        img1 = plt.imread(img_files[i])
+        seg1 = segment_spheroid(img1, enhance=enhance)
+
+        dis = compute_displacements(window_size, img0, img1, mask1=mask,
+                                    cutoff=cutoff, drift_correction=drift_correction)
+
+        displ.extend(list(np.ravel(np.sqrt(dis['u']**2. + dis['v']**2.))))
+
+        img0 = img1.copy()
+
+    return np.percentile(displ, 95)
