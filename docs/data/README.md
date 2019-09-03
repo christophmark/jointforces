@@ -2,13 +2,13 @@
 
 This folder contains relevant files to test/apply the analysis workflow of `jointforces`.
 
-## MCF7-time-lapse.zip
+## [MCF7-time-lapse.zip](https://github.com/christophmark/jointforces/blob/master/docs/data/MCF7-time-lapse.zip)
 
 Exemplary time-lapse images of a MCF7 spheroid containing 4000 cells (at the time of seeding) that is embedded in a 1.2mg/ml collagen gel together with silica beads as fiducial markers.
 
 The image series consists of 145 images that are recorded with a 5 minute interval and cover a total time interval of 12 hours. The pixel size is 1.29 µm/pixel. Each image is a minimum projection of a brightfield image stack that covers 100µm across the equatorial plane of the spheroid.
 
-## collagen12.pkl
+## [collagen12.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/collagen12.pkl)
 
 Lookup table for 1.2 mg/ml collagen as described in [Steinwachs et al. (2016)](https://www.nature.com/articles/nmeth.3685). The file was created by the following code:
 
