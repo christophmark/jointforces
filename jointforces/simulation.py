@@ -92,7 +92,6 @@ def spherical_contraction(meshfile, outfolder, pressure, material, r_inner=None,
     print ('Inner node spacing: '+str(inner_spacing*1e6)+'µm')
     print ('Outer node spacing: '+str(outer_spacing*1e6)+'µm')
 
-
     bcond = np.zeros((len(coords), 4))
     bcond[:, 3] = 1.
 
@@ -200,7 +199,8 @@ def extract_deformation_curve(folder, x):
     parameters = {}
     for line in lines:
         try:
-            key, value = line.split('=')
+            key, value = line.split('= ')
+            value = value.split(' ')[0]
             parameters[key.strip()] = float(value.strip())
         except:
             pass
@@ -212,8 +212,8 @@ def extract_deformation_curve(folder, x):
     displ = np.genfromtxt(folder + '/U.dat')
 
     # compute binned normed displacements and normed coordinates
-    u = np.sqrt(np.sum(coords ** 2., axis=1)) / parameters['INNER_RADIUS']
-    v = np.sqrt(np.sum(displ ** 2., axis=1)) / parameters['INNER_RADIUS']
+    u = np.sqrt(np.sum(coords ** 2., axis=1)) / (parameters['INNER_RADIUS']*10**-6)
+    v = np.sqrt(np.sum(displ ** 2., axis=1)) / (parameters['INNER_RADIUS']*10**-6)
 
     y = np.array([np.nanmedian(v[(u >= x[i]) & (u < x[i + 1])]) for i in range(len(x) - 1)])
 
@@ -222,7 +222,7 @@ def extract_deformation_curve(folder, x):
     return results
 
 
-def create_lookup_table(folder, x0=1, x1=100, n=40):
+def create_lookup_table(folder, x0=1, x1=50, n=100):
     subfolders = glob(folder+'/*/')
 
     x = np.logspace(np.log10(x0), np.log10(x1), n+1, endpoint=True)
