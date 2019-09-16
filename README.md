@@ -29,13 +29,13 @@ jf.set_saeno_path(r'C:\Software\SAENO')
 ```
 
 ### 2. Mesh generation
-Here, we create a spherical bulk of material (with a radius `r_outer=2cm`, emulating the biopolymer network) with a small, centered spherical inclusion (with a radius `r_inner=100µm`, emulating the multicellular aggregate). The keyword-argument `length_factor` determines the mesh granularity:
+Here, we create a spherical bulk of material (with a radius `r_outer=1cm`, emulating the biopolymer network) with a small, centered spherical inclusion (with a radius `r_inner=100µm`, emulating the multicellular aggregate). The keyword-argument `length_factor` determines the mesh granularity:
 
 ```python
 jf.mesh.spherical_inclusion('spherical-inclusion.msh', 
                             r_inner=100, 
-                            r_outer=20000, 
-                            length_factor=0.2)
+                            r_outer=10000, 
+                            length_factor=0.05)
 ```
 
 The resulting mesh is saved as `spherical-inclusion.msh` and can be displayed in `Gmsh` using the following command:
@@ -76,13 +76,13 @@ Non-linear materials are characterized by four parameters:
 A full description of the non-linear material model and the parameters can be found in [Steinwachs et al. (2016)](https://www.nature.com/articles/nmeth.3685)
 
 #### Running simulations in parallel
-To be able to estimate the contractility of a multicellular aggregate by relating the measured deformation field to simulated ones, we need to execute a set of simulations that cover a wide range of contractile pressures. To speed up this process, `jointforces` provides a parallelization method that distributes individual instances of the `SAENO` optimizer across different CPU cores. The following code snippet runs 100 simulations ranging from pressure values of 0.1Pa to 1000Pa (logarithmically spaced):
+To be able to estimate the contractility of a multicellular aggregate by relating the measured deformation field to simulated ones, we need to execute a set of simulations that cover a wide range of contractile pressures. To speed up this process, `jointforces` provides a parallelization method that distributes individual instances of the `SAENO` optimizer across different CPU cores. The following code snippet runs 150 simulations ranging from pressure values of 0.1Pa to 10000Pa (logarithmically spaced):
 
 ```python
 jf.simulation.distribute('jf.simulation.spherical_contraction',
                          const_args={'meshfile': 'spherical-contraction.msh', 'outfolder': 'simu',
                          'material': jf.materials.collagen12},
-                         var_arg='pressure', start=0.1, end=1000, n=100, log_scaling=True)
+                         var_arg='pressure', start=0.1, end=10000, n=150, log_scaling=True)
 ```
 
 The method automatically creates subfolders within the output-folder `simu`, called `simulation000000`, `simulation000001`, and so on, plus a file `pressure-values.txt` that contains the list of pressure values used in the simulations.
@@ -103,24 +103,26 @@ get_displacement, get_pressure = jf.simulation.create_lookup_functions(lookup_ta
 Finally, we may save these functions to file, e.g. to load them again in another script:
 
 ```python
-jf.simulation.save_lookup_functions(get_displacement, get_pressure, 'lookup.pkl')
-get_displacement, get_pressure = jf.simulation.load_lookup_functions('lookup.pkl')
+jf.simulation.save_lookup_functions(get_displacement, get_pressure, 'collagen12.pkl')
+get_displacement, get_pressure = jf.simulation.load_lookup_functions('collagen12.pkl')
 ```
 
 For example, we may now ask for the estimated pressure of a spheroid with radius `r` that induces a deformation of `0.2*r` at a distance of `2*r`:
 
 ```python
 print(get_pressure(2, 0.2))
->>> 120.56001018487754
+>>> 99.81708381387853
 ```
+
+We provide a pre-computed lookup table for the standard 1.2mg/ml collagen gel [here](https://github.com/christophmark/jointforces/tree/master/docs/data). This lookup table has been created using the exact commands described above.
 
 ### 5. Particle image velocimetry
 
-Up to this point, we have only covered material simulations, but not the analysis of measured time-lapse image series. To detect deformations in the material surrounding the spheroid, `jointforces` uses the [Particle Image Velocimetry](https://en.wikipedia.org/wiki/Particle_image_velocimetry) algorithm of the [`OpenPIV`](http://www.openpiv.net/openpiv-python/) package. The following command automatically reads in all image files that match a filterstring within a given folder, and computes the deformation fields between subsequent images, and saves overlay plots of the deformation fields:
+Up to this point, we have only covered material simulations, but not the analysis of measured time-lapse image series. To detect deformations in the material surrounding the spheroid, `jointforces` uses the [Particle Image Velocimetry](https://en.wikipedia.org/wiki/Particle_image_velocimetry) algorithm of the [`OpenPIV`](http://www.openpiv.net/openpiv-python/) package. The following command automatically reads in all image files that match a filterstring within a given folder, and computes the deformation fields between subsequent images, and saves overlay plots of the deformation fields. The exemplary data used in this example can be downloaded [here](https://github.com/christophmark/jointforces/tree/master/docs/data).
 
 ```python
 jf.piv.compute_displacement_series('MCF7-time-lapse', '*.tif', 'MCF7-piv', 
-                                   window_size=70, cutoff=700)
+                                   window_size=40, cutoff=650)
 ```
 
 The command performs PIV on all `*.tif` files in the the folder `MCF7-time-lapse`, the results are saved int he folder `MCF7-piv`. The window size of the PIV algorithm should be chosen as small as possible to increase spatial resolution, but also large enough to contain multiple fiducial markers for an accurate detection of local material deformations. The `cutoff` parameter can be used to disregard all displacements that are detected further away from the center than the set value (e.g. because an optical coupler is visible in the corners of the image).
@@ -129,10 +131,10 @@ The command performs PIV on all `*.tif` files in the the folder `MCF7-time-lapse
 
 ### 6. Force reconstruction
 
-Finally, we may use the lookup functions we have created above and use them to assign the best-fit pressure to each time step of the image series. Additionally, the user supplies the size of one pixel in the image in micrometers. With this information, the surface are of the spheroid is calculated to obtain the total contractility. The output is a [`Pandas`](https://pandas.pydata.org/) Dataframe containing mean values and standard deviation of both pressure and contractility. If a filename is provided, the results are also saved as an Excel file:
+Finally, we may use the lookup functions we have created above and use them to assign the best-fit pressure to each time step of the image series. Additionally, the user supplies the size of one pixel in the image in micrometers. With this information, the surface are of the spheroid is calculated to obtain the total contractility. The output is a [`Pandas`](https://pandas.pydata.org/) Dataframe containing mean values, median values and standard deviation of both pressure and contractility. If a filename is provided, the results are also saved as an Excel file:
 
 ```python
-res = jf.force.reconstruct('MCF7-piv', 'lookup.pkl', 6.45/5, 'MCF7-recon.xlsx')
+res = jf.force.reconstruct('MCF7-piv', 'collagen12.pkl', 6.45/5, 'MCF7-recon.xlsx')
 
 t = np.arange(len(res))*5/60
 mu = res['Mean Contractility (µN)']
