@@ -26,12 +26,13 @@ def enhance_contrast(img):
     return img
 
 
-def segment_spheroid(img, enhance=True):
+def segment_spheroid(img, enhance=True, thres = 0.9):
     """
     Image segmentation function to create spheroid mask, radius, and position of a spheroid in a grayscale image.
 
     Args:
         img(array): Grayscale image as a Numpy array
+        thres(float): To adjust the segmentation
 
     Returns:
         dict: Dictionary with keys: mask, radius, centroid (x/y)
@@ -44,7 +45,7 @@ def segment_spheroid(img, enhance=True):
         img = enhance_contrast(img)
 
     # flip y (to match x/y coordinates) and binarize
-    mask = img[::-1] < threshold_otsu(img) * 0.9
+    mask = img[::-1] < threshold_otsu(img) * thres
 
     # remove other objects
     mask = scipy_morph.binary_dilation(mask, iterations=3)
@@ -78,14 +79,24 @@ def compute_displacements(window_size, img0, img1, mask1=None, cutoff=None, drif
     # ignore ubiquitous warning messages from OpenPIV
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-
+        
+        
         # compute displacements
-        ut, vt, sig2noise = openpiv.pyprocess.piv(img0,
-                                                  img1,
-                                                  window_size=window_size,
-                                                  overlap=window_size // 2,
-                                                  dt=1,
-                                                  sig2noise_method='peak2peak')
+        try:
+            ut, vt, sig2noise = openpiv.pyprocess.piv(img0,
+                                                      img1,
+                                                      window_size=window_size,
+                                                      overlap=window_size // 2,
+                                                      dt=1,
+                                                      sig2noise_method='peak2peak')
+        except(AttributeError):  
+            # if not found use the newer function here, no extended search area by default
+            ut, vt, sig2noise = openpiv.pyprocess.extended_search_area_piv(img0,
+                                                      img1,
+                                                      window_size=window_size,
+                                                      overlap=window_size // 2,
+                                                      dt=1,
+                                                      sig2noise_method='peak2peak')
 
         # replace outliers
         ut, vt = openpiv.filters.replace_outliers(ut, vt, method='localmean', max_iter=3, kernel_size=1)
