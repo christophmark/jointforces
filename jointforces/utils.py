@@ -44,4 +44,4 @@ def set_saeno_path(path, overwrite=False):
 
 
 def load(file):
-    return np.load(file).item()
+    return np.load(file, allow_pickle=True).item()
