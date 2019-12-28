@@ -12,7 +12,7 @@ setup(
     author='Christoph Mark, David Böhringer',
     author_email='christoph.mark@fau.de',
     license='The MIT License (MIT)',
-    install_requires=['numpy>=1.16.2', 'pandas>=0.23.4', 'matplotlib>=2.2.2', 'scipy>=1.1.0', 'scikit-image>=0.14.2', 'openpiv>=0.20.8', 'tqdm>=4.26.0', 'natsort>=5.1.0', 'dill>=0.2.9'],
+    install_requires=['saenopy>=0.7.1', 'gmsh-sdk>=4.5.0','numpy>=1.16.2', 'pandas>=0.23.4', 'matplotlib>=2.2.2', 'scipy>=1.1.0', 'scikit-image>=0.14.2', 'openpiv>=0.20.8', 'tqdm>=4.26.0', 'natsort>=5.1.0', 'dill>=0.2.9'],
     keywords = ['piv', 'contractility', 'material simulation', 'biophysics'],
     classifiers = [],
     )

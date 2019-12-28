@@ -6,6 +6,7 @@ from natsort import natsorted
 from .simulation import load_lookup_functions
 from .utils import load
 
+
 def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2):
     # get filepaths for PIV results
     dis_files = natsorted(glob(folder+'/dis*.npy'))
@@ -90,7 +91,7 @@ def infer_pressure(x_rav, y_rav, u_rav, v_rav, x_sph, y_sph, r_sph, get_pressure
     displacement = np.array([-np.dot(di, mi) for di, mi in zip(d, m)])
 
     abs = np.sqrt(u_rav2**2. + v_rav2**2.)
-    mask = displacement/abs > 0.94 # cos(20deg)
+    mask = displacement/abs > 0.94  # cos(20deg)
     distance = distance[mask]
     displacement = displacement[mask]
 

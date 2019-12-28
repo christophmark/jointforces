@@ -8,10 +8,9 @@ from subprocess import PIPE
 from time import sleep
 from tqdm import tqdm
 from scipy.interpolate import LinearNDInterpolator
-from jointforces import SAENOPATH
 
 
-def spherical_contraction(meshfile, outfolder, pressure, material, r_inner=None, r_outer=None, logfile = False):
+def spherical_contraction(meshfile, outfolder, pressure, material, r_inner=None, r_outer=None, logfile=False):
     # open mesh file
     with open(meshfile, 'r') as f:
         lines = f.readlines()
@@ -142,18 +141,19 @@ OUTER_RADIUS = {} µm
 INNER_NODE_SPACING = {} µm
 OUTER_NODE_SPACING = {} µm
 SURFACE_NODES = {}
-TOTAL_NODES = {}""".format(K_0, D_0, L_S, D_S, pressure, force_per_node, r_inner*1e6 , r_outer*1e6 , inner_spacing*1e6, outer_spacing*1e6, np.sum(mask_inner), len(coords))
+TOTAL_NODES = {}""".format(K_0, D_0, L_S, D_S, pressure, force_per_node, r_inner*1e6, r_outer*1e6, inner_spacing*1e6,
+                           outer_spacing*1e6, np.sum(mask_inner), len(coords))
 
     with open(outfolder + "/parameters.txt", "w") as f:
         f.write(parameters)
-        
-        
-     # Create log file if activated
-    if logfile == True:
+
+    # Create log file if activated
+    if logfile:
         
         # create log file with system output
         logfile = open(outfolder + "/saeno_log.txt", 'w')
-        cmd = Popen(SAENOPATH+"/saeno CONFIG {}/config.txt".format(os.path.abspath(outfolder)), stdout=PIPE , universal_newlines=True, shell=False)
+        cmd = Popen("saenopy CONFIG {}/config.txt".format(os.path.abspath(outfolder)), stdout=PIPE,
+                    universal_newlines=True, shell=False)
         # print and save a reduced version of saeno log
         for line in cmd.stdout:
             if not '%' in line:
@@ -164,10 +164,8 @@ TOTAL_NODES = {}""".format(K_0, D_0, L_S, D_S, pressure, force_per_node, r_inner
         
     # if false just show the non reduced system output    
     else:
-        cmd = call(SAENOPATH+"/saeno CONFIG {}/config.txt".format(os.path.abspath(outfolder)))     
+        cmd = call("saenopy CONFIG {}/config.txt".format(os.path.abspath(outfolder)))
         
-
-
 
 def distribute(func, const_args, var_arg='pressure', start=0.1, end=1000, n=120, log_scaling=True, n_cores=None):
     if n_cores is None:
@@ -284,6 +282,7 @@ def create_lookup_functions(lookup_table):
         return np.exp(f_inv(np.log(distance), displacement))
 
     return get_displacement, get_pressure
+
 
 def save_lookup_functions(get_displacement, get_pressure, outfile):
     with open(outfile, 'wb') as f:

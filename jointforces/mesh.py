@@ -24,7 +24,7 @@ def spherical_inclusion(outfile, r_inner=100, r_outer=10000, length_factor=0.05)
     # 2D mesh algorithm (1: MeshAdapt, 2: Automatic, 5: Delaunay, 6: Frontal, 7: BAMG, 8: DelQuad)
     gmsh.option.setNumber("Mesh.Algorithm", 2)
     
-    #3D mesh algorithm (1: Delaunay, 4: Frontal, 5: Frontal Delaunay, 6: Frontal Hex, 7: MMG3D, 9: R-tree, 10: HXT)
+    # 3D mesh algorithm (1: Delaunay, 4: Frontal, 5: Frontal Delaunay, 6: Frontal Hex, 7: MMG3D, 9: R-tree, 10: HXT)
     gmsh.option.setNumber("Mesh.Algorithm3D", 1)
     
     # Mesh size --------------------------------------------------------------------------------------------------------
@@ -38,7 +38,7 @@ def spherical_inclusion(outfile, r_inner=100, r_outer=10000, length_factor=0.05)
     # (for 3D Delaunay, use 1: longest or 2: shortest surface edge length; 1 by default)
     gmsh.option.setNumber("Mesh.CharacteristicLengthExtendFromBoundary", 1)
     
-     # Turn off 0 for dimensionless mesh, or if 1 set mesh size (so far only possible for points..)
+    # Turn off 0 for dimensionless mesh, or if 1 set mesh size (so far only possible for points..)
     gmsh.option.setNumber("Mesh.CharacteristicLengthFromPoints", 0)
     
     # Optimize the Mesh-------------------------------------------------------------------------------------------------
@@ -50,8 +50,7 @@ def spherical_inclusion(outfile, r_inner=100, r_outer=10000, length_factor=0.05)
     
     # Optimize the mesh using Netgen to improve the quality of tetrahedral elements, Default value: 0
     gmsh.option.setNumber("Mesh.OptimizeNetgen", 1)
-    
-    
+
     # Mesh Output Format -----------------------------------------------------------------------------------------------
     # default=10  (1: msh, 2: unv, 10: auto, 16: vtk, 19: vrml, 21: mail, 26: pos stat, 27: stl, 28: p3d, 30: mesh, 
     #              31: bdf, 32: cgns, 33: med, 34: diff, 38: ir3, 39: inp, 40: ply2, 41: celum, 42: su2, 47: tochnog, 
