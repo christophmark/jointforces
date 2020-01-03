@@ -197,10 +197,7 @@ def distribute(func, const_args, var_arg='pressure', start=0.1, end=1000, n=120,
     processes = []
 
     while True:
-        if len(values) == 0:
-            break
-
-        if len(processes) < n_cores:
+        if len(processes) < n_cores and len(values) > 0:
             command = '''python -c "import jointforces; import jointforces as jf; {}('''.format(func)
             for key in const_args:
                 if isinstance(const_args[key], str):
@@ -216,6 +213,9 @@ def distribute(func, const_args, var_arg='pressure', start=0.1, end=1000, n=120,
         sleep(1.)
 
         processes = [p for p in processes if p.poll() is None]
+
+        if len(processes) == 0:
+            break
 
 
 def extract_deformation_curve(folder, x):
@@ -279,12 +279,18 @@ def create_lookup_functions(lookup_table):
 
     x, y = np.meshgrid(log_distance, log_pressure)
 
-    f = LinearNDInterpolator(np.array([np.ravel(x), np.ravel(y)]).T, np.ravel(displacement))
+    mask = ~(np.isnan(x) | np.isnan(y) | np.isnan(displacement))
+
+    x = x[mask]
+    y = y[mask]
+    displacement = displacement[mask]
+
+    f = LinearNDInterpolator(np.array([x, y]).T, displacement)
 
     def get_displacement(distance, pressure):
         return f(np.log(distance), np.log(pressure))
 
-    f_inv = LinearNDInterpolator(np.array([np.ravel(x), np.ravel(displacement)]).T, np.ravel(y))
+    f_inv = LinearNDInterpolator(np.array([x, displacement]).T, y)
 
     def get_pressure(distance, displacement):
         return np.exp(f_inv(np.log(distance), displacement))
