@@ -1,5 +1,6 @@
 import os
 import dill
+import shutil
 import numpy as np
 from glob import glob
 from subprocess import call
@@ -165,7 +166,14 @@ TOTAL_NODES = {}""".format(K_0, D_0, L_S, D_S, pressure, force_per_node, r_inner
     # if false just show the non reduced system output    
     else:
         cmd = call("saenopy CONFIG {}/config.txt".format(os.path.abspath(outfolder)))
-        
+
+    # copy result files from "*_py2" folder
+    for filename in glob(outfolder+'_py2/*.*'):
+        shutil.copy(filename, outfolder)
+
+    # remove "*_py2" folder
+    shutil.rmtree(outfolder+'_py2')
+
 
 def distribute(func, const_args, var_arg='pressure', start=0.1, end=1000, n=120, log_scaling=True, n_cores=None):
     if n_cores is None:
