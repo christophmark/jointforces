@@ -122,10 +122,10 @@ Up to this point, we have only covered material simulations, but not the analysi
 
 ```python
 jf.piv.compute_displacement_series('MCF7-time-lapse', '*.tif', 'MCF7-piv', 
-                                   window_size=40, cutoff=650)
+                                   window_size=40, cutoff=650, draw_mask='False')
 ```
 
-The command performs PIV on all `*.tif` files in the the folder `MCF7-time-lapse`, the results are saved int he folder `MCF7-piv`. The window size of the PIV algorithm should be chosen as small as possible to increase spatial resolution, but also large enough to contain multiple fiducial markers for an accurate detection of local material deformations. The `cutoff` parameter can be used to disregard all displacements that are detected further away from the center than the set value (e.g. because an optical coupler is visible in the corners of the image).
+The command performs PIV on all `*.tif` files in the the folder `MCF7-time-lapse`, the results are saved int he folder `MCF7-piv`. The window size of the PIV algorithm should be chosen as small as possible to increase spatial resolution, but also large enough to contain multiple fiducial markers for an accurate detection of local material deformations. The `cutoff` parameter can be used to disregard all displacements that are detected further away from the center than the set value (e.g. because an optical coupler is visible in the corners of the image). With the `draw_mask` option the user can decide to draw a poylgon mask by hand instead of using the automatic segmentation. 
 
 ![Loading GIF...](https://raw.githubusercontent.com/christophmark/jointforces/master/docs/gifs/mcf7-piv.gif)
 
