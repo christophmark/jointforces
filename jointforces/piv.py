@@ -15,6 +15,7 @@ import matplotlib.cm as cm
 import openpiv.pyprocess
 import openpiv.process
 import openpiv.filters
+from roipoly import RoiPoly
 
 
 def enhance_contrast(img, gauss=False, gamma=None):
@@ -82,14 +83,12 @@ def segment_spheroid(img, enhance=True, thres = 0.9):
 def custom_mask(img):
     """
     Image segmentation function to create a custom polygon mask, and evalute radius and position of the masked object.
-    Need to have roipoly installed via pip to use this function  (pip install roipoly)
     Need to use %matplotlib qt in jupyter notebook
     Args:
         img(array): Grayscale image as a Numpy array
     Returns:
         dict: Dictionary with keys: mask, radius, centroid (x/y)
     """
-    from roipoly import RoiPoly
     height = img.shape[0]
     width  = img.shape[1]
     # click polygon mask interactive
@@ -174,7 +173,7 @@ def displacement_plot(img, segmentation, displacements, quiver_scale=1, color_no
     mask = segmentation['mask']
     cx, cy = segmentation['centroid']
 
-    plt.imshow(img, cmap='Greys_r', extent=[0, width, height, 0], origin='lower')
+    plt.imshow(enhance_contrast(img), cmap='Greys_r', extent=[0, width, height, 0], origin='lower')
 
     if cmap is None:
         p = plt.quiver(x, y, u, v,
@@ -239,7 +238,7 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
         os.makedirs(outfolder)
 
   
-    img0 = enhance_contrast(plt.imread(img_files[0]), gauss=gauss,gamma=gamma)
+    img0 = plt.imread(img_files[0])
     
     # segment , draw or load in mask
     if draw_mask == False:  # normal segmentation
@@ -256,7 +255,7 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
     v_sum = None
 
     for i in tqdm(range(1, len(img_files))):
-        img1 = enhance_contrast(plt.imread(img_files[i]), gauss=gauss,gamma=gamma)
+        img1 = plt.imread(img_files[i])
         
         if custom_mask == False:
             seg1 = segment_spheroid(img1, enhance=enhance)
