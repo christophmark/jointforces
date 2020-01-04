@@ -5,11 +5,35 @@ A Python package for conducting 3D traction force microscopy on multicellular ag
 ![Loading GIF...](https://raw.githubusercontent.com/christophmark/jointforces/master/docs/gifs/mcf7-raw.gif)
 
 ## Installation
-The current version of this package can be downloaded as a zip file [here](https://github.com/christophmark/jointforces/zipball/master), or by cloning this repository. After unzipping, run the following command within the unzipped folder: `pip install -e .`. This will automatically download and install all other required packages.
+The current version of this package can be downloaded as a zip file [here](https://github.com/christophmark/jointforces/zipball/master), or by cloning this repository. After unzipping, run the following command within the unzipped folder: `pip install -e .`. This will automatically download and install all other required packages. In case of errors during the installation of other required packages, Windows users may also use the pre-compiled binaries provided [here](https://www.lfd.uci.edu/~gohlke/pythonlibs/).
 
 `jointforces` relies on the Python bindings of the mesh generator [`Gmsh`](http://gmsh.info/) to create finite element geometries. These Python bindings are available in the `Gmsh SDK` that can be downloaded [here](http://gmsh.info/#Download), or by running the following command: `pip install --upgrade gmsh-sdk`.
 
 `jointforces` uses [`SAENO`](https://github.com/Tschaul/SAENO) to find equilibrium configurations in material simulations. We provide precompiled binary executables of `SAENO` for 64bit Windows systems [here](https://github.com/christophmark/jointforces/tree/master/docs/bin). The source code for building SAENO on other platforms can be found [here](https://github.com/Tschaul/SAENO).
+
+## Minimal example
+`jointforces` provides [example data](https://github.com/christophmark/jointforces/tree/master/docs/data) and [pre-computed material simulations](https://github.com/christophmark/jointforces/tree/master/docs/data) for 1.2mg/ml collagen gels as described in [Steinwachs et al. (2016)](https://www.nature.com/articles/nmeth.3685). The following code snippet...
+- loads a series of images
+- segments the spheroid in each image
+- applies particle image velocimetry to each pair of subsequent images
+- compares the resulting matrix deformations to a range of material simulations
+- computes the contractile pressure and overall contractility of the spheroid over time
+
+```python
+import jointforces as jf
+
+jf.piv.compute_displacement_series('MCF7-time-lapse',  # image folder
+                                   '*.tif',            # file pattern
+                                   'MCF7-piv',         # output folder
+                                   window_size=40,     # PIV window
+                                   cutoff=650)         # PIV cutoff
+
+jf.force.reconstruct('MCF7-piv',        # PIV output folder
+                     'collagen12.pkl',  # lookup table
+                     1.29,              # pixel size (µm)
+                     'results.xlsx')    # output file
+
+```
 
 ## Documentation
 This section details a complete walk-through of the analysis of a 3D traction force microscopy experiment. The data we use in this example can be downloaded [here](https://github.com/christophmark/jointforces/tree/master/docs/data). The data consists of 145 consecutive images of a MCF7 tumor spheroid contracting for 12h within a 1.2mg/ml collagen gel. The contractility of a multicellular aggregate is estimated by comparing the measured deformation field induced by the contracting cells to a set of simulated deformation fields of varying contractility. While we provide precompiled simulations for various materials, this documentation not only covers the force reconstruction step, but also the material simulations.

@@ -237,7 +237,6 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
     if not os.path.exists(outfolder):
         os.makedirs(outfolder)
 
-  
     img0 = plt.imread(img_files[0])
     
     # segment , draw or load in mask
@@ -255,6 +254,7 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
     v_sum = None
 
     for i in tqdm(range(1, len(img_files))):
+
         img1 = plt.imread(img_files[i])
         
         if custom_mask == False:
