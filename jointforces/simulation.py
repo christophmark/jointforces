@@ -153,7 +153,7 @@ TOTAL_NODES = {}""".format(K_0, D_0, L_S, D_S, pressure, force_per_node, r_inner
         
         # create log file with system output
         logfile = open(outfolder + "/saeno_log.txt", 'w')
-        cmd = Popen("saenopy CONFIG {}/config.txt".format(os.path.abspath(outfolder)), stdout=PIPE,
+        cmd = Popen(["saenopy","CONFIG","{}//config.txt".format(os.path.abspath(outfolder))], stdout=PIPE, 
                     universal_newlines=True, shell=False)
         # print and save a reduced version of saeno log
         for line in cmd.stdout:
@@ -165,7 +165,7 @@ TOTAL_NODES = {}""".format(K_0, D_0, L_S, D_S, pressure, force_per_node, r_inner
         
     # if false just show the non reduced system output    
     else:
-        cmd = call("saenopy CONFIG {}/config.txt".format(os.path.abspath(outfolder)))
+        cmd = call(["saenopy","CONFIG", "{}//config.txt".format(os.path.abspath(outfolder))])
 
     # copy result files from "*_py2" folder
     for filename in glob(outfolder+'_py2/*.*'):
@@ -206,7 +206,7 @@ def distribute(func, const_args, var_arg='pressure', start=0.1, end=1000, n=120,
                     command += '''{}={},'''.format(key, const_args[key])
             command += '''outfolder='{}', {}={})"'''.format(outfolder+'/simulation'+str(index[0]).zfill(6), var_arg, values[0])
 
-            processes.append(Popen(command))
+            processes.append(Popen(command, shell='True'))
             del values[0]
             del index[0]
 
