@@ -3,8 +3,14 @@ import pandas as pd
 from tqdm import tqdm
 from glob import glob
 from natsort import natsorted
+import matplotlib.cm 
+import matplotlib.pyplot as plt
+import os
 from .simulation import load_lookup_functions
 from .utils import load
+
+
+
 
 
 def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2):
@@ -154,3 +160,87 @@ def infer_pressure(x_rav, y_rav, u_rav, v_rav, x_sph, y_sph, r_sph, get_pressure
     pressure = get_pressure(distance, displacement)
 
     return [distance, displacement, angle, pressure]
+
+
+def eval_angles(folder, output, n_max=None):
+    """
+    Evaluate angles over time for an spheroid (give folder where 'reconstruct' function was used) and stores 
+    the results in the output folder.
+    N_max may define the last image to evaluate 
+    """
+    # read in angle pressures
+    angles  = pd.read_excel(folder + '//result_angles.xlsx')
+    # read in plots
+    plots = glob(folder+'//plot*.png')
+    # make folder if not existing
+    if not os.path.exists(output):
+        os.makedirs(output)
+    # list of evaluated angles
+    angle_list = [a for a in range(-175, 175, 5)]
+    # make figure
+    f, (ax1, ax2) = plt.subplots(1, 2, figsize=(9,5))
+    # make result dictionary
+    res_angles = {'mean_pr_angles (Pa)': [], 'sd_pr_angles (Pa)': [], 'CoV': []}
+    
+    # loop over all timesteps
+    for t in range(len(angles[0][:n_max])):                   
+        pressures = []
+        # go through different angles 
+        for z in angle_list:        
+             # append for each angle the pressure of the current timestep
+             pressures.append(np.array(angles[z])[t])      
+        # norm colors for each image individually    viridis/RdBu      
+        colors = matplotlib.cm.get_cmap('viridis')((pressures - np.min(pressures)) / (np.max(pressures) - np.min(pressures))) 
+
+        # plot pie chart with angle dependet pressures
+        ax1.pie([5]*len(angle_list), labels=np.array(np.round(pressures),dtype=int),    
+               shadow=False, colors=colors, startangle=180, labeldistance   =1.05,
+                rotatelabels = False,textprops={'fontsize': 4.2})  
+        ax1.axis('equal')  
+        # show quiver plot on the right side
+        plot = plt.imread(plots[t])
+        ax2.imshow(plot)
+        plt.axis('off')
+        
+        # do some statistics
+        mean = np.round(np.mean(pressures))
+        sd = np.round(np.std(pressures))
+        CoV = np.round(sd/mean, 2)
+        res_angles['mean_pr_angles (Pa)'].append(mean)
+        res_angles['sd_pr_angles (Pa)'].append(sd)
+        res_angles['CoV'].append(CoV)
+        
+        # annotate     
+        ax1.text(0.01, 0.95,'Coefficient of Variation: '+str(CoV), 
+         horizontalalignment='center',
+         verticalalignment='center',
+         transform = ax1.transAxes, fontsize=9.2)  
+        ax1.text(0.5, 0.06,'Angle dependent pressures (Pa) ', 
+         horizontalalignment='center',
+         verticalalignment='center',
+         transform = ax1.transAxes, fontsize=7, color='k')  
+        ax1.text(0.5, 0.02,str(mean)+r' Pa $\pm$ '+str(sd)+' Pa (mean $\pm$ sd)', 
+         horizontalalignment='center',
+         verticalalignment='center',
+         transform = ax1.transAxes, fontsize=7, color='k') 
+ 
+        # save figure
+        plt.savefig(output+'//plot_{}.png'.format(str(t).zfill(4)), dpi=300)
+        ax1.cla()
+        ax2.cla()
+        
+    # save excel file     
+    ae = pd.DataFrame.from_dict(res_angles)
+    ae.columns = ['mean_pr_angles (Pa)',
+                  'sd_pr_angles (Pa)',
+                  'CoV',]
+
+    ae.to_excel(output+'/angles_eval.xlsx')
+
+    return ae
+
+
+
+
+
+
