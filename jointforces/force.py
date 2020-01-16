@@ -25,6 +25,9 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2):
                'pressure_min': [], 'pressure_max': [], 'contractility_min': [], 'contractility_max': [],
                'angle_min': [], 'angle_max': []}
 
+    # create dict with all angles
+    angles_dict = {str(a): [] for a in range(-175, 175, 5)}
+    
     u_sum = None
     v_sum = None
 
@@ -90,6 +93,10 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2):
 
         results['angle_min'].append(alpha_min)
         results['angle_max'].append(alpha_max)
+        
+        # append pressures for all angle data
+        for i,a in enumerate(angles_dict):
+            angles_dict[a].append(pr_median[i])
 
     df = pd.DataFrame.from_dict(results)
     df.columns = ['Mean Pressure (Pa)',
@@ -107,8 +114,20 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2):
 
     if outfile is not None:
         df.to_excel(outfile)
+    else:
+        df.to_excel(folder+'//result.xlsx')
+     
+    # save pressures for all angles
+    an = pd.DataFrame.from_dict(angles_dict)
+    an.columns = [a for a in range(-175, 175, 5)]
+    if outfile is not None:
+        an.to_excel(outfile[:-5]+'_angles.xlsx')
+    else:
+        an.to_excel(folder+'//result_angles.xlsx')    
 
-    return df
+    return df    
+ 
+
 
 
 def infer_pressure(x_rav, y_rav, u_rav, v_rav, x_sph, y_sph, r_sph, get_pressure):
