@@ -14,15 +14,23 @@ import matplotlib.cm as cm
 import openpiv.pyprocess
 import openpiv.process
 import openpiv.filters
+from roipoly import RoiPoly
 
 
-def enhance_contrast(img):
+def enhance_contrast(img, gauss=False, gamma=None):
     img = img.astype(np.float)
-    img = gaussian(img, 2)
+    # apply gaussian filter 
+    if gauss==True:
+        img = gaussian(img, 2)
+    # contrast enhancement
     img -= np.percentile(img, 0.5)
     img /= np.percentile(img, 99.5)
     img[img < 0.] = 0.
     img[img > 1.] = 1.
+    img /= 256
+    # gamma correction 
+    if gamma is not None:
+        img = adjust_gamma(img, gamma)  
     return img
 
 
@@ -69,6 +77,34 @@ def segment_spheroid(img, enhance=True, thres = 0.9):
 
     # return dictionary containing spheroid information
     return {'mask': mask, 'radius': radius, 'centroid': (cx, cy)}
+
+
+def custom_mask(img):
+    """
+    Image segmentation function to create a custom polygon mask, and evalute radius and position of the masked object.
+    Need to use %matplotlib qt in jupyter notebook
+    Args:
+        img(array): Grayscale image as a Numpy array
+    Returns:
+        dict: Dictionary with keys: mask, radius, centroid (x/y)
+    """
+    height = img.shape[0]
+    width  = img.shape[1]
+    # click polygon mask interactive
+    plt.ion()
+    plt.imshow(img, extent=[0, width, height, 0])
+    plt.text(0.5, 1.05,'Click Polygon Mask with left click, finish with right click',  fontsize=12,
+         horizontalalignment='center',
+         verticalalignment='center',c='darkred', transform= plt.gca().transAxes)#     transform = ax.transAxes)
+    my_roi = RoiPoly(color='r')
+    # Extract mask and segementation details
+    mask = np.flipud(my_roi.get_mask(img))   # flip mask due to imshow 
+    # determine radius of spheroid
+    radius = np.sqrt(np.sum(mask) / np.pi)
+    # determine center of mass
+    cy, cx = scipy_meas.center_of_mass(mask)
+    # return dictionary containing spheroid information
+    return {'mask': mask, 'radius': radius, 'centroid': (cx, cy)} 
 
 
 def compute_displacements(window_size, img0, img1, mask1=None, cutoff=None, drift_correction=True):
@@ -137,7 +173,7 @@ def displacement_plot(img, segmentation, displacements, quiver_scale=1, color_no
     mask = segmentation['mask']
     cx, cy = segmentation['centroid']
 
-    plt.imshow(img, cmap='Greys_r', extent=[0, width, height, 0], origin='lower')
+    plt.imshow(enhance_contrast(img), cmap='Greys_r', extent=[0, width, height, 0], origin='lower')
 
     if cmap is None:
         p = plt.quiver(x, y, u, v,
@@ -187,19 +223,31 @@ def save_displacement_plot(filename, img, segmentation, displacements, quiver_sc
     plt.close(fig)
 
 
-def compute_displacement_series(folder, filter, outfolder, n_max=None, enhance=True,
-                                window_size=70, cutoff=None, drift_correction=True,
-                                plot=True, quiver_scale=1, color_norm=75.):
+def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=None,
+                                enhance=True, window_size=70, cutoff=None, drift_correction=True,
+                                plot=True, quiver_scale=1, color_norm=75., draw_mask = False, 
+                                gamma=None, gauss=False, load_mask=None):   # load_mask
     img_files = natsorted(glob(folder+'/'+filter))
 
     if n_max is not None:
         img_files = img_files[:n_max+1]
+        
+    if n_min is not None:
+        img_files = img_files[n_min:]   
 
     if not os.path.exists(outfolder):
         os.makedirs(outfolder)
 
     img0 = plt.imread(img_files[0])
-    seg0 = segment_spheroid(img0, enhance=enhance)
+    
+    # segment , draw or load in mask
+    if draw_mask == False:  # normal segmentation
+        seg0 = segment_spheroid(img0, enhance=enhance)
+    else:                   # draw manual
+        seg0 = custom_mask(img0)
+    if load_mask is not None:   # load in mask
+        seg0 = np.load(load_mask, allow_pickle=True).item()
+        
 
     np.save(outfolder+'/seg000000.npy', seg0)
 
@@ -207,15 +255,21 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, enhance=T
     v_sum = None
 
     for i in tqdm(range(1, len(img_files))):
+
         img1 = plt.imread(img_files[i])
-        seg1 = segment_spheroid(img1, enhance=enhance)
-
+        
+        if custom_mask == False:
+            seg1 = segment_spheroid(img1, enhance=enhance)
+        else:
+            seg1 = seg0.copy()
+            
         dis = compute_displacements(window_size, img0, img1, mask1=seg1['mask'],
-                                    cutoff=cutoff, drift_correction=drift_correction)
-
+                                cutoff=cutoff, drift_correction=drift_correction)
         np.save(outfolder + '/seg'+str(i).zfill(6)+'.npy', seg1)
         np.save(outfolder + '/dis'+str(i).zfill(6)+'.npy', dis)
-
+            
+            
+            
         if plot:
             if u_sum is None:
                 u_sum = dis['u']
@@ -226,8 +280,12 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, enhance=T
 
             dis_sum = {'x': dis['x'], 'y': dis['y'], 'u': u_sum, 'v': v_sum}
 
-            save_displacement_plot(outfolder+'/plot'+str(i).zfill(6)+'.png', img1, seg1, dis_sum,
-                                   quiver_scale=quiver_scale, color_norm=color_norm)
+            if custom_mask == False:
+                save_displacement_plot(outfolder+'/plot'+str(i).zfill(6)+'.png', img1, seg1, dis_sum,
+                                       quiver_scale=quiver_scale, color_norm=color_norm)
+            else:
+                save_displacement_plot(outfolder+'/plot'+str(i).zfill(6)+'.png', img1, seg0, dis_sum,
+                                       quiver_scale=quiver_scale, color_norm=color_norm)
 
         img0 = img1.copy()
 
