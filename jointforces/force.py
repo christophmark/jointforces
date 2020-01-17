@@ -203,8 +203,8 @@ def eval_angles(folder, output, n_max=None):
         plt.axis('off')
         
         # do some statistics
-        mean = np.round(np.mean(pressures))
-        sd = np.round(np.std(pressures))
+        mean = np.round(np.nanmean(pressures))
+        sd = np.round(np.nanstd(pressures))
         CoV = np.round(sd/mean, 2)
         res_angles['mean_pr_angles (Pa)'].append(mean)
         res_angles['sd_pr_angles (Pa)'].append(sd)
