@@ -11,7 +11,7 @@ from tqdm import tqdm
 from scipy.interpolate import LinearNDInterpolator
 
 
-def spherical_contraction(meshfile, outfolder, pressure, material, r_inner=None, r_outer=None, logfile=False):
+def spherical_contraction(meshfile, outfolder, pressure, material, r_inner=None, r_outer=None, logfile=False,  max_iter = 300, step = 0.066, conv_crit = 0.01):
     # open mesh file
     with open(meshfile, 'r') as f:
         lines = f.readlines()
@@ -113,19 +113,19 @@ def spherical_contraction(meshfile, outfolder, pressure, material, r_inner=None,
     iconf = np.zeros((len(coords), 3))
     np.savetxt(outfolder + '/iconf.dat', iconf)
 
-    # create config file for SAENO
+    # create config file for SAENO    
     config = r"""MODE = relaxation
 BOXMESH = 0
 FIBERPATTERNMATCHING = 0
-REL_CONV_CRIT = 1e-11
-REL_ITERATIONS = 300
-REL_SOLVER_STEP = 0.066
+REL_CONV_CRIT = {}
+REL_ITERATIONS = {}
+REL_SOLVER_STEP = {}
 K_0 = {}
 D_0 = {}
 L_S = {}
 D_S = {}
 CONFIG = {}\config.txt
-DATAOUT = {}""".format(K_0, D_0, L_S, D_S, os.path.abspath(outfolder), os.path.abspath(outfolder))
+DATAOUT = {}""".format(conv_crit, max_iter, step, K_0, D_0, L_S, D_S, os.path.abspath(outfolder), os.path.abspath(outfolder))
 
     with open(outfolder + "/config.txt", "w") as f:
         f.write(config)
