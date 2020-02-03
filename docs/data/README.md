@@ -26,7 +26,7 @@ jf.simulation.distribute('jf.simulation.spherical_contraction',
                                      'material': jf.materials.collagen12},
                          var_arg='pressure', start=0.1, end=10000, n=150, log_scaling=True, n_cores=3)
 
-lookup_table = jf.simulation.create_lookup_table('D:\material-sims-collagen12', x0=1, x1=50, n=100)
+lookup_table = jf.simulation.create_lookup_table('D:\material-sims-collagen12', x0=1, x1=50, n=150)
 
 get_displacement, get_pressure = jf.simulation.create_lookup_functions(lookup_table)
 
