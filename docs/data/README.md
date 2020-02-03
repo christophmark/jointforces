@@ -33,3 +33,21 @@ get_displacement, get_pressure = jf.simulation.create_lookup_functions(lookup_ta
 jf.simulation.save_lookup_functions(get_displacement, get_pressure, 'collagen12.pkl')
 ```
 
+
+
+## [collagen06.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/collagen06.pkl)
+
+Lookup table for 0.6 mg/ml collagen as described in [Steinwachs et al. (2016)](https://www.nature.com/articles/nmeth.3685).
+
+## [collagen24.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/collagen24.pkl)
+
+Lookup table for 2.4 mg/ml collagen as described in [Steinwachs et al. (2016)](https://www.nature.com/articles/nmeth.3685).
+
+## [fibrin40.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/fibrin40.pkl)
+
+Lookup table for 4.0 mg/ml fibrin as described in [Steinwachs et al. (2016)](https://www.nature.com/articles/nmeth.3685).
+
+## [matri10.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/matri10.pkl)
+
+Lookup table for 10.0 mg/ml Matrigel as described in [Steinwachs et al. (2016)](https://www.nature.com/articles/nmeth.3685).
+
