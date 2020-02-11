@@ -219,7 +219,7 @@ def eval_angles(folder, output, n_max=None):
          horizontalalignment='center',
          verticalalignment='center',
          transform = ax1.transAxes, fontsize=7, color='k')  
-        ax1.text(0.5, 0.02,str(mean)+r' Pa $\pm$ '+str(sd)+' Pa (mean $\pm$ sd)', 
+        ax1.text(0.5, 0.02,str(mean)+r' Pa $\pm$ '+str(sd)+r' Pa (mean $\pm$ sd)', 
          horizontalalignment='center',
          verticalalignment='center',
          transform = ax1.transAxes, fontsize=7, color='k') 
