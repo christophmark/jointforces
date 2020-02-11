@@ -32,7 +32,7 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2):
                'angle_min': [], 'angle_max': []}
 
     # create dict with all angles
-    angles_dict = {str(a): [] for a in range(-175, 175, 5)}
+    angles_dict = {str(a): [] for a in range(-180, 180, 5)}
     
     u_sum = None
     v_sum = None
@@ -59,7 +59,7 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2):
 
         pr_angle = []
         pr_median = []
-        for alpha in range(-175, 175, 5):
+        for alpha in range(-180, 180, 5):
             mask2 = (angle >= (alpha-5)*np.pi/180.) & (angle < (alpha+5)*np.pi/180.)
             pr_angle.append(alpha)
             pr_median.append(np.nanmedian(pressure[mask & mask2]))
@@ -125,7 +125,7 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2):
      
     # save pressures for all angles
     an = pd.DataFrame.from_dict(angles_dict)
-    an.columns = [a for a in range(-175, 175, 5)]
+    an.columns = [a for a in range(-180, 180, 5)]
     if outfile is not None:
         an.to_excel(outfile[:-5]+'_angles.xlsx')
     else:
@@ -176,7 +176,7 @@ def eval_angles(folder, output, n_max=None):
     if not os.path.exists(output):
         os.makedirs(output)
     # list of evaluated angles
-    angle_list = [a for a in range(-175, 175, 5)]
+    angle_list = [a for a in range(-180, 180, 5)]
     # make figure
     f, (ax1, ax2) = plt.subplots(1, 2, figsize=(9,5))
     # make result dictionary
@@ -238,8 +238,6 @@ def eval_angles(folder, output, n_max=None):
     ae.to_excel(output+'/angles_eval.xlsx')
 
     return ae
-
-
 
 
 
