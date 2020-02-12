@@ -162,14 +162,17 @@ def infer_pressure(x_rav, y_rav, u_rav, v_rav, x_sph, y_sph, r_sph, get_pressure
     return [distance, displacement, angle, pressure]
 
 
-def eval_angles(folder, output, n_max=None):
+# Evaluate Angle dependet Pressures
+def angle_analysis(folder, output, n_max=None, small_pressure = False, fontsize=7, name_of_resultfile='result_angles.xlsx'):
     """
-    Evaluate angles over time for an spheroid (give folder where 'reconstruct' function was used) and stores 
+    Evaluate angles over time for an spheroid (needs folder where 'reconstruct' function was used) and stores 
     the results in the output folder.
-    N_max may define the last image to evaluate 
+    - N_max may define the last image to evaluate 
+    - Small_pressure true returns plots that are scaled to 100 Pa whereas false returns plots that are scaled up to 1000 Pa
+    - Evaluated excel sheet with angle data is automatically searched in folder, if name differs from  'result_angles.xlsx' it can be specified using name_of_resultfile
     """
     # read in angle pressures
-    angles  = pd.read_excel(folder + '//result_angles.xlsx')
+    angles  = pd.read_excel(folder + '//'+ name_of_resultfile)
     # read in plots
     plots = glob(folder+'//plot*.png')
     # make folder if not existing
@@ -179,6 +182,13 @@ def eval_angles(folder, output, n_max=None):
     angle_list = [a for a in range(-180, 180, 5)]
     # make figure
     f, (ax1, ax2) = plt.subplots(1, 2, figsize=(9,5))
+            
+    #second plot with only the left plot
+    fb,axb = plt.subplots( figsize=(3,3))  
+    # for color norm
+    max_pr = np.nanmax([np.max(np.array(angles[z])) for z in angle_list])  
+    plt.style.use('dark_background')
+    
     # make result dictionary
     res_angles = {'mean_pr_angles (Pa)': [], 'sd_pr_angles (Pa)': [], 'CoV': []}
     
@@ -188,20 +198,12 @@ def eval_angles(folder, output, n_max=None):
         # go through different angles 
         for z in angle_list:        
              # append for each angle the pressure of the current timestep
-             pressures.append(np.array(angles[z])[t])      
+             pressures.append(np.array(angles[z])[t])    
+                
         # norm colors for each image individually    viridis/RdBu      
-        colors = matplotlib.cm.get_cmap('viridis')((pressures - np.min(pressures)) / (np.max(pressures) - np.min(pressures))) 
-
-        # plot pie chart with angle dependet pressures
-        ax1.pie([5]*len(angle_list), labels=np.array(np.round(pressures),dtype=int),    
-               shadow=False, colors=colors, startangle=180, labeldistance   =1.05,
-                rotatelabels = False,textprops={'fontsize': 4.2})  
-        ax1.axis('equal')  
-        # show quiver plot on the right side
-        plot = plt.imread(plots[t])
-        ax2.imshow(plot)
-        plt.axis('off')
-        
+        colors = matplotlib.cm.get_cmap('viridis')(pressures / max_pr ) 
+        colorcycle = 'darkred'
+    
         # do some statistics
         mean = np.round(np.nanmean(pressures))
         sd = np.round(np.nanstd(pressures))
@@ -210,25 +212,133 @@ def eval_angles(folder, output, n_max=None):
         res_angles['sd_pr_angles (Pa)'].append(sd)
         res_angles['CoV'].append(CoV)
         
-        # annotate     
-        ax1.text(0.01, 0.95,'Coefficient of Variation: '+str(CoV), 
-         horizontalalignment='center',
-         verticalalignment='center',
-         transform = ax1.transAxes, fontsize=9.2)  
-        ax1.text(0.5, 0.06,'Angle dependent pressures (Pa) ', 
-         horizontalalignment='center',
-         verticalalignment='center',
-         transform = ax1.transAxes, fontsize=7, color='k')  
-        ax1.text(0.5, 0.02,str(mean)+r' Pa $\pm$ '+str(sd)+r' Pa (mean $\pm$ sd)', 
-         horizontalalignment='center',
-         verticalalignment='center',
-         transform = ax1.transAxes, fontsize=7, color='k') 
- 
-        # save figure
-        plt.savefig(output+'//plot_{}.png'.format(str(t).zfill(4)), dpi=300)
-        ax1.cla()
-        ax2.cla()
+
+        # Mode that shows and norms up to 1000 Pa
+        if small_pressure == False:
         
+            # now use 1000 as maximum
+            x = [np.sin(i*np.pi/180) for i in angle_list] * (pressures / np.array([1000]*len(pressures)) ) 
+            y = [np.cos(i*np.pi/180) for i in angle_list] * (pressures / np.array([1000] *len(pressures)) ) 
+            # combined figure
+            # plot circles
+            circle_100pa = plt.Circle((0, 0), 100/ 1000 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+            circle_250pa = plt.Circle((0, 0), 250/ 1000 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+            circle_500pa = plt.Circle((0, 0), 500/ 1000 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+            circle_750pa = plt.Circle((0, 0), 750/ 1000 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+            ax1.text(0.5, 0.57, '100 Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=ax1.transAxes,fontsize=fontsize)
+            ax1.text(0.5, 0.65, '250 Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=ax1.transAxes,fontsize=fontsize)
+            ax1.text(0.5, 0.77, '500 Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=ax1.transAxes,fontsize=fontsize)
+            ax1.text(0.5, 0.9, '750 Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=ax1.transAxes,fontsize=fontsize)
+            ax1.add_artist(circle_100pa)
+            ax1.add_artist(circle_250pa)
+            ax1.add_artist(circle_500pa)
+            ax1.add_artist(circle_750pa)
+            ax1.axis('equal')  
+            ax1.scatter(x,y, s=22, c=colors)
+            ax1.set_xlim([-1, 1])
+            ax1.set_ylim([-1, 1])
+            ax1.axis('off')
+            # annotate CoV    
+            ax1.text(0.01, 0.95,'Coefficient of Variation: '+str(CoV), 
+             horizontalalignment='center',
+             verticalalignment='center',
+             transform = ax1.transAxes, fontsize=9.2)  
+            ax1.text(0.5, 0.06,'Angle dependent pressures (Pa) ', 
+             horizontalalignment='center',
+             verticalalignment='center',
+             transform = ax1.transAxes, fontsize=7, color='k')  
+            ax1.text(0.5, 0.02,str(mean)+r' Pa $\pm$ '+str(sd)+r' Pa (mean $\pm$ sd)', 
+             horizontalalignment='center',
+             verticalalignment='center',
+             transform = ax1.transAxes, fontsize=7, color='k')  
+                
+            # show quiver plot on the right side
+            plot = plt.imread(plots[t])
+            ax2.imshow(plot)
+            plt.axis('off')
+            ax2.axis('off')
+            # save figure
+            f.savefig(output+'//plot_{}.png'.format(str(t).zfill(4)), dpi=300)
+            ax1.cla()
+            ax2.cla()
+            # Single figure
+            # plot circles
+            circle_100pa = plt.Circle((0, 0), 100/ 1000 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+            circle_250pa = plt.Circle((0, 0), 250/ 1000 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+            circle_500pa = plt.Circle((0, 0), 500/ 1000 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+            circle_750pa = plt.Circle((0, 0), 750/ 1000 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+            axb.text(0.5, 0.57, '100 Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=axb.transAxes,fontsize=fontsize)
+            axb.text(0.5, 0.65, '250 Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=axb.transAxes,fontsize=fontsize)
+            axb.text(0.5, 0.77, '500 Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=axb.transAxes,fontsize=fontsize)
+            axb.text(0.5, 0.9, '750 Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=axb.transAxes,fontsize=fontsize)
+            axb.add_artist(circle_100pa)
+            axb.add_artist(circle_250pa)
+            axb.add_artist(circle_500pa)
+            axb.add_artist(circle_750pa)   
+            axb.axis('equal')  
+            axb.scatter(x,y, s=22, c=colors)
+            axb.set_xlim([-1, 1])
+            axb.set_ylim([-1, 1])
+            axb.axis('off')
+            plt.savefig(output+'//single_{}.png'.format(str(t).zfill(4)), dpi=300)
+            axb.cla()
+            
+     # Mode that shows and norms up to 100 Pa
+        if small_pressure == True:
+            # now use 100 as maximum
+            x = [np.sin(i*np.pi/180) for i in angle_list] * (pressures / np.array([100]*len(pressures)) ) 
+            y = [np.cos(i*np.pi/180) for i in angle_list] * (pressures / np.array([100] *len(pressures)) ) 
+            # combined figure
+            # plot circles
+            circle_a = plt.Circle((0, 0), 10/ 100 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+            circle_b = plt.Circle((0, 0), 25/ 100 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+            circle_c = plt.Circle((0, 0), 50/ 100 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+            ax1.text(0.5, 0.57, '10 Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=ax1.transAxes,fontsize=fontsize)
+            ax1.text(0.5, 0.65, '25 Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=ax1.transAxes,fontsize=fontsize)
+            ax1.text(0.5, 0.77, '50 Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=ax1.transAxes,fontsize=fontsize)
+            ax1.add_artist(circle_a)
+            ax1.add_artist(circle_b)
+            ax1.add_artist(circle_c)
+            ax1.axis('equal')  
+            ax1.scatter(x,y, s=22, c=colors)
+            ax1.set_xlim([-1, 1])
+            ax1.set_ylim([-1, 1])
+            ax1.axis('off')
+            # annotate CoV    
+            ax1.text(0.01, 0.95,'Coefficient of Variation: '+str(CoV), 
+             horizontalalignment='center',
+             verticalalignment='center',
+             transform = ax1.transAxes, fontsize=9.2)  
+            # show quiver plot on the right side
+            plot = plt.imread(plots[t])
+            ax2.imshow(plot)
+            plt.axis('off')
+            ax2.axis('off')
+            # save figure
+            f.savefig(output+'//plot_{}.png'.format(str(t).zfill(4)), dpi=300)
+            ax1.cla()
+            ax2.cla()
+            
+            # single figure
+            # plot circles
+            circle_a = plt.Circle((0, 0), 10/ 100 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+            circle_b = plt.Circle((0, 0), 25/ 100 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+            circle_c = plt.Circle((0, 0), 50/ 100 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+            #circle_750pa = plt.Circle((0, 0), 100/ 300 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+            axb.text(0.5, 0.57, '10 Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=axb.transAxes,fontsize=fontsize)
+            axb.text(0.5, 0.65, '25 Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=axb.transAxes,fontsize=fontsize)
+            axb.text(0.5, 0.77, '50 Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=axb.transAxes,fontsize=fontsize)
+            axb.add_artist(circle_a)
+            axb.add_artist(circle_b)
+            axb.add_artist(circle_c)
+            axb.axis('equal')  
+            axb.scatter(x,y, s=22, c=colors)
+            axb.set_xlim([-1, 1])
+            axb.set_ylim([-1, 1])
+            axb.axis('off')
+            plt.savefig(output+'//single_{}.png'.format(str(t).zfill(4)), dpi=300)
+            axb.cla()
+
     # save excel file     
     ae = pd.DataFrame.from_dict(res_angles)
     ae.columns = ['mean_pr_angles (Pa)',
@@ -238,6 +348,7 @@ def eval_angles(folder, output, n_max=None):
     ae.to_excel(output+'/angles_eval.xlsx')
 
     return ae
+
 
 
 
