@@ -163,14 +163,17 @@ def infer_pressure(x_rav, y_rav, u_rav, v_rav, x_sph, y_sph, r_sph, get_pressure
 
 
 # Evaluate Angle dependet Pressures
-def angle_analysis(folder, output, n_max=None, small_pressure = False, fontsize=7, name_of_resultfile='result_angles.xlsx'):
+def angle_analysis(folder, output, n_max=None, small_pressure = False, fontsize=7, name_of_resultfile='result_angles.xlsx', dt=None):
     """
     Evaluate angles over time for an spheroid (needs folder where 'reconstruct' function was used) and stores 
     the results in the output folder.
     - N_max may define the last image to evaluate 
     - Small_pressure true returns plots that are scaled to 100 Pa whereas false returns plots that are scaled up to 1000 Pa
     - Evaluated excel sheet with angle data is automatically searched in folder, if name differs from  'result_angles.xlsx' it can be specified using name_of_resultfile
+    - dt is time between consecutive images in seconds; If given a timestamp will be displayed 
     """
+    from datetime import timedelta
+    
     # read in angle pressures
     angles  = pd.read_excel(folder + '//'+ name_of_resultfile)
     # read in plots
@@ -217,8 +220,8 @@ def angle_analysis(folder, output, n_max=None, small_pressure = False, fontsize=
         if small_pressure == False:
         
             # now use 1000 as maximum
-            x = [np.sin(i*np.pi/180) for i in angle_list] * (pressures / np.array([1000]*len(pressures)) ) 
-            y = [np.cos(i*np.pi/180) for i in angle_list] * (pressures / np.array([1000] *len(pressures)) ) 
+            x = [np.cos(i*np.pi/180) for i in angle_list] * (pressures / np.array([1000]*len(pressures)) ) 
+            y = [np.sin(i*np.pi/180) for i in angle_list] * (pressures / np.array([1000] *len(pressures)) ) 
             # combined figure
             # plot circles
             circle_100pa = plt.Circle((0, 0), 100/ 1000 , color=colorcycle, zorder=10, fill=False, linestyle='--')
@@ -239,18 +242,18 @@ def angle_analysis(folder, output, n_max=None, small_pressure = False, fontsize=
             ax1.set_ylim([-1, 1])
             ax1.axis('off')
             # annotate CoV    
-            ax1.text(0.01, 0.95,'Coefficient of Variation: '+str(CoV), 
+            ax1.text(0.01, 0.91,'Coefficient of Variation: '+str(CoV), 
              horizontalalignment='center',
              verticalalignment='center',
              transform = ax1.transAxes, fontsize=9.2)  
-            ax1.text(0.5, 0.06,'Angle dependent pressures (Pa) ', 
-             horizontalalignment='center',
-             verticalalignment='center',
-             transform = ax1.transAxes, fontsize=7, color='k')  
-            ax1.text(0.5, 0.02,str(mean)+r' Pa $\pm$ '+str(sd)+r' Pa (mean $\pm$ sd)', 
-             horizontalalignment='center',
-             verticalalignment='center',
-             transform = ax1.transAxes, fontsize=7, color='k')  
+            
+            # annotate time if timestep is given
+            if dt is not None:
+                ax1.text(0.03, 0.98,str(timedelta(seconds=t*dt)), 
+                  horizontalalignment='center',
+                  verticalalignment='center',
+                  transform = ax1.transAxes, fontsize=12)  
+
                 
             # show quiver plot on the right side
             plot = plt.imread(plots[t])
@@ -286,8 +289,8 @@ def angle_analysis(folder, output, n_max=None, small_pressure = False, fontsize=
      # Mode that shows and norms up to 100 Pa
         if small_pressure == True:
             # now use 100 as maximum
-            x = [np.sin(i*np.pi/180) for i in angle_list] * (pressures / np.array([100]*len(pressures)) ) 
-            y = [np.cos(i*np.pi/180) for i in angle_list] * (pressures / np.array([100] *len(pressures)) ) 
+            x = [np.cos(i*np.pi/180) for i in angle_list] * (pressures / np.array([100]*len(pressures)) ) 
+            y = [np.sin(i*np.pi/180) for i in angle_list] * (pressures / np.array([100] *len(pressures)) ) 
             # combined figure
             # plot circles
             circle_a = plt.Circle((0, 0), 10/ 100 , color=colorcycle, zorder=10, fill=False, linestyle='--')
@@ -305,10 +308,17 @@ def angle_analysis(folder, output, n_max=None, small_pressure = False, fontsize=
             ax1.set_ylim([-1, 1])
             ax1.axis('off')
             # annotate CoV    
-            ax1.text(0.01, 0.95,'Coefficient of Variation: '+str(CoV), 
+            ax1.text(0.01, 0.91,'Coefficient of Variation: '+str(CoV), 
              horizontalalignment='center',
              verticalalignment='center',
              transform = ax1.transAxes, fontsize=9.2)  
+            
+            # annotate time if timestep is given
+            if dt is not None:
+                ax1.text(0.03, 0.98,str(timedelta(seconds=t*dt)), 
+                  horizontalalignment='center',
+                  verticalalignment='center',
+                  transform = ax1.transAxes, fontsize=12)  
             # show quiver plot on the right side
             plot = plt.imread(plots[t])
             ax2.imshow(plot)
