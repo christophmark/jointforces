@@ -1,8 +1,8 @@
 # Exemplary data
 
-This folder contains relevant files to test/apply the analysis workflow of `jointforces`.
+This folder contains relevant files (or the respective links) to test/apply the analysis workflow of `jointforces`.
 
-## [MCF7-time-lapse.zip](https://github.com/christophmark/jointforces/blob/master/docs/data/MCF7-time-lapse.zip)
+## [MCF7-time-lapse.zip](https://www.dropbox.com/s/b6uztm3tgdo491p/MCF7-time-lapse.zip?dl=1)
 
 Exemplary time-lapse images of a MCF7 spheroid containing 4000 cells (at the time of seeding) that is embedded in a 1.2mg/ml collagen gel together with silica beads as fiducial markers.
 

@@ -13,7 +13,7 @@ In some cases the installation of the required package `OpenPIV` fails due to mi
 Visual studio (may needs to be installed additionally for OpenPiv) can be downloaded [here](https://visualstudio.microsoft.com/de/downloads/). At installation select the development tools.
 
 ## Minimal example
-`jointforces` provides [example data](https://github.com/christophmark/jointforces/tree/master/docs/data) and [pre-computed material simulations](https://github.com/christophmark/jointforces/tree/master/docs/data) for 1.2mg/ml collagen gels as described in [Steinwachs et al. (2016)](https://www.nature.com/articles/nmeth.3685). The following code snippet...
+`jointforces` provides [example data](https://www.dropbox.com/s/b6uztm3tgdo491p/MCF7-time-lapse.zip?dl=1) and [pre-computed material simulations](https://github.com/christophmark/jointforces/tree/master/docs/data) for 1.2mg/ml collagen gels as described in [Steinwachs et al. (2016)](https://www.nature.com/articles/nmeth.3685). The following code snippet...
 - loads a series of images
 - segments the spheroid in each image
 - applies particle image velocimetry to each pair of subsequent images
@@ -37,7 +37,7 @@ jf.force.reconstruct('MCF7-piv',        # PIV output folder
 ```
 
 ## Documentation
-This section details a complete walk-through of the analysis of a 3D traction force microscopy experiment. The data we use in this example can be downloaded [here](https://github.com/christophmark/jointforces/tree/master/docs/data). The data consists of 145 consecutive images of a MCF7 tumor spheroid contracting for 12h within a 1.2mg/ml collagen gel. The contractility of a multicellular aggregate is estimated by comparing the measured deformation field induced by the contracting cells to a set of simulated deformation fields of varying contractility. While we provide precompiled simulations for various materials, this documentation not only covers the force reconstruction step, but also the material simulations.
+This section details a complete walk-through of the analysis of a 3D traction force microscopy experiment. The data we use in this example can be downloaded [here](https://www.dropbox.com/s/b6uztm3tgdo491p/MCF7-time-lapse.zip?dl=1). The data consists of 145 consecutive images of a MCF7 tumor spheroid contracting for 12h within a 1.2mg/ml collagen gel. The contractility of a multicellular aggregate is estimated by comparing the measured deformation field induced by the contracting cells to a set of simulated deformation fields of varying contractility. While we provide precompiled simulations for various materials, this documentation not only covers the force reconstruction step, but also the material simulations.
 
 The module is imported in Python as:
 
@@ -70,7 +70,7 @@ Having created the mesh geometry, we define appropriate boundary conditions and 
 jf.simulation.spherical_contraction('test.msh', 'simu', 100, jf.materials.collagen12)
 ```
 
-More detailed information about the output files of a simulation can be found the [Wiki of the SAENO project](https://github.com/Tschaul/SAENO/wiki). The file `parameters.txt` contains all parameters used int he simulation. Note that `jointforces` provides functions that read in the resulting files of material simulations again to facilitate a comparison of simulated and measured deformation fields, as detailed below.
+More detailed information about the output files of a simulation can be found the [documentation of the `saenopy` project](https://saenopy.readthedocs.io/). The file `parameters.txt` contains all parameters used int he simulation. Note that `jointforces` provides functions that read in the resulting files of material simulations again to facilitate a comparison of simulated and measured deformation fields, as detailed below.
 
 #### Material parameters
 `jointforces` provides "pre-configured" material types for collagen gels of three different concentrations (0.6, 1.2, and 2.4mg/ml). Detailed protocols for reproducing these gels can be found in [Steinwachs et al. (2016)](https://www.nature.com/articles/nmeth.3685) and [Condor et al. (2017)](https://currentprotocols.onlinelibrary.wiley.com/doi/abs/10.1002/cpcb.24). Furthermore, one can define a linear elastic material with a specified `stiffness` (in Pa) with:
@@ -135,7 +135,7 @@ We provide a pre-computed lookup table for the standard 1.2mg/ml collagen gel [h
 
 ### 4. Particle image velocimetry
 
-Up to this point, we have only covered material simulations, but not the analysis of measured time-lapse image series. To detect deformations in the material surrounding the spheroid, `jointforces` uses the [Particle Image Velocimetry](https://en.wikipedia.org/wiki/Particle_image_velocimetry) algorithm of the [`OpenPIV`](http://www.openpiv.net/openpiv-python/) package. The following command automatically reads in all image files that match a filterstring within a given folder, and computes the deformation fields between subsequent images, and saves overlay plots of the deformation fields. The exemplary data used in this example can be downloaded [here](https://github.com/christophmark/jointforces/tree/master/docs/data).
+Up to this point, we have only covered material simulations, but not the analysis of measured time-lapse image series. To detect deformations in the material surrounding the spheroid, `jointforces` uses the [Particle Image Velocimetry](https://en.wikipedia.org/wiki/Particle_image_velocimetry) algorithm of the [`OpenPIV`](http://www.openpiv.net/openpiv-python/) package. The following command automatically reads in all image files that match a filterstring within a given folder, and computes the deformation fields between subsequent images, and saves overlay plots of the deformation fields. The exemplary data used in this example can be downloaded [here](https://www.dropbox.com/s/b6uztm3tgdo491p/MCF7-time-lapse.zip?dl=1).
 
 ```python
 jf.piv.compute_displacement_series('MCF7-time-lapse', '*.tif', 'MCF7-piv', 
@@ -175,4 +175,4 @@ plt.show()
 *jointforces* is tested on Python 3.7 and a Windows 10 64bit system. It depends on `numpy`, `pandas`, `matplotlib`, `scipy`, `scikit-image`, `openpiv`, `tqdm`, `natsort`, and `dill`. We recommend using the [Anaconda distribution](https://www.continuum.io/downloads) of Python. Windows users may also take advantage of pre-compiled binaries for all dependencies, which can be found at [Christoph Gohlke's page](http://www.lfd.uci.edu/~gohlke/pythonlibs/).
 
 ## License
-The `jointforces` package itself is licensed under the [MIT License](https://github.com/christophmark/jointforces/blob/master/LICENSE). The [exemplary data](https://github.com/christophmark/jointforces/tree/master/docs/data) and the [precompiled binaries](https://github.com/christophmark/jointforces/tree/master/docs/bin) of SAENO are provided "as is", without any warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement.
+The `jointforces` package itself is licensed under the [MIT License](https://github.com/christophmark/jointforces/blob/master/LICENSE). The [exemplary data](https://www.dropbox.com/s/b6uztm3tgdo491p/MCF7-time-lapse.zip?dl=1) are provided "as is", without any warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement.

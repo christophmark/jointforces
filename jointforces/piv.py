@@ -208,6 +208,8 @@ def displacement_plot(img, segmentation, displacements, quiver_scale=1, color_no
     plt.axis('off')
     plt.gca().get_xaxis().set_visible(False)
     plt.gca().get_yaxis().set_visible(False)
+    
+    return p
 
 
 def save_displacement_plot(filename, img, segmentation, displacements, quiver_scale=1, color_norm=75., cmap=cm.jet,
