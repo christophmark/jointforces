@@ -12,6 +12,12 @@ In some cases the installation of the required package `OpenPIV` fails due to mi
 
 Visual studio (may needs to be installed additionally for OpenPiv) can be downloaded [here](https://visualstudio.microsoft.com/de/downloads/). At installation select the development tools.
 
+
+### Troubleshooting
+In some cases the installation of the required package `OpenPIV` fails due to missing compilers. In that case, Windows users may use the pre-compiled binaries provided [here](https://www.lfd.uci.edu/~gohlke/pythonlibs/#openpiv). Download the approriate `*.whl`-File for your Python version and install via `pip install *.whl`. This works not only for `OpenPIV`, but for all packages hosted on [Christoph Gohlke's page](https://www.lfd.uci.edu/~gohlke/pythonlibs/). 
+
+Visual studio (may needs to be installed additionally for OpenPiv) can be downloaded [here](https://visualstudio.microsoft.com/de/downloads/). At installation select the development tools.
+
 ## Minimal example
 `jointforces` provides [example data](https://www.dropbox.com/s/b6uztm3tgdo491p/MCF7-time-lapse.zip?dl=1) and [pre-computed material simulations](https://github.com/christophmark/jointforces/tree/master/docs/data) for 1.2mg/ml collagen gels as described in [Steinwachs et al. (2016)](https://www.nature.com/articles/nmeth.3685). The following code snippet...
 - loads a series of images
@@ -139,10 +145,10 @@ Up to this point, we have only covered material simulations, but not the analysi
 
 ```python
 jf.piv.compute_displacement_series('MCF7-time-lapse', '*.tif', 'MCF7-piv', 
-                                   window_size=40, cutoff=650)
+                                   window_size=40, cutoff=650, draw_mask='False')
 ```
 
-The command performs PIV on all `*.tif` files in the the folder `MCF7-time-lapse`, the results are saved int he folder `MCF7-piv`. The window size of the PIV algorithm should be chosen as small as possible to increase spatial resolution, but also large enough to contain multiple fiducial markers for an accurate detection of local material deformations. The `cutoff` parameter can be used to disregard all displacements that are detected further away from the center than the set value (e.g. because an optical coupler is visible in the corners of the image).
+The command performs PIV on all `*.tif` files in the the folder `MCF7-time-lapse`, the results are saved int he folder `MCF7-piv`. The window size of the PIV algorithm should be chosen as small as possible to increase spatial resolution, but also large enough to contain multiple fiducial markers for an accurate detection of local material deformations. The `cutoff` parameter can be used to disregard all displacements that are detected further away from the center than the set value (e.g. because an optical coupler is visible in the corners of the image). With the `draw_mask` option the user can decide to draw a poylgon mask by hand instead of using the automatic segmentation. 
 
 ![Loading GIF...](https://raw.githubusercontent.com/christophmark/jointforces/master/docs/gifs/mcf7-piv.gif)
 
