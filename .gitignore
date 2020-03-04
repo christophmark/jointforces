@@ -58,3 +58,6 @@ target/
 
 # IDE stuff
 .idea/
+
+# saenopy temp folder
+._py2/

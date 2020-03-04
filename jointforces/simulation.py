@@ -1,5 +1,6 @@
 import os
 import dill
+import shutil
 import numpy as np
 from glob import glob
 from subprocess import call
@@ -8,10 +9,9 @@ from subprocess import PIPE
 from time import sleep
 from tqdm import tqdm
 from scipy.interpolate import LinearNDInterpolator
-from jointforces import SAENOPATH
 
 
-def spherical_contraction(meshfile, outfolder, pressure, material, r_inner=None, r_outer=None, logfile = False):
+def spherical_contraction(meshfile, outfolder, pressure, material, r_inner=None, r_outer=None, logfile=False,  max_iter = 300, step = 0.066, conv_crit = 0.01):
     # open mesh file
     with open(meshfile, 'r') as f:
         lines = f.readlines()
@@ -113,19 +113,19 @@ def spherical_contraction(meshfile, outfolder, pressure, material, r_inner=None,
     iconf = np.zeros((len(coords), 3))
     np.savetxt(outfolder + '/iconf.dat', iconf)
 
-    # create config file for SAENO
+    # create config file for SAENO    
     config = r"""MODE = relaxation
 BOXMESH = 0
 FIBERPATTERNMATCHING = 0
-REL_CONV_CRIT = 1e-11
-REL_ITERATIONS = 300
-REL_SOLVER_STEP = 0.066
+REL_CONV_CRIT = {}
+REL_ITERATIONS = {}
+REL_SOLVER_STEP = {}
 K_0 = {}
 D_0 = {}
 L_S = {}
 D_S = {}
 CONFIG = {}\config.txt
-DATAOUT = {}""".format(K_0, D_0, L_S, D_S, os.path.abspath(outfolder), os.path.abspath(outfolder))
+DATAOUT = {}""".format(conv_crit, max_iter, step, K_0, D_0, L_S, D_S, os.path.abspath(outfolder), os.path.abspath(outfolder))
 
     with open(outfolder + "/config.txt", "w") as f:
         f.write(config)
@@ -142,18 +142,19 @@ OUTER_RADIUS = {} µm
 INNER_NODE_SPACING = {} µm
 OUTER_NODE_SPACING = {} µm
 SURFACE_NODES = {}
-TOTAL_NODES = {}""".format(K_0, D_0, L_S, D_S, pressure, force_per_node, r_inner*1e6 , r_outer*1e6 , inner_spacing*1e6, outer_spacing*1e6, np.sum(mask_inner), len(coords))
+TOTAL_NODES = {}""".format(K_0, D_0, L_S, D_S, pressure, force_per_node, r_inner*1e6, r_outer*1e6, inner_spacing*1e6,
+                           outer_spacing*1e6, np.sum(mask_inner), len(coords))
 
     with open(outfolder + "/parameters.txt", "w") as f:
         f.write(parameters)
-        
-        
-     # Create log file if activated
-    if logfile == True:
+
+    # Create log file if activated
+    if logfile:
         
         # create log file with system output
         logfile = open(outfolder + "/saeno_log.txt", 'w')
-        cmd = Popen(SAENOPATH+"/saeno CONFIG {}/config.txt".format(os.path.abspath(outfolder)), stdout=PIPE , universal_newlines=True, shell=False)
+        cmd = Popen(["saenopy","CONFIG","{}//config.txt".format(os.path.abspath(outfolder))], stdout=PIPE, 
+                    universal_newlines=True, shell=False)
         # print and save a reduced version of saeno log
         for line in cmd.stdout:
             if not '%' in line:
@@ -164,9 +165,14 @@ TOTAL_NODES = {}""".format(K_0, D_0, L_S, D_S, pressure, force_per_node, r_inner
         
     # if false just show the non reduced system output    
     else:
-        cmd = call(SAENOPATH+"/saeno CONFIG {}/config.txt".format(os.path.abspath(outfolder)))     
-        
+        cmd = call(["saenopy","CONFIG", "{}//config.txt".format(os.path.abspath(outfolder))])
 
+    # copy result files from "*_py2" folder
+    for filename in glob(outfolder+'_py2/*.*'):
+        shutil.copy(filename, outfolder)
+
+    # remove "*_py2" folder
+    shutil.rmtree(outfolder+'_py2')
 
 
 def distribute(func, const_args, var_arg='pressure', start=0.1, end=1000, n=120, log_scaling=True, n_cores=None):
@@ -191,10 +197,7 @@ def distribute(func, const_args, var_arg='pressure', start=0.1, end=1000, n=120,
     processes = []
 
     while True:
-        if len(values) == 0:
-            break
-
-        if len(processes) < n_cores:
+        if len(processes) < n_cores and len(values) > 0:
             command = '''python -c "import jointforces; import jointforces as jf; {}('''.format(func)
             for key in const_args:
                 if isinstance(const_args[key], str):
@@ -203,13 +206,16 @@ def distribute(func, const_args, var_arg='pressure', start=0.1, end=1000, n=120,
                     command += '''{}={},'''.format(key, const_args[key])
             command += '''outfolder='{}', {}={})"'''.format(outfolder+'/simulation'+str(index[0]).zfill(6), var_arg, values[0])
 
-            processes.append(Popen(command))
+            processes.append(Popen(command, shell='True'))
             del values[0]
             del index[0]
 
         sleep(1.)
 
         processes = [p for p in processes if p.poll() is None]
+
+        if len(processes) == 0:
+            break
 
 
 def extract_deformation_curve(folder, x):
@@ -273,17 +279,24 @@ def create_lookup_functions(lookup_table):
 
     x, y = np.meshgrid(log_distance, log_pressure)
 
-    f = LinearNDInterpolator(np.array([np.ravel(x), np.ravel(y)]).T, np.ravel(displacement))
+    mask = ~(np.isnan(x) | np.isnan(y) | np.isnan(displacement))
+
+    x = x[mask]
+    y = y[mask]
+    displacement = displacement[mask]
+
+    f = LinearNDInterpolator(np.array([x, y]).T, displacement)
 
     def get_displacement(distance, pressure):
         return f(np.log(distance), np.log(pressure))
 
-    f_inv = LinearNDInterpolator(np.array([np.ravel(x), np.ravel(displacement)]).T, np.ravel(y))
+    f_inv = LinearNDInterpolator(np.array([x, displacement]).T, y)
 
     def get_pressure(distance, displacement):
         return np.exp(f_inv(np.log(distance), displacement))
 
     return get_displacement, get_pressure
+
 
 def save_lookup_functions(get_displacement, get_pressure, outfile):
     with open(outfile, 'wb') as f:

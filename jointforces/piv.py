@@ -107,6 +107,34 @@ def custom_mask(img):
     # return dictionary containing spheroid information
     return {'mask': mask, 'radius': radius, 'centroid': (cx, cy)} 
 
+def custom_mask(img):
+    """
+    Image segmentation function to create a custom polygon mask, and evalute radius and position of the masked object.
+    Need to use %matplotlib qt in jupyter notebook
+    Args:
+        img(array): Grayscale image as a Numpy array
+    Returns:
+        dict: Dictionary with keys: mask, radius, centroid (x/y)
+    """
+    height = img.shape[0]
+    width  = img.shape[1]
+    # click polygon mask interactive
+    plt.ion()
+    plt.imshow(img, extent=[0, width, height, 0])
+    plt.text(0.5, 1.05,'Click Polygon Mask with left click, finish with right click',  fontsize=12,
+         horizontalalignment='center',
+         verticalalignment='center',c='darkred', transform= plt.gca().transAxes)#     transform = ax.transAxes)
+    my_roi = RoiPoly(color='r')
+    # Extract mask and segementation details
+    mask = np.flipud(my_roi.get_mask(img))   # flip mask due to imshow 
+    # determine radius of spheroid
+    radius = np.sqrt(np.sum(mask) / np.pi)
+    # determine center of mass
+    cy, cx = scipy_meas.center_of_mass(mask)
+    # return dictionary containing spheroid information
+    return {'mask': mask, 'radius': radius, 'centroid': (cx, cy)} 
+
+
 def compute_displacements(window_size, img0, img1, mask1=None, cutoff=None, drift_correction=True):
     # get image size
     height = img1.shape[0]
@@ -208,6 +236,8 @@ def displacement_plot(img, segmentation, displacements, quiver_scale=1, color_no
     plt.axis('off')
     plt.gca().get_xaxis().set_visible(False)
     plt.gca().get_yaxis().set_visible(False)
+    
+    return p
 
 
 def save_displacement_plot(filename, img, segmentation, displacements, quiver_scale=1, color_norm=75., cmap=cm.jet,
@@ -223,9 +253,11 @@ def save_displacement_plot(filename, img, segmentation, displacements, quiver_sc
     plt.close(fig)
 
 
-def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=None, enhance=True,
-                                window_size=70, cutoff=None, drift_correction=True,
-                                plot=True, quiver_scale=1, color_norm=75., draw_mask = False, gamma=None, gauss=False, load_mask=None):   # load_mask
+def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=None,
+                                enhance=True, window_size=70, cutoff=None, drift_correction=True,
+                                plot=True, quiver_scale=1, color_norm=75., draw_mask = False, 
+                                gamma=None, gauss=False, load_mask=None):
+  
     img_files = natsorted(glob(folder+'/'+filter))
 
     if n_max is not None:
