@@ -163,7 +163,7 @@ def infer_pressure(x_rav, y_rav, u_rav, v_rav, x_sph, y_sph, r_sph, get_pressure
 
 
 # Evaluate Angle dependet Pressures
-def angle_analysis(folder, output, n_max=None, small_pressure = False, fontsize=7, name_of_resultfile='result_angles.xlsx', dt=None):
+def angle_analysis(folder, output, n_max=None, small_pressure = False, fontsize=7, name_of_resultfile='result_angles.xlsx', dt=None, angle_legend=False):
     """
     Evaluate angles over time for an spheroid (needs folder where 'reconstruct' function was used) and stores 
     the results in the output folder.
@@ -171,6 +171,7 @@ def angle_analysis(folder, output, n_max=None, small_pressure = False, fontsize=
     - Small_pressure true returns plots that are scaled to 100 Pa whereas false returns plots that are scaled up to 1000 Pa
     - Evaluated excel sheet with angle data is automatically searched in folder, if name differs from  'result_angles.xlsx' it can be specified using name_of_resultfile
     - dt is time between consecutive images in seconds; If given a timestamp will be displayed 
+    - angle_legend will draw a legend with angles if active 
     """
     from datetime import timedelta
     
@@ -215,7 +216,16 @@ def angle_analysis(folder, output, n_max=None, small_pressure = False, fontsize=
         res_angles['sd_pr_angles (Pa)'].append(sd)
         res_angles['CoV'].append(CoV)
         
-
+        if angle_legend == True:
+            # position of label text
+            shift = 0.9
+            posx_legend = [np.cos(i*np.pi/180) * shift for i in angle_list] 
+            posy_legend = [np.sin(i*np.pi/180) * shift for i in angle_list] 
+            # plot text
+            [ax1.text(posx_legend[i],posy_legend[i], str(angle_list[i]), c='darkred', fontsize=4, horizontalalignment='center') for i in range(len(angle_list))] 
+            [axb.text(posx_legend[i],posy_legend[i], str(angle_list[i]), c='darkred', fontsize=3.6, horizontalalignment='center') for i in range(len(angle_list))]   
+                    
+        #ax1.scatter(posx_legend,posy_legend, s=22, c=colors)
         # Mode that shows and norms up to 1000 Pa
         if small_pressure == False:
         
@@ -261,7 +271,7 @@ def angle_analysis(folder, output, n_max=None, small_pressure = False, fontsize=
             plt.axis('off')
             ax2.axis('off')
             # save figure
-            f.savefig(output+'//plot_{}.png'.format(str(t).zfill(4)), dpi=300)
+            f.savefig(output+'//plot_{}.png'.format(str(t).zfill(4)), dpi=200)
             ax1.cla()
             ax2.cla()
             # Single figure
@@ -283,7 +293,7 @@ def angle_analysis(folder, output, n_max=None, small_pressure = False, fontsize=
             axb.set_xlim([-1, 1])
             axb.set_ylim([-1, 1])
             axb.axis('off')
-            plt.savefig(output+'//single_{}.png'.format(str(t).zfill(4)), dpi=300)
+            plt.savefig(output+'//single_{}.png'.format(str(t).zfill(4)), dpi=200)
             axb.cla()
             
      # Mode that shows and norms up to 100 Pa
@@ -325,12 +335,12 @@ def angle_analysis(folder, output, n_max=None, small_pressure = False, fontsize=
             plt.axis('off')
             ax2.axis('off')
             # save figure
-            f.savefig(output+'//plot_{}.png'.format(str(t).zfill(4)), dpi=300)
+            f.savefig(output+'//plot_{}.png'.format(str(t).zfill(4)), dpi=200)
             ax1.cla()
             ax2.cla()
             
             # single figure
-            # plot circles
+            # plot circles       
             circle_a = plt.Circle((0, 0), 10/ 100 , color=colorcycle, zorder=10, fill=False, linestyle='--')
             circle_b = plt.Circle((0, 0), 25/ 100 , color=colorcycle, zorder=10, fill=False, linestyle='--')
             circle_c = plt.Circle((0, 0), 50/ 100 , color=colorcycle, zorder=10, fill=False, linestyle='--')
@@ -346,8 +356,12 @@ def angle_analysis(folder, output, n_max=None, small_pressure = False, fontsize=
             axb.set_xlim([-1, 1])
             axb.set_ylim([-1, 1])
             axb.axis('off')
-            plt.savefig(output+'//single_{}.png'.format(str(t).zfill(4)), dpi=300)
+            plt.savefig(output+'//single_{}.png'.format(str(t).zfill(4)), dpi=200)
             axb.cla()
+
+
+
+
 
     # save excel file     
     ae = pd.DataFrame.from_dict(res_angles)
