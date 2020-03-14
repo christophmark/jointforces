@@ -9,9 +9,7 @@ The current version of this package can be downloaded as a zip file [here](https
 
 
 ### Troubleshooting
-In some cases the installation of the required package `OpenPIV` fails due to missing compilers. In that case, Windows users may use the pre-compiled binaries provided [here](https://www.lfd.uci.edu/~gohlke/pythonlibs/#openpiv). Download the approriate `*.whl`-File for your Python version and install via `pip install *.whl`. This works not only for `OpenPIV`, but for all packages hosted on [Christoph Gohlke's page](https://www.lfd.uci.edu/~gohlke/pythonlibs/). Select the package based on the python version tag (`cpX`) and the platform tag (`winX`) of your setup.
-
-Visual studio (can be installed alternatively to the `*.whl`-File) can be downloaded [here](https://visualstudio.microsoft.com/de/downloads/). At installation select the development tools.
+In some cases the installation of the required package `OpenPIV` fails due to missing compilers. In that case, Windows users may use the pre-compiled binaries provided [here](https://www.lfd.uci.edu/~gohlke/pythonlibs/#openpiv). Download the approriate `*.whl`-File for your Python version and install via `pip install *.whl`. This works not only for `OpenPIV`, but for all packages hosted on [Christoph Gohlke's page](https://www.lfd.uci.edu/~gohlke/pythonlibs/). Find your version based on the python version tag (`cpX`) and the platform tag (`winX`) of your setup. Visual studio (can be installed alternatively to the `*.whl`-File) can be downloaded [here](https://visualstudio.microsoft.com/de/downloads/). At installation select the development tools.
 
 ## Minimal example
 `jointforces` provides [example data](https://www.dropbox.com/s/b6uztm3tgdo491p/MCF7-time-lapse.zip?dl=1) and [pre-computed material simulations](https://github.com/christophmark/jointforces/tree/master/docs/data) for 1.2mg/ml collagen gels as described in [Steinwachs et al. (2016)](https://www.nature.com/articles/nmeth.3685). The following code snippet...
