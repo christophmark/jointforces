@@ -158,6 +158,7 @@ def compute_displacements(window_size, img0, img1, mask1=None, cutoff=None, drif
             ut, vt, sig2noise = openpiv.pyprocess.extended_search_area_piv(img0,
                                                       img1,
                                                       window_size=window_size,
+                                                      search_area_size = window_size,
                                                       overlap=window_size // 2,
                                                       dt=1,
                                                       sig2noise_method='peak2peak')

@@ -360,9 +360,6 @@ def angle_analysis(folder, output, n_max=None, small_pressure = False, fontsize=
             axb.cla()
 
 
-
-
-
     # save excel file     
     ae = pd.DataFrame.from_dict(res_angles)
     ae.columns = ['mean_pr_angles (Pa)',
