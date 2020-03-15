@@ -145,23 +145,24 @@ def compute_displacements(window_size, img0, img1, mask1=None, cutoff=None, drif
         warnings.simplefilter("ignore")
         
         
+        # # compute displacements
+        # try:
+        #     ut, vt, sig2noise = openpiv.pyprocess.piv(img0,
+        #                                               img1,
+        #                                               window_size=window_size,
+        #                                               overlap=window_size // 2,
+        #                                               dt=1,
+        #                                               sig2noise_method='peak2peak')
+        # except(AttributeError):  
+        #     # if not found use the newer function here, no extended search area by default
         # compute displacements
-        try:
-            ut, vt, sig2noise = openpiv.pyprocess.piv(img0,
-                                                      img1,
-                                                      window_size=window_size,
-                                                      overlap=window_size // 2,
-                                                      dt=1,
-                                                      sig2noise_method='peak2peak')
-        except(AttributeError):  
-            # if not found use the newer function here, no extended search area by default
-            ut, vt, sig2noise = openpiv.pyprocess.extended_search_area_piv(img0,
-                                                      img1,
-                                                      window_size=window_size,
-                                                      search_area_size = window_size,
-                                                      overlap=window_size // 2,
-                                                      dt=1,
-                                                      sig2noise_method='peak2peak')
+        ut, vt, sig2noise = openpiv.pyprocess.extended_search_area_piv(img0,
+                                                  img1,
+                                                  window_size=window_size,
+                                                  search_area_size = window_size,
+                                                  overlap=window_size // 2,
+                                                  dt=1,
+                                                  sig2noise_method='peak2peak')
 
         # replace outliers
         ut, vt = openpiv.filters.replace_outliers(ut, vt, method='localmean', max_iter=3, kernel_size=1)
