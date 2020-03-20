@@ -55,8 +55,8 @@ def segment_spheroid(img, enhance=True, thres = 0.9):
         img = enhance_contrast(img, gauss=True)
 
     # flip y (to match x/y coordinates) and binarize
-    mask = img[::-1] < threshold_otsu(img) * thres
-
+    mask = img[::-1] < threshold_otsu(img) * thres    
+    
     # remove other objects
     mask = scipy_morph.binary_dilation(mask, iterations=3)
     mask = scipy_morph.binary_fill_holes(mask)
@@ -80,32 +80,7 @@ def segment_spheroid(img, enhance=True, thres = 0.9):
     # return dictionary containing spheroid information
     return {'mask': mask, 'radius': radius, 'centroid': (cx, cy)}
 
-def custom_mask(img):
-    """
-    Image segmentation function to create a custom polygon mask, and evalute radius and position of the masked object.
-    Need to use %matplotlib qt in jupyter notebook
-    Args:
-        img(array): Grayscale image as a Numpy array
-    Returns:
-        dict: Dictionary with keys: mask, radius, centroid (x/y)
-    """
-    height = img.shape[0]
-    width  = img.shape[1]
-    # click polygon mask interactive
-    plt.ion()
-    plt.imshow(img, extent=[0, width, height, 0])
-    plt.text(0.5, 1.05,'Click Polygon Mask with left click, finish with right click',  fontsize=12,
-         horizontalalignment='center',
-         verticalalignment='center',c='darkred', transform= plt.gca().transAxes)#     transform = ax.transAxes)
-    my_roi = RoiPoly(color='r')
-    # Extract mask and segementation details
-    mask = np.flipud(my_roi.get_mask(img))   # flip mask due to imshow 
-    # determine radius of spheroid
-    radius = np.sqrt(np.sum(mask) / np.pi)
-    # determine center of mass
-    cy, cx = scipy_meas.center_of_mass(mask)
-    # return dictionary containing spheroid information
-    return {'mask': mask, 'radius': radius, 'centroid': (cx, cy)} 
+
 
 def custom_mask(img):
     """
@@ -145,7 +120,7 @@ def compute_displacements(window_size, img0, img1, mask1=None, cutoff=None, drif
         warnings.simplefilter("ignore")
 
         # compute displacements
-        ut, vt, sig2noise = openpiv.pyprocess.extended_search_area_piv(img0,
+        ut, vt, sig2noise = openpiv.pyprocess.extended_search_area_piv(img0,   
                                                   img1,
                                                   window_size=window_size,
                                                   search_area_size = window_size,
@@ -160,7 +135,8 @@ def compute_displacements(window_size, img0, img1, mask1=None, cutoff=None, drif
         x, y = openpiv.process.get_coordinates(image_size=img1.shape,
                                                window_size=window_size,
                                                overlap=window_size // 2)
-
+    # flip y-values of PIV-arrows for correct orientation
+    y = y[::-1]
     # if mask is specified, replace displacements within mask with NaN
     # if cutoff is specified, replace displacements further out from the center than cutoff value with NaN
     for i, xi in enumerate(x[0, :]):
@@ -179,8 +155,7 @@ def compute_displacements(window_size, img0, img1, mask1=None, cutoff=None, drif
     if drift_correction:
         ut -= np.nanmean(ut)
         vt -= np.nanmean(vt)
-
-    return {'x': x, 'y': y, 'u': ut, 'v': vt}
+    return {'x': x, 'y': y , 'u': ut, 'v': vt}
 
 
 def displacement_plot(img, segmentation, displacements, quiver_scale=1, color_norm=75., cmap=cm.jet, s=50, **kwargs):
@@ -193,7 +168,7 @@ def displacement_plot(img, segmentation, displacements, quiver_scale=1, color_no
     cx, cy = segmentation['centroid']
 
     plt.imshow(enhance_contrast(img), cmap='Greys_r', extent=[0, width, height, 0], origin='lower')
-
+   
     if cmap is None:
         p = plt.quiver(x, y, u, v,
                        alpha=0.8,
@@ -217,7 +192,7 @@ def displacement_plot(img, segmentation, displacements, quiver_scale=1, color_no
                         np.zeros_like(overlay).T,
                         np.zeros_like(overlay).T,
                         overlay.T]).T
-
+ 
     plt.imshow(overlay.astype(np.float), extent=[0, width, height, 0], zorder=1000)
     plt.scatter([cx], [cy], lw=1, edgecolors='k', c='r', s=s)
 
@@ -261,7 +236,7 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
         os.makedirs(outfolder)
 
     img0 = plt.imread(img_files[0])
-    
+
     # segment , draw or load in mask
     if draw_mask == False:  # normal segmentation
         seg0 = segment_spheroid(img0, enhance=enhance)
@@ -289,9 +264,7 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
                                 cutoff=cutoff, drift_correction=drift_correction)
         np.save(outfolder + '/seg'+str(i).zfill(6)+'.npy', seg1)
         np.save(outfolder + '/dis'+str(i).zfill(6)+'.npy', dis)
-            
-            
-            
+                     
         if plot:
             if u_sum is None:
                 u_sum = dis['u']
