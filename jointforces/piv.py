@@ -106,6 +106,8 @@ def custom_mask(img):
     radius = np.sqrt(np.sum(mask) / np.pi)
     # determine center of mass
     cy, cx = scipy_meas.center_of_mass(mask)
+    # hide pop-up windows   
+    plt.ioff()
     # return dictionary containing spheroid information
     return {'mask': mask, 'radius': radius, 'centroid': (cx, cy)} 
 
