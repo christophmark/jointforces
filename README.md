@@ -171,7 +171,7 @@ plt.show()
 ![Table](https://raw.githubusercontent.com/christophmark/jointforces/master/docs/images/mcf7-excel.png)
 
 
-In addition to the total pressure, the pressure in individual angle sections may also be analysed. The angle-dependent pressure for 5° sections is automatically stored in an additional Excel document and can be visualized by using `angle_analysis`.
+In addition to the total pressure, the pressure in individual angle sections can be analysed. The pressures within 5° angle-sections is stored in an additional Excel document and can be visualized by using the `angle_analysis()` function.
 
 ![Angle](https://raw.githubusercontent.com/christophmark/jointforces/master/docs/images/angle-segmentation.png)
 
