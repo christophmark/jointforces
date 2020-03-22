@@ -13,7 +13,19 @@ from .utils import load
 
 
 
-def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2):
+def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2, angle_filter=20):
+    """
+    - folder: contains PIV results
+    - lookupfile: Material look-up table for force reconstruction
+    - muperpixel: Pixelsize
+    - outfile: can be used to change the standard name of the excel file 
+    - r_min: Specifies the minimal distance in which deformations are evaluated. 
+    By default 2 radii to avoid close-range effects.
+    - angle_filter:  If 'None' all Deformations are taken into account, else 
+    deformations where the angle to the spheroid axis is smaller than the specified
+    angle (in degree) are taken into account for a more robust evaluation. 
+    Default is 20 degree.
+    """
     # get filepaths for PIV results
     dis_files = natsorted(glob(folder+'/dis*.npy'))
     seg_files = natsorted(glob(folder+'/seg*.npy'))
@@ -54,7 +66,7 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2):
 
         cx, cy = seg['centroid']
 
-        distance, displacement, angle, pressure = infer_pressure(x_rav, y_rav, u_sum, v_sum, cx, cy, r0, get_pressure)
+        distance, displacement, angle, pressure = infer_pressure(x_rav, y_rav, u_sum, v_sum, cx, cy, r0, get_pressure , angle_filter=angle_filter)
         mask = distance > r_min
 
         pr_angle = []
@@ -136,27 +148,37 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2):
 
 
 
-def infer_pressure(x_rav, y_rav, u_rav, v_rav, x_sph, y_sph, r_sph, get_pressure):
+def infer_pressure(x_rav, y_rav, u_rav, v_rav, x_sph, y_sph, r_sph, get_pressure, angle_filter = 20):
+    """
+    - angle_filter:  If 'None' all Deformations are taken into account, else 
+    deformations where the angle to the spheroid axis is smaller than the specified
+    angle (in degree) are taken into account for a more robust evaluation. 
+    Default is 20 degree.
+    """
+    # compute relative distances and angle
     dx = (x_rav[~np.isnan(u_rav)] - x_sph) / r_sph
     dy = (y_rav[~np.isnan(u_rav)] - y_sph) / r_sph
     distance = np.sqrt(dx ** 2 + dy ** 2)
     angle = np.arctan2(dy, dx)
 
+    # compute relative deformation
     u_rav2 = u_rav[~np.isnan(u_rav)] / r_sph
     v_rav2 = v_rav[~np.isnan(u_rav)] / r_sph
-
+    
+    # project deformation to spheroid axis
     m = (np.array([dx, dy]).T) / np.expand_dims(distance, axis=1)
     d = np.array([u_rav2, v_rav2]).T
-
     displacement = np.array([-np.dot(di, mi) for di, mi in zip(d, m)])
-
-    abs = np.sqrt(u_rav2**2. + v_rav2**2.)
-    mask = displacement/abs > 0.94  # cos(20deg)
-
-    distance = distance[mask]
-    angle = angle[mask]
-    displacement = displacement[mask]
-
+    
+    # optional filter deformations that are not alliged with axis 
+    if angle_filter is not None:
+        abs = np.sqrt(u_rav2**2. + v_rav2**2.)
+        mask = displacement/abs > np.cos(2*np.pi * angle_filter/360)
+        distance = distance[mask]
+        angle = angle[mask]
+        displacement = displacement[mask]
+        
+    # determine pressure with deformation distance look-up tables
     pressure = get_pressure(distance, displacement)
 
     return [distance, displacement, angle, pressure]
