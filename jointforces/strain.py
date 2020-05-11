@@ -118,7 +118,7 @@ def create_strain_maps(folder, delta, outfolder='strain-maps', radius=2, i_max=N
         plt.tight_layout()
         plt.savefig(outfolder+'/strain'+str(i+1).zfill(6)+'.png', dpi=250)
         plt.clf()
-        plt.close()
+   
     # plot and save overview
     np.savetxt(os.path.join(outfolder,"plots")+'/median_strain.txt', median_strain)
     np.savetxt(os.path.join(outfolder,"plots")+'/max_strain.txt', max_strain)
@@ -130,7 +130,7 @@ def create_strain_maps(folder, delta, outfolder='strain-maps', radius=2, i_max=N
     plt.plot(median_strain)
     plt.tight_layout()
     plt.savefig(os.path.join(outfolder,"plots")+'/median_strain.png', dpi=300)
-    plt.clf()
+    plt.close()
     # max strain
     plt.figure(figsize=(6,2))
     plt.grid()
@@ -139,7 +139,7 @@ def create_strain_maps(folder, delta, outfolder='strain-maps', radius=2, i_max=N
     plt.plot(max_strain)
     plt.tight_layout()
     plt.savefig(os.path.join(outfolder,"plots")+'/max_strain.png', dpi=300)
-    plt.clf()
+    plt.close()
     return 
 
 
@@ -255,6 +255,7 @@ def create_stiffness_maps(folder, delta, outfolder='stiffness-maps', k0=1645, ep
         print('')
         median_stiffness.append(np.nanmedian(stiffness))
         max_stiffness.append(np.nanmax(stiffness))
+        plt.clf()
         
      # plot and save overview    
     np.savetxt(os.path.join(outfolder,"plots")+'/median_stiffness.txt', median_stiffness)
@@ -267,7 +268,7 @@ def create_stiffness_maps(folder, delta, outfolder='stiffness-maps', k0=1645, ep
     plt.plot(median_stiffness)
     plt.tight_layout()
     plt.savefig(os.path.join(outfolder,"plots")+'/median_stiffness.png', dpi=300)
-    plt.clf()
+    plt.close()
     # max stiffness
     plt.figure(figsize=(6,2))
     plt.grid()
@@ -276,5 +277,5 @@ def create_stiffness_maps(folder, delta, outfolder='stiffness-maps', k0=1645, ep
     plt.plot(max_stiffness)
     plt.tight_layout()
     plt.savefig(os.path.join(outfolder,"plots")+'/max_stiffness.png', dpi=300)
-    plt.clf()
+    plt.close()
     return 
