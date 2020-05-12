@@ -117,7 +117,7 @@ def create_strain_maps(folder, delta, outfolder='strain-maps', radius=2, i_max=N
         plt.gca().get_yaxis().set_visible(False)
         plt.tight_layout()
         plt.savefig(outfolder+'/strain'+str(i+1).zfill(6)+'.png', dpi=250)
-        plt.clf()
+        plt.close()
    
     # plot and save overview
     np.savetxt(os.path.join(outfolder,"plots")+'/median_strain.txt', median_strain)
@@ -255,7 +255,7 @@ def create_stiffness_maps(folder, delta, outfolder='stiffness-maps', k0=1645, ep
         print('')
         median_stiffness.append(np.nanmedian(stiffness))
         max_stiffness.append(np.nanmax(stiffness))
-        plt.clf()
+        plt.close()
         
      # plot and save overview    
     np.savetxt(os.path.join(outfolder,"plots")+'/median_stiffness.txt', median_stiffness)
