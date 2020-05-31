@@ -224,7 +224,7 @@ def save_displacement_plot(filename, img, segmentation, displacements, quiver_sc
 def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=None,
                                 enhance=True, window_size=70, cutoff=None, drift_correction=True,
                                 plot=True, quiver_scale=1, color_norm=75., draw_mask = False, 
-                                gamma=None, gauss=False, load_mask=None):
+                                gamma=None, gauss=False, load_mask=None, thres_segmentation = 0.9):
   
     img_files = natsorted(glob(folder+'/'+filter))
 
@@ -241,7 +241,7 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
 
     # segment , draw or load in mask
     if draw_mask == False:  # normal segmentation
-        seg0 = segment_spheroid(img0, enhance=enhance)
+        seg0 = segment_spheroid(img0, enhance=enhance, thres=thres_segmentation)
     else:                   # draw manual
         seg0 = custom_mask(img0)
     if load_mask is not None:   # load in mask
