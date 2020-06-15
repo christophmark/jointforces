@@ -23,16 +23,18 @@ def custom(K_0, D_0, L_S, D_S):
 
 # The following material parameters are taken from Steinwachs et al. (2016).
 # See https://www.nature.com/articles/nmeth.3685 for detailed protocols to
-# replicate the bioploymer gels
+# replicate the bioploymer gels - 
+###  L_S Paramter is now changed according to the saenopy defintion 
+###  ( +1 compared to original saeno definiton making it a strain now)
 
 # 1:1 mixture of Collagen G and Collagen R (0.6mg/ml)
-collagen06 = {'K_0': 447, 'D_0': 0.0008, 'L_S': 0.0075, 'D_S': 0.033}
+collagen06 = {'K_0': 447, 'D_0': 0.0008, 'L_S': 1.0075, 'D_S': 0.033}
 
 # 1:1 mixture of Collagen G and Collagen R (1.2mg/ml)
-collagen12 = {'K_0': 1645, 'D_0': 0.0008, 'L_S': 0.0075, 'D_S': 0.033}
+collagen12 = {'K_0': 1645, 'D_0': 0.0008, 'L_S': 1.0075, 'D_S': 0.033}
 
 # 1:1 mixture of Collagen G and Collagen R (2.4mg/ml)
-collagen24 = {'K_0': 5208, 'D_0': 0.0008, 'L_S': 0.0075, 'D_S': 0.033}
+collagen24 = {'K_0': 5208, 'D_0': 0.0008, 'L_S': 1.0075, 'D_S': 0.033}
 
 # Fibrin gel (4.0mg/ml)
 fibrin40 = {'K_0': 2091, 'D_0': 0.002, 'L_S': 1e30, 'D_S': 1e30}
