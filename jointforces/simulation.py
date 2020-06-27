@@ -196,6 +196,8 @@ def distribute(func, const_args, var_arg='pressure', start=0.1, end=1000, n=120,
     index = list(np.arange(len(values)))
     processes = []
 
+    
+    
     while True:
         if len(processes) < n_cores and len(values) > 0:
             command = '''python -c "import jointforces; import jointforces as jf; {}('''.format(func)
@@ -205,7 +207,7 @@ def distribute(func, const_args, var_arg='pressure', start=0.1, end=1000, n=120,
                 else:
                     command += '''{}={},'''.format(key, const_args[key])
             command += '''outfolder='{}', {}={})"'''.format(outfolder+'/simulation'+str(index[0]).zfill(6), var_arg, values[0])
-
+            print ("Simulations in the queue: "+str(len(values)))
             processes.append(Popen(command, shell='True'))
             del values[0]
             del index[0]
