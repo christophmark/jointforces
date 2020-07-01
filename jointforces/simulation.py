@@ -309,3 +309,48 @@ def load_lookup_functions(file):
     with open(file, 'rb') as f:
         get_displacement, get_pressure = dill.load(f)
     return get_displacement, get_pressure
+
+
+
+def linear_lookup_interpolator(emodulus, output_newtable="new-lin-lookup.pkl", reference_folder=None):
+    """
+    Create individual lookup-tables for linear materials by shifting a reference lookuptable for a linear fiber material.
+    
+    For linear fiber materials the following relation is used:  k0 = 6 * E_Modulus (see Steinwachs[2015]) 
+    
+    Original simulation reached up to 10 000 Pa for a simulated k0 = 2364 (emodul ~394 Pa) - interpolation should be usefull for a wide range of
+     emoduli - however keep in mind that there might be limits for extreme Emoduli-pressures combination due to the range of the original simulations 
+     (in such a case a constant maximal or minimal-pressure value will be returned since there are no better fitting simulations)
+    
+    emodulus:ArithmeticError Desired Youngs modulus for which the linear lookup table is created
+    reference_folder: Folder containing the reference lookup functions and reference interpolators to create
+    the new look up table; By default (None) will search for the reference files automatically  
+    output_newtable: name for the new reference table (needs .pkl ending)
+    """
+    
+    # if not specified differently we find the correct reference files automatically
+    if not reference_folder:
+        import jointforces
+        reference_folder = os.path.join(jointforces.__file__,"..","..","docs","data","linear_reference_table")
+        
+    # load in  reference lookuptable to for a simulated k2364 (emodul ~394 Pa) up to 10 000 Pa 
+    get_displacement_ref, get_pressure_ref = load_lookup_functions(os.path.join(reference_folder,'linear-ref-functions-k2364.pkl'))
+
+    # load in in reference interpolators
+    f_ref,f_inv_ref = load_lookup_functions(os.path.join(reference_folder,'linear-interp-f-finv-k2364.pkl')) 
+    
+    # shift the table accordingly 
+    def get_displacement_new(distance, pressure):
+        return f_ref(np.log(distance), np.log(pressure)) * 2364 /(emodulus*6)
+
+    def get_pressure_new(distance, displacement):
+        return np.exp(f_inv_ref(np.log(distance), displacement)) * (emodulus*6)/2364
+    
+    # save the new lookup functions
+    save_lookup_functions(get_displacement_new, get_pressure_new, output_newtable)
+
+    return get_displacement_new, get_pressure_new
+
+
+
+
