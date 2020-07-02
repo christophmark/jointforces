@@ -130,7 +130,14 @@ print(get_pressure(2, 0.2))
 >>> 99.81708381387853
 ```
 
-We provide a pre-computed lookup table for the standard 1.2mg/ml collagen gel [here](https://github.com/christophmark/jointforces/tree/master/docs/data). This lookup table has been created using the exact commands described above.
+We provide a pre-computed lookup table for the standard 1.2mg/ml collagen gel [here](https://github.com/christophmark/jointforces/tree/master/docs/data). This lookup table has been created using the exact commands described above. In addition further lookup tables for different concentrations and hydrogels are provided. For individual nonlinear materials, the material properties can be determined by using [saenopy](https://saenopy.readthedocs.io/en/latest/fit_material_parameters.html) and can then be used to create a new lookup table. Lookup tables for arbitrary linear elastic material of different stiffness can be easily created using an interpolation function as follows:
+
+```python
+jf.simulation.linear_lookup_interpolator(emodulus=250, output_newtable="linear-lookup-emodul-250Pa.pkl", 
+```
+
+
+
 
 ### 4. Particle image velocimetry
 
