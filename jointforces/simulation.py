@@ -316,7 +316,7 @@ def linear_lookup_interpolator(emodulus, output_newtable="new-lin-lookup.pkl", r
     """
     Create individual lookup-tables for linear materials by shifting a reference lookuptable for a linear fiber material.
     
-    For linear fiber materials the following relation is used:  k0 = 6 * E_Modulus (see Steinwachs[2015]) 
+    For linear fiber materials the following relation is used:  k0 = 6 * E_Modulus  (for a possion ration of 0.25, see Steinwachs[2015]) 
     
     Original simulation reached up to 10 000 Pa for a simulated k0 = 2364 (emodul ~394 Pa) - interpolation should be usefull for a wide range of
      emoduli - however keep in mind that there might be limits for extreme Emoduli-pressures combination due to the range of the original simulations 
