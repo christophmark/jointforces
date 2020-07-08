@@ -27,7 +27,7 @@ def get_displ(x_rav, y_rav, u_rav, v_rav, x_sph, y_sph):
     return [distance, angle, displacement]
 
 
-def create_strain_maps(folder, delta, outfolder='strain-maps', radius=2, i_max=None):
+def create_strain_maps(folder, delta, outfolder='strain-maps', radius=2, i_max=None, vmin=1, vmax=1.5, ticks_strains=[ 1, 1.1 , 1.2 , 1.3, 1.4, 1.5]):
     """
     Creates 2D Strain maps for a time series. 
     (and single plot with mean and maximal strain for eacht time step)
@@ -107,8 +107,10 @@ def create_strain_maps(folder, delta, outfolder='strain-maps', radius=2, i_max=N
         plt.figure(figsize=(8, 6))
         height = strain.shape[0]
         width = strain.shape[1]
-        plt.imshow(strain, vmin=1, vmax=1.5, cmap='magma', extent=[0, width, height, 0], origin='lower')
-        cb = plt.colorbar(fraction=0.025, label='Strain', ticks=[ 1, 1.1 , 1.2 , 1.3, 1.4, 1.5])
+        # plot strain map            
+        plt.imshow(strain, vmin=vmin, vmax=vmax, cmap='magma', extent=[0, width, height, 0], origin='lower')
+        cb = plt.colorbar(fraction=0.025, label='Strain', ticks=ticks_strains)
+            
         #cb.ax.set_yticklabels(['$\mathregular{\leq}$ 300 Pa', '400 Pa', '500 Pa', '$\mathregular{\geq}$ 600 Pa'])
         plt.xlim((0, width))
         plt.ylim((0, height))
