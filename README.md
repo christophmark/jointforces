@@ -177,18 +177,19 @@ plt.show()
 
 ![Table](https://raw.githubusercontent.com/christophmark/jointforces/master/docs/images/mcf7-excel.png)
 
+## Custom Mask
+
+As an alternative to the automatic threshold segmentation manual segmentation can be done using `jf.piv.displacement_series(draw_mask=True)`. Within a pop-up window the borders of the mask can be defined by using left-clicks. When you defined the region of interest you can finish with a right-click and the analysis will continue using the defined mask.
+
 
 ## Angle Analysis
 
-In addition to the total pressure, the pressure derived from individual angle sections can be analysed. The Results.xlsx returns the global Pressure/Force-Values, where we consider all matrix-deformations for the analysis. In the Results_angles.xlsx we divide the matrix into 5-degree angle sections around the center and then calculate the individual Pressure/Values-Values only from the matrix-deformations within these angle-sections. These values might be visualized by using the `jf.force.angle_analysis(angle_legend=True)`
+In addition to the total pressure, the pressure within individual angle-sections can be analyzed. The Results.xlsx returns the global Pressure/Force-Values, where we consider all matrix-deformations for the analysis. In the Results_angles.xlsx we divide the matrix into 5-degree angle sections around the center and then calculate the individual Pressure/Values-Values only from the matrix-deformations within these angle-sections. These values might be visualized by using the `jf.force.angle_analysis(angle_legend=True)`
 
 ![Angle](https://raw.githubusercontent.com/christophmark/jointforces/master/docs/images/angle-segmentation.png)
 
 *Issue: The angle-sections are by default chosen to 5 degree. Depending on the chosen window-size and image-data the amount of "arrows" in each section may be small. By default we  neglect displacements that are in close proximity to the mask or differ highly from the center-axis (to neglect e.g. influence of bubbles). Therefore, it can happen that one might end up with empty angle sections. In that case, you might want to disable the mentioned filters by using the following arguments during force-reconstruction `jf.force.reconstruct(r_min = 0, angle_filter = None)`. Also reducing the windowsize for the angle-analysis could help.*
 
-## Custom Mask
-
-As an alternative to the automatic threshold segmentation manual segmentation can be done using `jf.piv.displacement_series(draw_mask=True)`. Within a pop-up window the borders of the mask can be defined by using left-clicks. When you defined the region of interest you can finish with a right-click and the analysis will continue using the defined mask.
 
 
 ## Dependencies
