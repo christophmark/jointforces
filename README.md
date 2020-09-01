@@ -188,7 +188,7 @@ In addition to the total pressure, the pressure derived from individual angle se
 
 ## Custom Mask
 
-As an alternative to the automatic threshold segmentation, manual segmentation can be done using `jf.piv.displacement_series(..  , draw_mask=True)`. Within a pop-up window the borders of the mask can be defined by using left-clicks. When you defined the region of interest you can finish with a right-click and the analysis will continue using the defined mask.
+As an alternative to the automatic threshold segmentation manual segmentation can be done using `jf.piv.displacement_series(draw_mask=True)`. Within a pop-up window the borders of the mask can be defined by using left-clicks. When you defined the region of interest you can finish with a right-click and the analysis will continue using the defined mask.
 
 
 ## Dependencies
