@@ -244,8 +244,8 @@ def angle_analysis(folder, output, n_max=None, small_pressure = False, fontsize=
             posx_legend = [np.cos(i*np.pi/180) * shift for i in angle_list] 
             posy_legend = [np.sin(i*np.pi/180) * shift for i in angle_list] 
             # plot text
-            [ax1.text(posx_legend[i],posy_legend[i], str(angle_list[i]), c='darkred', fontsize=4, horizontalalignment='center') for i in range(len(angle_list))] 
-            [axb.text(posx_legend[i],posy_legend[i], str(angle_list[i]), c='darkred', fontsize=3.6, horizontalalignment='center') for i in range(len(angle_list))]   
+            [ax1.text(posx_legend[i],posy_legend[i], str(angle_list[i]), color='darkred', fontsize=4, horizontalalignment='center') for i in range(len(angle_list))] 
+            [axb.text(posx_legend[i],posy_legend[i], str(angle_list[i]), color='darkred', fontsize=3.6, horizontalalignment='center') for i in range(len(angle_list))]   
                     
         #ax1.scatter(posx_legend,posy_legend, s=22, c=colors)
         # Mode that shows and norms up to 1000 Pa
