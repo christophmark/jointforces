@@ -283,9 +283,9 @@ def angle_analysis(folder, output, n_max=None,plot=True, small_pressure = False,
 				# annotate time if timestep is given
                 if dt is not None:
                     ax1.text(0.03, 0.98,str(timedelta(seconds=t*dt)), 
-					  horizontalalignment='center',
-					  verticalalignment='center',
-					  transform = ax1.transAxes, fontsize=12)  
+                             horizontalalignment='center',
+                             verticalalignment='center',
+                             transform = ax1.transAxes, fontsize=12)  
 
 					
 				# show quiver plot on the right side
@@ -342,16 +342,16 @@ def angle_analysis(folder, output, n_max=None,plot=True, small_pressure = False,
                 ax1.axis('off')
 				# annotate CoV    
                 ax1.text(0.01, 0.91,'Coefficient of Variation: '+str(CoV), 
-				 horizontalalignment='center',
-				 verticalalignment='center',
-				 transform = ax1.transAxes, fontsize=9.2)  
+                         horizontalalignment='center',
+                             verticalalignment='center',
+                            transform = ax1.transAxes, fontsize=9.2)  
 				
 				# annotate time if timestep is given
                 if dt is not None:
                     ax1.text(0.03, 0.98,str(timedelta(seconds=t*dt)), 
-					  horizontalalignment='center',
-					  verticalalignment='center',
-					  transform = ax1.transAxes, fontsize=12)  
+                             horizontalalignment='center',
+                             verticalalignment='center',
+                             transform = ax1.transAxes, fontsize=12)  
 				# show quiver plot on the right side
                 plot = plt.imread(plots[t])
                 ax2.imshow(plot)
