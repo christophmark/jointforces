@@ -130,11 +130,37 @@ print(get_pressure(2, 0.2))
 >>> 99.81708381387853
 ```
 
+
+In brief, we can create a custom material lookup table by following the code beneath. Instead of creating an individual mesh, you might simply use the provided mesh file with r_inner=100 and r_outer=1000 [link] (in this case the function 'jf.mesh.spherical_inclusion' can be removed from the following code).
+
+```python
+import jointforces as jf
+
+jf.mesh.spherical_inclusion('spherical-inclusion.msh',   # not needed if you use the provided mesh 
+                            r_inner=100,
+                            r_outer=10000,
+                            length_factor=0.05)
+                            
+jf.simulation.distribute('jf.simulation.spherical_contraction',
+                         const_args={'meshfile': 'spherical-inclusion.msh',     # path to the provied or the new generated mesh
+                                     'outfolder': 'D:/material-sims-new-material',
+                                     'material': jf.materials.custom(K_0, D_0, L_S, D_S) },      # Enter your own material parameters here
+                         var_arg='pressure', start=0.1, end=10000, n=150, log_scaling=True, n_cores=3)
+
+lookup_table = jf.simulation.create_lookup_table('D:\material-sims-new-material', x0=1, x1=50, n=150)
+get_displacement, get_pressure = jf.simulation.create_lookup_functions(lookup_table)
+jf.simulation.save_lookup_functions(get_displacement, get_pressure, 'new-material.pkl')
+```
+
+
+
+
 We provide a pre-computed lookup table for the standard 1.2mg/ml collagen gel [here](https://github.com/christophmark/jointforces/tree/master/docs/data). This lookup table has been created using the exact commands described above. In addition further lookup tables for different concentrations and hydrogels are provided. For individual nonlinear materials, the material properties can be determined by using [saenopy](https://saenopy.readthedocs.io/en/latest/fit_material_parameters.html) and can then be used to create a new lookup table. Lookup tables for arbitrary linear elastic material of different stiffness can be easily created using an interpolation function as follows:
 
 ```python
 jf.simulation.linear_lookup_interpolator(emodulus=250, output_newtable="linear-lookup-emodul-250Pa.pkl")
 ```
+
 
 
 
