@@ -131,7 +131,7 @@ print(get_pressure(2, 0.2))
 ```
 
 
-In brief, we can create a custom material lookup table by following the code beneath. Instead of creating an individual mesh, you might simply use the provided mesh file  (r_inner=100; r_outer=10000) [here](https://github.com/christophmark/jointforces/blob/master/docs/data/spherical-inclusion.msh) (in this case the function 'jf.mesh.spherical_inclusion' can be removed from the following code).
+In brief, we can create a custom material lookup table by following the code. Instead of creating an individual mesh, you might simply use the provided mesh file [here](https://github.com/christophmark/jointforces/blob/master/docs/data/spherical-inclusion.msh) (r_inner=100, r_outer=10000; in this case the function 'jf.mesh.spherical_inclusion' can be removed from the following code).
 
 ```python
 import jointforces as jf
