@@ -131,7 +131,7 @@ print(get_pressure(2, 0.2))
 ```
 
 
-In brief, we can create custom lookup tabs by following the code beneath to the following code.  Instead of creating an individual mesh, you might also use a provided mesh file  [link] (with r_inner=100 and r_outer=1000; in this case the function 'jf.mesh.spherical_inclusion' can be removed from the following code)
+In brief, we can create custom material lookup tabs by following the code beneath.  Instead of creating an individual mesh, you might also use the provided mesh file with r_inner=100 and r_outer=1000 [link] (in this case the function 'jf.mesh.spherical_inclusion' can be removed from the following code).
 
 ```python
 import jointforces as jf
@@ -140,8 +140,7 @@ jf.mesh.spherical_inclusion('spherical-inclusion.msh',   # not needed if you use
                             r_inner=100,
                             r_outer=10000,
                             length_factor=0.05)
-
-
+                            
 jf.simulation.distribute('jf.simulation.spherical_contraction',
                          const_args={'meshfile': 'spherical-inclusion.msh',     # path to the provied or the new generated mesh
                                      'outfolder': 'D:/material-sims-new-material',
@@ -149,9 +148,7 @@ jf.simulation.distribute('jf.simulation.spherical_contraction',
                          var_arg='pressure', start=0.1, end=10000, n=150, log_scaling=True, n_cores=3)
 
 lookup_table = jf.simulation.create_lookup_table('D:\material-sims-new-material', x0=1, x1=50, n=150)
-
 get_displacement, get_pressure = jf.simulation.create_lookup_functions(lookup_table)
-
 jf.simulation.save_lookup_functions(get_displacement, get_pressure, 'new-material.pkl')
 ```
 
