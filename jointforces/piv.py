@@ -7,15 +7,17 @@ import scipy.ndimage.measurements as scipy_meas
 from skimage.filters import gaussian, threshold_otsu
 from skimage.morphology import remove_small_objects
 from skimage.exposure import adjust_gamma   
+from skimage import io
 from glob import glob
 from tqdm import tqdm
 from natsort import natsorted
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import openpiv.pyprocess
-import openpiv.process
+#import openpiv.process
 import openpiv.filters
 from roipoly import RoiPoly
+
 
 
 def enhance_contrast(img, gauss=False, gamma=None):
@@ -49,11 +51,12 @@ def segment_spheroid(img, enhance=True, thres = 0.9):
     """
     height = img.shape[0]
     width = img.shape[1]
-
+    
     # contrast enhancement
     if enhance:
         img = enhance_contrast(img, gauss=True)
-
+        
+    
     # flip y (to match x/y coordinates) and binarize
     mask = img[::-1] < threshold_otsu(img) * thres    
     
@@ -70,6 +73,8 @@ def segment_spheroid(img, enhance=True, thres = 0.9):
     distance_to_center = np.sqrt(np.sum((center_of_mass - np.array([height / 2, width / 2])) ** 2, axis=1))
 
     mask = (labeled_mask == distance_to_center.argmin() + 1)
+
+    plt.imshow(mask)
 
     # determine radius of spheroid
     radius = np.sqrt(np.sum(mask) / np.pi)
@@ -130,12 +135,16 @@ def compute_displacements(window_size, img0, img1, mask1=None, cutoff=None, drif
                                                   dt=1,
                                                   sig2noise_method='peak2peak')
 
+        # ToDo  Signal to noise filter option by threshold
+        # u, v, mask = validation.sig2noise_val( ut, vt, sig2noise, threshold = 2.5 )
+        # u, v = filters.replace_outliers( u, v, method='localmean', max_iter=10, kernel_size=2)
+
         # replace outliers
         ut, vt = openpiv.filters.replace_outliers(ut, vt, method='localmean', max_iter=3, kernel_size=1)
 
         # get coordinates corresponding to displacement
-        x, y = openpiv.process.get_coordinates(image_size=img1.shape,
-                                               window_size=window_size,
+        x, y = openpiv.pyprocess.get_coordinates(image_size=img1.shape,
+                                               search_area_size=window_size,
                                                overlap=window_size // 2)
     # flip y-values of PIV-arrows for correct orientation
     y = y[::-1]
@@ -221,24 +230,34 @@ def save_displacement_plot(filename, img, segmentation, displacements, quiver_sc
     plt.close(fig)
 
 
+
+
+
 def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=None,
                                 enhance=True, window_size=70, cutoff=None, drift_correction=True,
                                 plot=True, quiver_scale=1, color_norm=75., draw_mask = False, 
-                                gamma=None, gauss=False, load_mask=None, thres_segmentation = 0.9):
+                                gamma=None, gauss=False, load_mask=None, thres_segmentation = 0.9, cut_img = False, cut_img_val = (None,None,None,None)):
   
     img_files = natsorted(glob(folder+'/'+filter))
-
+    # mainimal and maximal timesteps for analysis
     if n_max is not None:
         img_files = img_files[:n_max+1]
         
     if n_min is not None:
         img_files = img_files[n_min:]   
-
+    # create output folder
     if not os.path.exists(outfolder):
         os.makedirs(outfolder)
+    # read in image - (mask certain area in image if specified)    
+    print(plt.imread(img_files[0]).dtype)
 
-    img0 = plt.imread(img_files[0])
-
+    if cut_img:
+        img0 = io.imread(img_files[0], as_gray='True')[cut_img_val[0]:cut_img_val[1],  cut_img_val[2]:cut_img_val[3] ] 
+    else:
+        img0 = io.imread(img_files[0], as_gray='True')
+        
+    
+      
     # segment , draw or load in mask
     if draw_mask == False:  # normal segmentation
         seg0 = segment_spheroid(img0, enhance=enhance, thres=thres_segmentation)
@@ -247,16 +266,20 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
     if load_mask is not None:   # load in mask
         seg0 = np.load(load_mask, allow_pickle=True).item()
         
-
+ 
     np.save(outfolder+'/seg000000.npy', seg0)
 
     u_sum = None
     v_sum = None
-
+    
+    # loop through all images
     for i in tqdm(range(1, len(img_files))):
-
-        img1 = plt.imread(img_files[i])
-        
+        # read in new image (and cut if specified)
+        if cut_img:
+            img1= io.imread(img_files[i], as_gray='True')[cut_img_val[0]:cut_img_val[1],  cut_img_val[2]:cut_img_val[3] ] 
+        else:
+            img1 = io.imread(img_files[i], as_gray='True')
+        # spheroid mask from t0        
         if custom_mask == False:
             seg1 = segment_spheroid(img1, enhance=enhance)
         else:
@@ -285,6 +308,8 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
                                        quiver_scale=quiver_scale, color_norm=color_norm)
 
         img0 = img1.copy()
+
+
 
 def compute_noise_level(folder, filter, n_max=10, enhance=True,
                         window_size=70, cutoff=None, drift_correction=True):
