@@ -58,6 +58,8 @@ def create_strain_maps(folder, delta, outfolder='strain-maps', radius=2, i_max=N
         i_max= len(dis_files)
     median_strain = []
     max_strain = []
+    max_defo = []
+    median_defo = []
     for i in tqdm(range(i_max)):
         # get displacement field
         dis = np.load(dis_files[i], allow_pickle="True").item()
@@ -102,8 +104,10 @@ def create_strain_maps(folder, delta, outfolder='strain-maps', radius=2, i_max=N
         #print (strain)
         print ("")
         print ("Max. Strain: "+str(np.nanmax(strain)))
-        median_strain.append(np.nanmedian(strain))
+        max_defo.append(np.nanmax(np.sqrt(u_rav**2 + v_rav**2 )))
+        median_defo.append(np.nanmedian(np.sqrt(u_rav**2 + v_rav**2 )))
         max_strain.append(np.nanmax(strain))
+        median_strain.append(np.nanmedian(strain))
         plt.figure(figsize=(8, 6))
         height = strain.shape[0]
         width = strain.shape[1]
@@ -121,9 +125,42 @@ def create_strain_maps(folder, delta, outfolder='strain-maps', radius=2, i_max=N
         plt.savefig(outfolder+'/strain'+str(i+1).zfill(6)+'.png', dpi=250)
         plt.close()
    
+    # save last strain map + deformations interpolated
+    np.save(os.path.join(outfolder,"strain_end.npy"),strain)
+    np.save(os.path.join(outfolder,"x_end.npy"),x2)
+    np.save(os.path.join(outfolder,"y_end.npy"),y2)
+    np.save(os.path.join(outfolder,"displ_end.npy"),displ2)
+    # raw accumulated data
+    np.save(os.path.join(outfolder,"x_rav_end.npy"),x_rav)
+    np.save(os.path.join(outfolder,"y_rav_end.npy"),y_rav)
+    np.save(os.path.join(outfolder,"u_rav_end.npy"),u_rav)
+    np.save(os.path.join(outfolder,"v_rav_end.npy"),v_rav)  
+    
+    
     # plot and save overview
     np.savetxt(os.path.join(outfolder,"plots")+'/median_strain.txt', median_strain)
-    np.savetxt(os.path.join(outfolder,"plots")+'/max_strain.txt', max_strain)
+    np.savetxt(os.path.join(outfolder,"plots")+'/max_strain.txt', max_strain)  
+    np.savetxt(os.path.join(outfolder,"plots")+'/max_defo.txt', max_defo)  
+    np.savetxt(os.path.join(outfolder,"plots")+'/median_defo.txt', median_defo)  
+    
+    # deformations  
+    plt.figure(figsize=(6,2))
+    plt.grid()
+    plt.xlabel("timesteps")
+    plt.ylabel("deformations (px)")
+    plt.plot(max_defo)
+    plt.tight_layout()
+    plt.savefig(os.path.join(outfolder,"plots")+'/max_defo.png', dpi=300)
+    plt.close()
+    # median strain    
+    plt.figure(figsize=(6,2))
+    plt.grid()
+    plt.xlabel("timesteps", fontsize=7)
+    plt.ylabel("median deformations (px)", fontsize=7)
+    plt.plot(median_defo)
+    plt.tight_layout()
+    plt.savefig(os.path.join(outfolder,"plots")+'/median_deformation.png', dpi=300)
+    plt.close()
     # median strain    
     plt.figure(figsize=(6,2))
     plt.grid()
@@ -133,6 +170,7 @@ def create_strain_maps(folder, delta, outfolder='strain-maps', radius=2, i_max=N
     plt.tight_layout()
     plt.savefig(os.path.join(outfolder,"plots")+'/median_strain.png', dpi=300)
     plt.close()
+    # max strain
     # max strain
     plt.figure(figsize=(6,2))
     plt.grid()
