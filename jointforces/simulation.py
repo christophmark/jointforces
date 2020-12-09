@@ -9,8 +9,251 @@ from subprocess import PIPE
 from time import sleep
 from tqdm import tqdm
 from scipy.interpolate import LinearNDInterpolator
+from saenopy import Solver
+import saenopy
+from saenopy.materials import SemiAffineFiberMaterial
+
+def read_meshfile(meshfile, r_inner=None, r_outer=None):
+    # open mesh file
+    with open(meshfile, 'r') as f:
+        lines = f.readlines()
+
+    # if r_inner or r_outer are defined in the mesh-file, ignore user input
+    meshinfo = {}
+    try:
+        paragraph = lines[lines.index('$Jointforces\n') + 1:lines.index('$EndJointforces\n')]
+        for line in paragraph:
+            key, value = line.strip().split('=')
+            try:
+                meshinfo[key] = float(value)
+            except ValueError:
+                meshinfo[key] = value
+
+        r_inner = meshinfo['r_inner']
+        r_outer = meshinfo['r_outer']
+
+        print('Geometry for spherical contraction is defined in mesh file (r_inner={:.2f}, r_outer={:.2f}).'.format(r_inner, r_outer))
+        if (r_inner is not None) or (r_outer is not None):
+            print('Will ignore user-defined values of r_inner and r_outer.')
+    except ValueError:
+        if r_inner is None:
+            raise ValueError('r_inner not defined')
+        if r_outer is None:
+            raise ValueError('r_outer not defined')
+            
+    # scale radii to meter
+    r_inner *= 10**-6
+    r_outer *= 10**-6
+    
+    # transform nodes and connection in SAENO format
+    # nodes
+    index_nodes = lines.index('$Nodes\n')
+    n_nodes = int(lines[index_nodes + 1])
+
+    coords = np.zeros((n_nodes, 3))
+    for i in range(n_nodes):
+        coords[i] = np.array([np.float(x) for x in lines[i + index_nodes + 2].split()[1:]])
+        
+      
+    # connections
+    index_elements = lines.index('$Elements\n')
+    n_elements = int(lines[index_elements + 1])
+
+    tets = np.zeros((n_elements, 4))
+    for i in range(n_elements):
+        tets[i] = lines[i + index_elements + 2].split()[-4:]
+
+    # to start with 0 and not 1
+    tets -= 1
+    
+    return coords, tets, r_inner, r_outer
+    
+
+def spherical_contraction_solver(meshfile, outfolder, pressure, material, r_inner=None, r_outer=None, logfile=False, initial_displacenemts=None, max_iter = 600, step = 0.0033, conv_crit = 0.01):
+    
+    
+    coords, tets, r_inner, r_outer = read_meshfile(meshfile, r_inner, r_outer)
+
+    # read in material parameters
+    K_0 = material['K_0']
+    D_0 = material['D_0']
+    L_S = material['L_S']
+    D_S = material['D_S']
+
+    # create output folder if it does not exist, print warning otherwise
+    if not os.path.exists(outfolder):
+        os.makedirs(outfolder)
+    else:
+        print('WARNING: Output folder already exists! ({})'.format(outfolder))
 
 
+    # Initialize saenopy solver opbject
+    M = Solver()
+    material_saenopy = SemiAffineFiberMaterial(K_0, D_0, L_S, D_S)
+    M.setMaterialModel(material_saenopy)
+    M.setNodes(coords)
+    M.setTetrahedra(tets)
+     
+    # define boundary conditions
+    distance = np.sqrt(np.sum(coords ** 2., axis=1))
+    mask_inner = distance < r_inner * 1.001
+    mask_outer = distance > r_outer * 0.999
+
+    # Save Node Density at inner and outer sphere
+    # Area per inner node
+    A_node_inner = (np.pi*4*(r_inner)**2)/np.sum(mask_inner) 
+    # simple sqrt as spacing
+    inner_spacing = np.sqrt(A_node_inner)    
+    
+    # Area per outer node
+    A_node_outer = (np.pi*4*(r_outer)**2)/np.sum(mask_outer)   
+    # simple sqrt as spacing
+    outer_spacing = np.sqrt(A_node_outer)
+    
+    print ('Inner node spacing: '+str(inner_spacing*1e6)+'µm')
+    print ('Outer node spacing: '+str(outer_spacing*1e6)+'µm')
+
+    
+    # displacements are everywhere NaN
+    bcond_displacement = np.zeros((len(coords), 3))*np.nan
+    # except of a the outer border
+    bcond_displacement[mask_outer] = 0
+    
+    # forces are everywhere 0
+    bcond_forces = np.zeros((len(coords), 3))
+    # except at the outer boder there they are NaN
+    bcond_forces[mask_outer] = np.nan
+    # and at the innter border they depend on the pressure
+    bcond_forces[mask_inner] = coords[mask_inner]
+    bcond_forces[mask_inner] /= distance[mask_inner, None]
+    A_inner = 4 * np.pi * r_inner ** 2.
+    force_per_node = pressure * A_inner / np.sum(mask_inner)
+    bcond_forces[mask_inner, :3] *= force_per_node
+    
+    # give the boundary conditions to the solver
+    M.setBoundaryCondition(bcond_displacement, bcond_forces)
+
+    if initial_displacenemts is not None:
+        M.setInitialDisplacements(initial_displacenemts)
+
+    # create info file with all relevant parameters of the simulation
+    parameters = r"""K_0 = {}
+D_0 = {}
+L_S = {}
+D_S = {}
+PRESSURE = {}
+FORCE_PER_SURFACE_NODE = {}
+INNER_RADIUS = {} µm
+OUTER_RADIUS = {} µm
+INNER_NODE_SPACING = {} µm
+OUTER_NODE_SPACING = {} µm
+SURFACE_NODES = {}
+TOTAL_NODES = {}""".format(K_0, D_0, L_S, D_S, pressure, force_per_node, r_inner*1e6, r_outer*1e6, inner_spacing*1e6,
+                           outer_spacing*1e6, np.sum(mask_inner), len(coords))
+
+    with open(outfolder + "/parameters.txt", "w") as f:
+        f.write(parameters)
+        
+    # solve the boundary problem
+    M.solve_boundarycondition(stepper=step, i_max=max_iter, rel_conv_crit=conv_crit, relrecname=outfolder + "/relrec.txt") #, verbose=True
+    M.save(outfolder + "/solver.npz")
+    
+  
+def distribute_solver(func, const_args, var_arg='pressure', start=0.1, end=1000, n=120, log_scaling=True, n_cores=None, get_initial=True):
+    # get_intial = True takes the deformationfield from previous simulation as start values for the next simulations, which reduces computation time
+    
+    
+    if n_cores is None:
+        n_cores = os.cpu_count()
+
+    if log_scaling:
+        values = np.logspace(np.log10(start), np.log10(end), n, endpoint=True)
+    else:
+        values = np.linspace(np.log10(start), np.log10(end), n, endpoint=True)
+
+    outfolder = const_args['outfolder']
+    del const_args['outfolder']
+
+    if not os.path.exists(outfolder):
+        os.makedirs(outfolder)
+
+    np.savetxt(outfolder+'/'+var_arg+'-values.txt', values)
+
+    values = list(values)
+    
+    index = 0
+    processes = []
+    import multiprocessing
+    while True:
+        processes = [p for p in processes if p.is_alive()]
+                
+        if len(processes) < n_cores and index < len(values):
+            v = values[index]
+            U = None
+            if get_initial==True:
+                for i in range(index-3, -1, -1):
+                    name = outfolder+'/simulation'+str(i).zfill(6) + "/solver.npz"
+                    if os.path.exists(name):
+                        M = saenopy.load(name)
+                        U = M.U
+                        break
+            p = multiprocessing.Process(target=spherical_contraction_solver, args=(const_args["meshfile"], outfolder+'/simulation'+str(index).zfill(6), v, const_args["material"], None, None, False, U, 600, 0.0033, 0.01))
+                
+            p.start()
+            processes.append(p)
+            index += 1
+        sleep(1.)
+        
+        if len(processes) == 0:
+            break
+    return
+    
+  
+
+
+def extract_deformation_curve_solver(folder, x):
+    # get simulation parameters
+    with open(folder+'/parameters.txt', 'r') as f:
+        lines = f.readlines()
+
+    parameters = {}
+    for line in lines:
+        try:
+            key, value = line.split('= ')
+            value = value.split(' ')[0]
+            parameters[key.strip()] = float(value.strip())
+        except:
+            pass
+
+    # load coordinates
+    M = saenopy.load(folder + "/solver.npz")
+    coords = M.R 
+    # load displacements
+    displ = M.U
+    
+    # compute binned normed displacements and normed coordinates
+    u = np.sqrt(np.sum(coords ** 2., axis=1)) / (parameters['INNER_RADIUS']*10**-6)
+    v = np.sqrt(np.sum(displ ** 2., axis=1)) / (parameters['INNER_RADIUS']*10**-6)
+
+    y = np.array([np.nanmedian(v[(u >= x[i]) & (u < x[i + 1])]) for i in range(len(x) - 1)])
+
+    # save results
+    results = {'pressure': parameters['PRESSURE'], 'bins': x, 'displacements': y}
+    return results
+  
+    
+  
+  
+
+  
+    
+"""
+Command_line_version 
+"""   
+    
+    
+    
+    
 def spherical_contraction(meshfile, outfolder, pressure, material, r_inner=None, r_outer=None, logfile=False,  max_iter = 600, step = 0.0033, conv_crit = 0.01):
     # open mesh file
     with open(meshfile, 'r') as f:
