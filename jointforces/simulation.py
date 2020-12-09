@@ -11,7 +11,7 @@ from tqdm import tqdm
 from scipy.interpolate import LinearNDInterpolator
 
 
-def spherical_contraction(meshfile, outfolder, pressure, material, r_inner=None, r_outer=None, logfile=False,  max_iter = 300, step = 0.066, conv_crit = 0.01):
+def spherical_contraction(meshfile, outfolder, pressure, material, r_inner=None, r_outer=None, logfile=False,  max_iter = 600, step = 0.0033, conv_crit = 0.01):
     # open mesh file
     with open(meshfile, 'r') as f:
         lines = f.readlines()
