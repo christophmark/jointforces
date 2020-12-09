@@ -242,7 +242,24 @@ def extract_deformation_curve_solver(folder, x):
     return results
   
     
-  
+def create_lookup_table_solver(folder, x0=1, x1=50, n=100):
+    subfolders = glob(folder+'/*/')
+
+    x = np.logspace(np.log10(x0), np.log10(x1), n+1, endpoint=True)
+    x_center = 10**(0.5*(np.log10(x[1:]) + np.log10(x[:-1])))
+
+    pressure_values = []
+    displacement_curves = []
+
+    for subfolder in tqdm(subfolders):
+        res = extract_deformation_curve_solver(subfolder, x)
+        pressure_values.append(res['pressure'])
+        displacement_curves.append(res['displacements'])
+
+    pressure_values = np.array(pressure_values)
+    displacement_curves = np.array(displacement_curves)
+
+    return {'pressure': pressure_values, 'x': x_center, 'y': displacement_curves}
   
 
   
