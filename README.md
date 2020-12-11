@@ -128,25 +128,35 @@ print(get_pressure(2, 0.2))
 ```
 
 
-In brief, we can create a custom material lookup table by following the code below. Instead of creating an individual mesh, you might simply use the provided mesh file [here](https://github.com/christophmark/jointforces/blob/master/docs/data/spherical-inclusion.msh) (with r_inner=100, r_outer=10000; in this case the function *jf.mesh.spherical_inclusion* can be removed from the following code).
+In brief, we can create a custom material lookup table by following the code below. Instead of creating an individual mesh, you might simply use the provided mesh file [here](https://github.com/christophmark/jointforces/blob/master/docs/data/spherical-inclusion.msh) (with r_inner=100, r_outer=10000; in this case the function *jf.mesh.spherical_inclusion* can be removed from the following code). 
 
 ```python
 import jointforces as jf
 
-jf.mesh.spherical_inclusion('spherical-inclusion.msh',   # not needed if you use the provided mesh 
-                            r_inner=100,
-                            r_outer=10000,
-                            length_factor=0.05)
-                            
-jf.simulation.distribute('jf.simulation.spherical_contraction',
-                         const_args={'meshfile': 'spherical-inclusion.msh',     # path to the provied or the new generated mesh
-                                     'outfolder': 'D:/material-sims-new-material',
-                                     'material': jf.materials.custom(K_0, D_0, L_S, D_S) },      # Enter your own material parameters here
-                         var_arg='pressure', start=0.1, end=10000, n=150, log_scaling=True, n_cores=3)
+if __name__ == '__main__':
+        
+    meshfile_loc = 'spherical-inclusion.msh'
+    out_folder = 'lookup_example'
+    out_table = 'lookup_example.pkl'
 
-lookup_table = jf.simulation.create_lookup_table('D:\material-sims-new-material', x0=1, x1=50, n=150)
-get_displacement, get_pressure = jf.simulation.create_lookup_functions(lookup_table)
-jf.simulation.save_lookup_functions(get_displacement, get_pressure, 'new-material.pkl')
+    
+    jf.mesh.spherical_inclusion(meshfile_loc,   # not needed if you use the provided mesh 
+                              r_inner=100,
+                              r_outer=10000,
+                              length_factor=0.06)
+    
+    jf.simulation.distribute_solver(  'jf.simulation.spherical_contraction_solver',  
+                              const_args={'meshfile': meshfile_loc,     # path to the provided or the new generated mesh
+                                          'outfolder': out_folder,    # output folder to store individual simulations
+                                          'max_iter': 600,   # maximal iterationts for convergence
+                                          'step': 0.0033,  # step size of iteration 
+                                          'material': jf.materials.custom(K_0, D_0, L_S, D_S) },      # Enter your own material parameters here
+                                          var_arg='pressure', start=0.1, end=1000, n=150, log_scaling=True, n_cores=3, get_initial=True)
+      
+    lookup_table = jf.simulation.create_lookup_table_solver(out_folder, x0=1, x1=50, n=100)    # output folder for combining the individual simulations
+    get_displacement, get_pressure = jf.simulation.create_lookup_functions(lookup_table)
+    jf.simulation.save_lookup_functions(get_displacement, get_pressure, out_table)
+
 ```
 
 
