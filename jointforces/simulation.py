@@ -159,9 +159,11 @@ TOTAL_NODES = {}""".format(K_0, D_0, L_S, D_S, pressure, force_per_node, r_inner
     M.save(outfolder + "/solver.npz")
     
   
-def distribute_solver(func, const_args, var_arg='pressure', start=0.1, end=1000, n=120, log_scaling=True, n_cores=None, get_initial=True):
+def distribute_solver(func, const_args, var_arg='pressure', start=0.1, end=1000, n=120, log_scaling=True, n_cores=None, get_initial=True, max_iter = 600, step = 0.0033, conv_crit = 0.01):
     # get_intial = True takes the deformationfield from previous simulation as start values for the next simulations, which reduces computation time
     
+    # by default use spherical contraction as function
+    func = spherical_contraction_solver
     
     if n_cores is None:
         n_cores = os.cpu_count()
@@ -197,7 +199,9 @@ def distribute_solver(func, const_args, var_arg='pressure', start=0.1, end=1000,
                         M = saenopy.load(name)
                         U = M.U
                         break
-            p = multiprocessing.Process(target=spherical_contraction_solver, args=(const_args["meshfile"], outfolder+'/simulation'+str(index).zfill(6), v, const_args["material"], None, None, False, U, 600, 0.0033, 0.01))
+            p = multiprocessing.Process(target=func,
+                                        args=(const_args["meshfile"],  outfolder+'/simulation'+str(index).zfill(6), 
+                                              v, const_args["material"], None, None, False, U, max_iter, step, conv_crit))
                 
             p.start()
             processes.append(p)
