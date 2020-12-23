@@ -165,7 +165,7 @@ The resulting material lookup table can be visualized by using the following fun
 jf.simulation.plot_lookup_table("material.pkl", pressure=[0,10000])
 ````
 
-![lookup](https://raw.githubusercontent.com/christophmark/jointforces/master/docs/images/lookup.png)
+![lookup](https://raw.githubusercontent.com/christophmark/jointforces/master/docs/images/Lookup.png)
 
 
 
