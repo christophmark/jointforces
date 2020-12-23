@@ -159,10 +159,10 @@ if __name__ == '__main__':
 
 ```
 
-The resulting material lookup table can be visualized by using the following function:
+All material-lookup-tables can be visualized for the simulated pressure range by using the following function. The material was simulated up to 10.000 Pa and we visualize the matrix deformations (relative to the spheroid size) for exactly this pressure range within a distance from 2 to 50 spheroid radii).
 
 ```python
-jf.simulation.plot_lookup_table("material.pkl", pressure=[0,10000])
+jf.simulation.plot_lookup_table("material.pkl", pressure=[0,10000], distance=[2,50])
 ````
 
 ![lookup](https://raw.githubusercontent.com/christophmark/jointforces/master/docs/images/Lookup.png)
