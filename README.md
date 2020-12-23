@@ -159,15 +159,13 @@ if __name__ == '__main__':
 
 ```
 
-All material-lookup-tables can be visualized for the simulated pressure range by using the following function. The material was simulated up to 10.000 Pa and we visualize the matrix deformations (relative to the spheroid size) for exactly this pressure range within a distance from 2 to 50 spheroid radii).
+The material lookup-tables can be visualized by using the following function. The shown material was simulated up to 10.000 Pa and we visualize the relative matrix deformations within exactly this pressure range for distances from 2 to 50 spheroid radii (distance and deformation both relative to spheroid size).
 
 ```python
 jf.simulation.plot_lookup_table("material.pkl", pressure=[0,10000], distance=[2,50])
 ````
 
-![lookup](https://raw.githubusercontent.com/christophmark/jointforces/master/docs/images/Lookup.png)
-
-
+<img src="https://raw.githubusercontent.com/christophmark/jointforces/master/docs/images/Lookup.png" width="400" />
 
 We provide pre-computed lookup-table for different collagen concentrations and further hydrogels gels [here](https://github.com/christophmark/jointforces/tree/master/docs/data). For individual nonlinear materials, the material properties can be determined by using [saenopy](https://saenopy.readthedocs.io/en/latest/material.html#Fitting-material-parameters) and can then be used to create a new lookup table. Lookup tables for arbitrary linear elastic material of different stiffness can be easily created using an interpolation function as follows:
 
