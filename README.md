@@ -165,7 +165,7 @@ All material-lookup-tables can be visualized for the simulated pressure range by
 jf.simulation.plot_lookup_table("material.pkl", pressure=[0,10000], distance=[2,50])
 ````
 
-<img src="https://raw.githubusercontent.com/christophmark/jointforces/master/docs/images/Lookup.png" width="300" />
+<img src="https://raw.githubusercontent.com/christophmark/jointforces/master/docs/images/Lookup.png" width="600" />
 
 We provide pre-computed lookup-table for different collagen concentrations and further hydrogels gels [here](https://github.com/christophmark/jointforces/tree/master/docs/data). For individual nonlinear materials, the material properties can be determined by using [saenopy](https://saenopy.readthedocs.io/en/latest/material.html#Fitting-material-parameters) and can then be used to create a new lookup table. Lookup tables for arbitrary linear elastic material of different stiffness can be easily created using an interpolation function as follows:
 
