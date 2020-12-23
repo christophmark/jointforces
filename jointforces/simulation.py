@@ -617,4 +617,75 @@ def linear_lookup_interpolator(emodulus, output_newtable="new-lin-lookup.pkl", r
 
 
 
-
+def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distance=[2,50], linewidth=2, n_lines = 1000, save_plot = None):
+    """
+    Create a figure of your (.pkl) material lookuptable
+    
+    lookup_table: path to .pkl file
+    pressure: pressure range which will be plotted as [pressure_min,pressure_max] in pascal (use the range that was used to calculate the lookuptable)
+    log_scale: plot logarithmically or linear if set to False
+    distance: The distance to the spheroid which is plotted on the x-axis; Unit is spheroid radii
+    linewidth: linewidth for the individual plots
+    n_lines: number of lines plotted between the minimal and maximal pressure
+    save_plot: saves the plot as png file if a path is given 
+    """
+    
+    import matplotlib.cm as cm 
+    import matplotlib.colors as colors
+    import matplotlib.pyplot as plt
+    
+    # load lookup table
+    get_displacement, get_pressure = load_lookup_functions(lookup_table)
+    
+    ## to avoid scaling issue for log(0) 
+    if pressure[0] == 0:
+        pressure[0] = 0.000001     
+   
+    # define pressure range
+    if log_scale:
+        pressure_list = np.logspace(np.log(pressure[0])/np.log(10), np.log(pressure[1])/np.log(10),  num=n_lines, base=10)     
+    else:
+        pressure_list = np.arange(pressure[0],pressure[1], step = (pressure[1]-pressure[0])/n_lines )
+      
+        
+    # make cmap
+    pressure_cmap = np.log(pressure_list) #pressure_list   #np.log(pressure_list)
+    c = cm.get_cmap('viridis')((pressure_cmap - np.min(pressure_cmap)) / (np.max(pressure_cmap) - np.min(pressure_cmap))) 
+    # create distance list
+    distance_list = np.arange(distance[0],distance[1], step =(distance[1]-distance[0]) / 1000 )
+    
+    
+    # get displacements for pressures list
+    displacement_list = [get_displacement(distance_list,i) for i in pressure_list]
+   
+    figure = plt.figure()
+    
+    for i in range(len(displacement_list)):
+        plt.plot( distance_list , displacement_list[i], c= c[i],linewidth=linewidth,alpha=0.5)
+   
+    # set x,y limit - go a bit above minimum and maximum
+    plt.ylim(np.nanmin(displacement_list)-(0.1*np.nanmin(displacement_list)),
+             np.nanmax(displacement_list)+(0.1*np.nanmax(displacement_list)))
+    
+    # set log if activated and go even more above minimum/maximum in log scale
+    if log_scale:
+        plt.loglog()
+        plt.ylim(np.nanmin(displacement_list)-(0.8*np.nanmin(displacement_list)),
+             np.nanmax(displacement_list)+(0.8*np.nanmax(displacement_list)))
+    
+    plt.grid(False)
+    plt.xlabel('Normed Distance', fontsize=14)
+    plt.ylabel('Normed Deformation', fontsize=14)
+    # make a colorbar
+    sm = cm.ScalarMappable(cmap='viridis', norm= colors.Normalize(vmin=np.min(pressure_list),vmax=np.max(pressure_list)))
+    sm.set_array(c)
+    cbar= plt.colorbar(sm, )
+    cbar.ax.get_yaxis().labelpad = 15
+    cbar.ax.set_ylabel('Pressure (Pa)', rotation=270 , fontsize=14)
+    plt.tight_layout()
+    # save plot if specified
+    if save_plot is not None:
+        plt.savefig(save_plot,dpi=500)  
+    plt.show()
+    
+    return figure
