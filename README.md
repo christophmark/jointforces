@@ -168,7 +168,7 @@ jf.simulation.plot_lookup_table("material.pkl", pressure=[0,10000], distance=[2,
 <img src="https://raw.githubusercontent.com/christophmark/jointforces/master/docs/images/Lookup.png" width="400" />
 
 
-Analog to the following code, the raw data can be plotted into the material lookup-table and thus directly compared to simulations of different times. The assigned simulation is displayed with dashed lines. A list of timesteps and the paths to the lookup-table and to the evaluated folder (containing u.npy, v.npy and result.xlsx data after piv and force reconstruction) must be given.
+Analog to the following code, the raw data can be plotted into the material lookup-table and thus directly compared to simulations of different times. The assigned simulation is displayed with dashed lines. A list of timesteps and the paths to the lookup-table and to the evaluated folder (containing u.npy, v.npy and result.xlsx data *after piv and force reconstruction*) must be given.
 
 
 ```python
