@@ -147,7 +147,7 @@ def compute_displacements(window_size, img0, img1, mask1=None, cutoff=None, drif
     # flip y-values of PIV-arrows for correct orientation
     y = y[::-1]
     # if mask is specified, replace displacements within mask with NaN
-    # if cutoff is specified, replace displacements further out from the center than cutoff value with NaN
+    # if cutoff is specified, replace displacements further out from the center than cutoff value (px) with NaN
     for i, xi in enumerate(x[0, :]):
         for j, yj in enumerate(y[:, 0]):
             if mask1 is not None:
@@ -155,7 +155,7 @@ def compute_displacements(window_size, img0, img1, mask1=None, cutoff=None, drif
                           int(xi - 0.5 * window_size):int(xi + 0.5 * window_size)]):
                     ut[j, i] = np.nan
                     vt[j, i] = np.nan
-            if cutoff is not None:
+            if cutoff is not None:   
                 if np.sqrt(((xi - 0.5 * width) ** 2. + (yj - 0.5 * height) ** 2.)) > cutoff:
                     ut[j, i] = np.nan
                     vt[j, i] = np.nan
