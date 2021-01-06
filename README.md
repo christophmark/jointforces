@@ -167,6 +167,20 @@ jf.simulation.plot_lookup_table("material.pkl", pressure=[0,10000], distance=[2,
 
 <img src="https://raw.githubusercontent.com/christophmark/jointforces/master/docs/images/Lookup.png" width="400" />
 
+
+Analog to the following code, the raw data can be plotted in the lookup-table and directly compared to simulations of different times. The assigned simulation is displayed with dashed lines. Paths to the lookup-table and the evaluated folder (containing u.npy, v.npy and result.xlsx data after piv and force reconstruction)
+
+
+```python
+jf.simulation.plot_lookup_table()
+
+plt.xlim()    Todo: enter the code here
+````
+
+<img src="https://raw.githubusercontent.com/christophmark/jointforces/master/docs/images/Lookup-with-data.png.png" width="400" />
+
+
+
 We provide pre-computed lookup-table for different collagen concentrations and further hydrogels gels [here](https://github.com/christophmark/jointforces/tree/master/docs/data). For individual nonlinear materials, the material properties can be determined by using [saenopy](https://saenopy.readthedocs.io/en/latest/material.html#Fitting-material-parameters) and can then be used to create a new lookup table. Lookup tables for arbitrary linear elastic material of different stiffness can be easily created using an interpolation function as follows:
 
 ```python
