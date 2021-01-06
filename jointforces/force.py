@@ -13,7 +13,7 @@ from .utils import load
 
 
 
-def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2, angle_filter=20):
+def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2, angle_filter=20, r_max=None):
     """
     - folder: contains PIV results
     - lookupfile: Material look-up table for force reconstruction
@@ -68,6 +68,8 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2, angle_fil
 
         distance, displacement, angle, pressure = infer_pressure(x_rav, y_rav, u_sum, v_sum, cx, cy, r0, get_pressure , angle_filter=angle_filter)
         mask = distance > r_min
+        if r_max:
+            mask = (r_max > distance) & (distance > r_min)
 
         pr_angle = []
         pr_median = []
