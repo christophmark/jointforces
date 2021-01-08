@@ -172,9 +172,16 @@ Analog to the following code, the raw data can be plotted into the material look
 
 
 ```python
-jf.simulation.plot_lookup_table()
+jf.simulation.plot_lookup_table(lookup_table=r"material.pkl", pressure=[0,10000],distance=[2,50])  
 
-plt.xlim()    Todo: enter the code here
+jf.simulation.plot_lookup_data(r"material.pkl",  # path to lookuptable 
+              data_folder = r"pos01_eval", # path to result folder after piv&force-reconstuction containing result.xlsx and piv output
+              color_list=["C0","C1","C2","C3","C4"],           # colors for the different times
+              timesteps=[2,6, 12*1,12*3,12*20],                # timesteps to plot
+              label_list=["10min","30min","1h","3h","20h"])    # corresponding label  (here 1 timestep equals 5 minutes)
+plt.ylim(5e-4,6);plt.xlim(1.99,11.5)                           # Zoom to a appropriate range and label the axis  
+plt.yticks([1e-3,1e-2,1e-1,1e0],["0.1%","1%","10%","100%"])
+plt.xticks([2,3,4,5,6,7,8,9,10],[2,3,4,5,6,7,8,9,10])
 ````
 
 <img src="https://raw.githubusercontent.com/christophmark/jointforces/master/docs/images/Lookup-with-data.png" width="400" />
