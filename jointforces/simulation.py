@@ -12,6 +12,8 @@ from scipy.interpolate import LinearNDInterpolator
 from saenopy import Solver
 import saenopy
 from saenopy.materials import SemiAffineFiberMaterial
+import pandas as pd
+
 
 def read_meshfile(meshfile, r_inner=None, r_outer=None):
     # open mesh file
@@ -617,7 +619,8 @@ def linear_lookup_interpolator(emodulus, output_newtable="new-lin-lookup.pkl", r
 
 
 
-def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distance=[2,50], linewidth=2, n_lines = 1000, save_plot = None):
+def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distance=[2,50], linewidth=2, n_lines = 1000, save_plot = None,
+                      fig_size=(5,4)):
     """
     Create a figure of your (.pkl) material lookuptable
     
@@ -658,7 +661,7 @@ def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distan
     # get displacements for pressures list
     displacement_list = [get_displacement(distance_list,i) for i in pressure_list]
    
-    figure = plt.figure()
+    figure = plt.figure(figsize=fig_size)
     
     for i in range(len(displacement_list)):
         plt.plot( distance_list , displacement_list[i], c= c[i],linewidth=linewidth,alpha=0.5)
@@ -689,3 +692,149 @@ def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distan
     plt.show()
     
     return figure
+
+
+def plot_lookup_data(lookup_table, data_folder, timesteps=[10,30,60], distance=[2,50], linewidth=3, 
+              color_line="k", color_raw="r", scatter_raw_data = True, marker_size_scatter=0.1,
+              marker_size_mean=10,angle_filter=20, color_list = None, 
+              label_list = None, timesteps_scatter=None ): 
+    """
+    plot the pressure for certain timesteps into the lookup table as a dotted line;
+    scatter_raw_data option to vuisualize all deformtation-distance data at that timestep
+    
+    Use the function after calling "plot_lookup_table" to visualize a certain pressure within the created lookuptable
+    
+    lookup_table: path to .pkl filer
+    data_folder: path to the evaluated folder containing result.xlsx and the dis*.npy & seg*.npy data
+    timesteps: list of the timesteps to plot into the lookup function
+    scatter_raw_data: option to scatter the individual deformations
+    timesteps_scatter: might be used to scatter only several timesteps - if none identical to timesteps
+    angle_filter: use same value as in evaluation
+    if color_list & label_list is provided the given colors and labels are used when plotting the raw data
+    e.g color_list=["C0","C1","C2"], label_list=["1h","3h","12h"],
+    
+    timesteps_scatter: might be used to scatter only several timesteps - if timesteps_scatter=None identical to timesteps;
+    keep the same length as timesteps to asure same coloring :
+    e.g timesteps=[1,2,3] --> timesteps_scatter= [None,2,None]  to show only second element
+    """   
+    import matplotlib.pyplot as plt
+    from glob import glob
+    from natsort import natsorted
+    from .simulation import load_lookup_functions
+    from .utils import load
+    from .force import infer_pressure
+    from tqdm import tqdm
+    
+    # scatter same timesteps if not spcified
+    if not timesteps_scatter:
+        timesteps_scatter = timesteps
+    
+    # read in the data
+    pressure = pd.read_excel(data_folder +"//result.xlsx")["Mean Pressure (Pa)"]
+    
+    # load lookup table
+    get_displacement, get_pressure = load_lookup_functions(lookup_table)
+    
+    # define pressure range  # -1 since pressure list is 1 element shorter 
+    # compared to image list (differences are taken)
+    pressure_list = [pressure[i-1] for i in timesteps]
+    
+    # create distance list
+    distance_list = np.arange(distance[0],distance[1], step =(distance[1]-distance[0]) / 1000 )
+
+    # get displacements for pressures list
+    displacement_list = [get_displacement(distance_list,i) for i in pressure_list]
+   
+    # draw simulations in uniform color
+    for i in range(len(displacement_list)):
+       plt.plot( distance_list , displacement_list[i], c= color_line, linestyle="--",
+                linewidth=linewidth,alpha=0.5,zorder=30)#, label="Simulation") 
+       if i==0: # plot label once
+           plt.plot( [] ,[] , c= color_line, linestyle="--",
+                    linewidth=linewidth,alpha=0.5,zorder=30, label="Simulations") 
+        
+    
+    # sum up deformations over time
+    dis_files = natsorted(glob(data_folder+'/dis*.npy'))[:np.nanmax(timesteps)]  # do not calcualte more then the necessary time steps
+    seg_files = natsorted(glob(data_folder+'/seg*.npy'))[:np.nanmax(timesteps)]
+
+    # initial spheroid radius and surface (used for force estimation)
+    r0 = load(seg_files[0])['radius']
+   
+    u_sum = None
+    v_sum = None
+    
+    distance_list_raw = []
+    displacement_list_raw = []
+    #pressure_list_raw = []
+    
+    # loop over series of PIV results
+    for (dis_file, seg_file) in tqdm(zip(dis_files, seg_files)):
+        dis = load(dis_file)
+        seg = load(seg_file)
+
+        x_rav = np.ravel(dis['x'])
+        y_rav = np.ravel(dis['y'])
+
+        try:
+            u_sum += np.ravel(dis['u'])
+            v_sum += np.ravel(dis['v'])
+        except:
+            u_sum = np.ravel(dis['u'])
+            v_sum = np.ravel(dis['v'])
+            
+        cx, cy = seg['centroid']
+        distance_raw, displacement_raw, angle_raw, pressure_raw = infer_pressure(x_rav, y_rav, u_sum, v_sum, cx, cy, r0, get_pressure , angle_filter=angle_filter)
+                       
+        # create list with accumulated deformations 
+        distance_list_raw.append(distance_raw)
+        displacement_list_raw.append(displacement_raw)
+        
+    # SCATTERED RAW DATA
+    #now plot the accumulated raw data at the corresponding timepoints if activated;
+    # deformation and image data have a length difference of 1
+    if scatter_raw_data:
+        # in case colors and labels are defined; 
+        if color_list and label_list:
+          for ci,t in enumerate(timesteps_scatter):
+            if t == None: #do not plot None elements 
+                  continue
+            plt.scatter(distance_list_raw[t-1],displacement_list_raw[t-1],s=marker_size_scatter,zorder=20,c = color_list[ci])      
+        # else same color for all here
+        else: 
+           for ci,t in enumerate(timesteps_scatter):
+            if t == None: #do not plot None elements
+                  continue
+            plt.scatter(distance_list_raw[t-1],displacement_list_raw[t-1],s=marker_size_scatter,zorder=20,c = color_raw) # deformation and image data have a length difference of 1
+        
+        
+    # PLOT THE MEAN RAW DATA
+    if color_list and label_list:
+        for ci,t in enumerate(timesteps):
+            # calculate the mean in distance windows for timesteps
+            mean_distance = []
+            mean_displacement = []
+            for i in range(distance[0],int(np.max(distance_list_raw[t-1]))):
+                mean_distance.append(i+0.5)
+                mean_disp = np.nanmean(displacement_list_raw[t-1][(distance_list_raw[t-1]>=i) & (distance_list_raw[t-1]<i+1)])
+                mean_displacement.append(mean_disp)
+            plt.plot(mean_distance,mean_displacement,"o-",ms=marker_size_mean, zorder=2000, 
+                     linewidth=linewidth,  markerfacecolor="w",  markeredgecolor=color_list[ci], 
+                     markeredgewidth=2 , label=label_list[ci], color="w" )     
+        ax = plt.legend( markerscale=0.4, fontsize=6.5,loc="upper right")
+        ax.set_zorder(2000)
+    else: 
+         for ci,t in enumerate(timesteps):
+            # calculate the mean in distance windows for timesteps
+            mean_distance = []
+            mean_displacement = []
+            for i in range(distance[0],int(np.max(distance_list_raw[t-1]))):
+                mean_distance.append(i+0.5)
+                mean_disp = np.nanmean(displacement_list_raw[t-1][(distance_list_raw[t-1]>=i) & (distance_list_raw[t-1]<i+1)])
+                mean_displacement.append(mean_disp)
+            plt.plot(mean_distance,mean_displacement,"o-",ms=marker_size_mean,zorder=2000,
+                     linewidth=linewidth, markerfacecolor="w",color ="w",
+                     markeredgecolor='color_raw', markeredgewidth=2)   
+        #plt.xlim(2,20);plt.ylim(1e-4,3) 
+
+    return 
