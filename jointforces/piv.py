@@ -265,7 +265,7 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
     if load_mask is not None:   # load in mask
         seg0 = np.load(load_mask, allow_pickle=True).item()
         
- 
+    # save initial segmentation
     np.save(outfolder+'/seg000000.npy', seg0)
 
     u_sum = None
@@ -286,7 +286,7 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
         # however wrongly detected masks here may lead to force fluctuations 
         # and can reduce the FoV too much. Since the standard approach for the 
         # later force reconstruction is unsing the initial timestep anyway, 
-        # the approach of always using the first mask here as well is quite robust 
+        # the approach of always using the t0 mask here as well is quite robust 
         if (draw_mask == False) & (continous_segmentation == True):
             seg1 = segment_spheroid(img1, enhance=enhance, thres=thres_segmentation)
         else:
