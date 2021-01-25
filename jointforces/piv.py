@@ -233,8 +233,9 @@ def save_displacement_plot(filename, img, segmentation, displacements, quiver_sc
 
 def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=None,
                                 enhance=True, window_size=70, cutoff=None, drift_correction=True,
-                                plot=True, quiver_scale=1, color_norm=75., draw_mask = False, 
-                                gamma=None, gauss=False, load_mask=None, thres_segmentation = 0.9, cut_img = False, cut_img_val = (None,None,None,None)):
+                                plot=True, continous_segmentation = False, quiver_scale=1, color_norm=75., 
+                                draw_mask = False, gamma=None, gauss=False, load_mask=None, thres_segmentation = 0.9,
+                                cut_img = False, cut_img_val = (None,None,None,None)):
   
     img_files = natsorted(glob(folder+'/'+filter))
     # mainimal and maximal timesteps for analysis
@@ -277,12 +278,21 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
             img1= io.imread(img_files[i], as_gray='True')[cut_img_val[0]:cut_img_val[1],  cut_img_val[2]:cut_img_val[3] ] 
         else:
             img1 = io.imread(img_files[i], as_gray='True')
-        # spheroid mask from t0        
-        if custom_mask == False:
-            seg1 = segment_spheroid(img1, enhance=enhance)
+        
+        # take the mask of the current timestep if continous_segmentation is active -
+        # if not always take the mask from t0 
+        # both options have advantages and disadvantages: continous_segmentation might
+        # determine the center over time more accurately and offers information over growth,
+        # however wrongly detected masks here may lead to force fluctuations 
+        # and can reduce the FoV too much. Since the standard approach for the 
+        # later force reconstruction is unsing the initial timestep anyway, 
+        # the approach of always using the first mask here as well is quite robust 
+        if (draw_mask == False) & (continous_segmentation == True):
+            seg1 = segment_spheroid(img1, enhance=enhance, thres=thres_segmentation)
         else:
             seg1 = seg0.copy()
-            
+        
+        # compute and save the matrx deformations and mask    
         dis = compute_displacements(window_size, img0, img1, mask1=seg1['mask'],
                                 cutoff=cutoff, drift_correction=drift_correction)
         np.save(outfolder + '/seg'+str(i).zfill(6)+'.npy', seg1)
@@ -298,13 +308,16 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
 
             dis_sum = {'x': dis['x'], 'y': dis['y'], 'u': u_sum, 'v': v_sum}
 
-            if custom_mask == False:
+            # plot same mask for all if continous segmentation is False or a custom mask is drawn
+            if (draw_mask == False) & (continous_segmentation == True):
                 save_displacement_plot(outfolder+'/plot'+str(i).zfill(6)+'.png', img1, seg1, dis_sum,
                                        quiver_scale=quiver_scale, color_norm=color_norm)
+            # plot individual mask for each timestep ( however for forcereconstruction later we do use
+            # the first timestep only to avoid errornous force fluctuations)    
             else:
                 save_displacement_plot(outfolder+'/plot'+str(i).zfill(6)+'.png', img1, seg0, dis_sum,
                                        quiver_scale=quiver_scale, color_norm=color_norm)
-
+        # next round we update the images        
         img0 = img1.copy()
 
 
