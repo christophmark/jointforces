@@ -17,7 +17,8 @@ import openpiv.pyprocess
 #import openpiv.process
 import openpiv.filters
 from roipoly import RoiPoly
-
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+import matplotlib as mpl
 
 
 def enhance_contrast(img, gauss=False, gamma=None):
@@ -167,7 +168,8 @@ def compute_displacements(window_size, img0, img1, mask1=None, cutoff=None, drif
     return {'x': x, 'y': y , 'u': ut, 'v': vt}
 
 
-def displacement_plot(img, segmentation, displacements, quiver_scale=1, color_norm=75., cmap=cm.jet, s=50, **kwargs):
+def displacement_plot(img, segmentation, displacements, quiver_scale=1, color_norm=75., cmap=cm.jet, s=50,
+                      cbar_um_scale = None, **kwargs):
     # get image size
     height = img.shape[0]
     width = img.shape[1]
@@ -185,6 +187,18 @@ def displacement_plot(img, segmentation, displacements, quiver_scale=1, color_no
                        units='xy',
                        pivot='mid',
                        **kwargs)
+    # if colorbar is plotted convert deformation to um and use the given 
+    # color norm as maximal deformation
+    elif cbar_um_scale is not None:  
+        d = (u ** 2 + v ** 2) ** 0.5
+        p = plt.quiver(x, y, u, -v, d*cbar_um_scale,     
+                       cmap=cmap,
+                       clim=[0, color_norm],
+                       alpha=0.8,
+                       scale=quiver_scale, #headlength =2,
+                       units='xy',
+                       pivot='mid',
+                       **kwargs)      
     else:
         d = (u ** 2 + v ** 2) ** 0.5
         p = plt.quiver(x, y, u, v, d,
@@ -195,7 +209,7 @@ def displacement_plot(img, segmentation, displacements, quiver_scale=1, color_no
                        units='xy',
                        pivot='mid',
                        **kwargs)
-
+        
     overlay = mask.astype(int) - scipy_morph.binary_erosion(mask, iterations=4).astype(int)
     overlay = np.array([overlay.T,
                         np.zeros_like(overlay).T,
@@ -204,11 +218,12 @@ def displacement_plot(img, segmentation, displacements, quiver_scale=1, color_no
  
     plt.imshow(overlay.astype(np.float), extent=[0, width, height, 0], zorder=1000)
     plt.scatter([cx], [cy], lw=1, edgecolors='k', c='r', s=s)
-
+    
     plt.xlim((0, width))
     plt.ylim((0, height))
 
     plt.axis('off')
+    plt.gca()
     plt.gca().get_xaxis().set_visible(False)
     plt.gca().get_yaxis().set_visible(False)
     
@@ -216,14 +231,44 @@ def displacement_plot(img, segmentation, displacements, quiver_scale=1, color_no
 
 
 def save_displacement_plot(filename, img, segmentation, displacements, quiver_scale=1, color_norm=75., cmap=cm.jet,
-                           s=50, **kwargs):
+                           s=50,cbar_um_scale = None,dpi=150,t=None, **kwargs):
     height = img.shape[0]
     width = img.shape[1]
     fig = plt.figure(figsize=(10 * (width / height), 10))
 
-    displacement_plot(img, segmentation, displacements, quiver_scale, color_norm, cmap, **kwargs)
+    displacement_plot(img, segmentation, displacements, quiver_scale, color_norm, 
+                      cmap,cbar_um_scale = cbar_um_scale, **kwargs)
+    ax = plt.gca()
+    # make colorbar (+scalebar) if active
+    if cbar_um_scale is not None: 
+        f=12 # fontsize
+        # add scalebar  
+        # from matplotlib_scalebar.scalebar import ScaleBar
+        # scalebar = ScaleBar(cbar_um_scale, "µm",length_fraction=0.1, location="lower right", 
+        #                     box_alpha=0 ,  fixed_value=500,color="w", font_properties={'size':f}) 
+        # plt.gca().add_artist(scalebar)
+        # add timestamp if time is specified  as t
+        if t is not None:
+            from datetime import timedelta
+            plt.text(0.145, 0.91, timedelta(minutes=t), 
+                     c="w", fontsize=f+6, horizontalalignment='center',
+                     verticalalignment='center', transform = ax.transAxes)
+        # create a mappable for the colormap with same range
+        norm = mpl.colors.Normalize(vmin=0,vmax=color_norm)
+        sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+        sm.set_array([])
+        # draw the colorbar into plot
+        cbaxes = inset_axes(ax, width="20%", height="2%", loc=1, borderpad=3.1) 
+        cbar = plt.colorbar(sm,cax=cbaxes, orientation='horizontal')
+        cbar.ax.tick_params(labelsize=f, colors ="w")
+        cbar.set_label(label='Deformation (µm)',fontsize=f, c="w")
+        # ticks
+        cbar.set_ticks([0.,color_norm/2,color_norm])
+        cbar.set_ticklabels(["0",f"{color_norm/2}",f">{color_norm}"])
 
-    plt.savefig(filename, bbox_inches='tight', pad_inches=0, dpi=150)
+        
+        
+    plt.savefig(filename, bbox_inches='tight', pad_inches=0, dpi=dpi)
     plt.clf()
     plt.close(fig)
 
@@ -235,9 +280,10 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
                                 enhance=True, window_size=70, cutoff=None, drift_correction=True,
                                 plot=True, continous_segmentation = False, quiver_scale=1, color_norm=75., 
                                 draw_mask = False, gamma=None, gauss=False, load_mask=None, thres_segmentation = 0.9,
-                                cut_img = False, cut_img_val = (None,None,None,None)):
+                                cut_img = False, cut_img_val = (None,None,None,None), cbar_um_scale = None, dpi=150, dt_min=None, cmap="jet"):
   
     img_files = natsorted(glob(folder+'/'+filter))
+    
     # mainimal and maximal timesteps for analysis
     if n_max is not None:
         img_files = img_files[:n_max+1]
@@ -307,16 +353,22 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
                 v_sum += dis['v']
 
             dis_sum = {'x': dis['x'], 'y': dis['y'], 'u': u_sum, 'v': v_sum}
-
+            
+            # create timestamp if not None
+            if dt_min is not None:
+                t=dt_min*i
+            else:
+                t= None
+            
             # plot same mask for all if continous segmentation is False or a custom mask is drawn
             if (draw_mask == False) & (continous_segmentation == True):
                 save_displacement_plot(outfolder+'/plot'+str(i).zfill(6)+'.png', img1, seg1, dis_sum,
-                                       quiver_scale=quiver_scale, color_norm=color_norm)
+                                       quiver_scale=quiver_scale, color_norm=color_norm,cbar_um_scale=cbar_um_scale,dpi=dpi,cmap=cmap,t=t)
             # plot individual mask for each timestep ( however for forcereconstruction later we do use
             # the first timestep only to avoid errornous force fluctuations)    
             else:
                 save_displacement_plot(outfolder+'/plot'+str(i).zfill(6)+'.png', img1, seg0, dis_sum,
-                                       quiver_scale=quiver_scale, color_norm=color_norm)
+                                       quiver_scale=quiver_scale, color_norm=color_norm,cbar_um_scale=cbar_um_scale,dpi=dpi,cmap=cmap,t=t)
         # next round we update the images        
         img0 = img1.copy()
 

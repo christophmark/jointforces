@@ -738,6 +738,7 @@ def plot_lookup_data(lookup_table, data_folder, timesteps=[10,30,60], distance=[
     # define pressure range  # -1 since pressure list is 1 element shorter 
     # compared to image list (differences are taken)
     pressure_list = [pressure[i-1] for i in timesteps]
+    print (pressure_list)
     
     # create distance list
     distance_list = np.arange(distance[0],distance[1], step =(distance[1]-distance[0]) / 1000 )

@@ -13,7 +13,7 @@ from .utils import load
 
 
 
-def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2, angle_filter=20, r_max=None):
+def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2, angle_filter=20, r_max=None,  continuous_radii = False):
     """
     - folder: contains PIV results
     - lookupfile: Material look-up table for force reconstruction
@@ -65,7 +65,11 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2, angle_fil
             v_sum = np.ravel(dis['v'])
 
         cx, cy = seg['centroid']
-
+        
+        # update radius if contious radii option is active
+        if continuous_radii == True:
+            r0 = seg['radius']
+        # else use always the intiial timepoint          
         distance, displacement, angle, pressure = infer_pressure(x_rav, y_rav, u_sum, v_sum, cx, cy, r0, get_pressure , angle_filter=angle_filter)
         mask = distance > r_min
         if r_max:
