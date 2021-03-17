@@ -145,8 +145,11 @@ def compute_displacements(window_size, img0, img1, mask1=None, cutoff=None, drif
         x, y = openpiv.pyprocess.get_coordinates(image_size=img1.shape,
                                                search_area_size=window_size,
                                                overlap=window_size // 2)
-    # flip y-values of PIV-arrows for correct orientation
-    y = y[::-1]
+    # change OpenPiv conversion for matplotlib / python arrays
+    y = y[::-1]    # flip y-axis for correct orientation with image
+    vt = -vt       # turn y component of deformations for correct orientation 
+    
+    
     # if mask is specified, replace displacements within mask with NaN
     # if cutoff is specified, replace displacements further out from the center than cutoff value (px) with NaN
     for i, xi in enumerate(x[0, :]):
@@ -191,13 +194,13 @@ def displacement_plot(img, segmentation, displacements, quiver_scale=1, color_no
     # color norm as maximal deformation
     elif cbar_um_scale is not None:  
         d = (u ** 2 + v ** 2) ** 0.5
-        p = plt.quiver(x, y, u, -v, d*cbar_um_scale,     
+        p = plt.quiver(x, y, u, v, d*cbar_um_scale,     
                        cmap=cmap,
                        clim=[0, color_norm],
                        alpha=0.8,
                        scale=quiver_scale, #headlength =2,
                        units='xy',
-                       pivot='mid',
+                       pivot='mid',width=6,
                        **kwargs)      
     else:
         d = (u ** 2 + v ** 2) ** 0.5
@@ -241,12 +244,12 @@ def save_displacement_plot(filename, img, segmentation, displacements, quiver_sc
     ax = plt.gca()
     # make colorbar (+scalebar) if active
     if cbar_um_scale is not None: 
-        f=12 # fontsize
+        f=17.5 # fontsize
         # add scalebar  
-        # from matplotlib_scalebar.scalebar import ScaleBar
-        # scalebar = ScaleBar(cbar_um_scale, "µm",length_fraction=0.1, location="lower right", 
-        #                     box_alpha=0 ,  fixed_value=500,color="w", font_properties={'size':f}) 
-        # plt.gca().add_artist(scalebar)
+        from matplotlib_scalebar.scalebar import ScaleBar
+        scalebar = ScaleBar(cbar_um_scale, "µm",length_fraction=0.1, location="lower right", 
+                            box_alpha=0 ,  fixed_value=200,color="w", font_properties={'size':f}) 
+        plt.gca().add_artist(scalebar)
         # add timestamp if time is specified  as t
         if t is not None:
             from datetime import timedelta
@@ -294,7 +297,7 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
     if not os.path.exists(outfolder):
         os.makedirs(outfolder)
     # read in image - (mask certain area in image if specified)    
-    print(plt.imread(img_files[0]).dtype)
+    #print(plt.imread(img_files[0]).dtype)
 
     if cut_img:
         img0 = io.imread(img_files[0], as_gray='True')[cut_img_val[0]:cut_img_val[1],  cut_img_val[2]:cut_img_val[3] ] 
@@ -310,7 +313,7 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
         seg0 = custom_mask(img0)
     if load_mask is not None:   # load in mask
         seg0 = np.load(load_mask, allow_pickle=True).item()
-        
+   
     # save initial segmentation
     np.save(outfolder+'/seg000000.npy', seg0)
 
