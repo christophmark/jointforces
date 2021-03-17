@@ -244,11 +244,11 @@ def save_displacement_plot(filename, img, segmentation, displacements, quiver_sc
     ax = plt.gca()
     # make colorbar (+scalebar) if active
     if cbar_um_scale is not None: 
-        f=17.5 # fontsize
+        f=25 # fontsize
         # add scalebar  
         from matplotlib_scalebar.scalebar import ScaleBar
         scalebar = ScaleBar(cbar_um_scale, "µm",length_fraction=0.1, location="lower right", 
-                            box_alpha=0 ,  fixed_value=200,color="w", font_properties={'size':f}) 
+                            box_alpha=0 ,  fixed_value=200,color="k", font_properties={'size':f}) 
         plt.gca().add_artist(scalebar)
         # add timestamp if time is specified  as t
         if t is not None:
@@ -263,8 +263,8 @@ def save_displacement_plot(filename, img, segmentation, displacements, quiver_sc
         # draw the colorbar into plot
         cbaxes = inset_axes(ax, width="20%", height="2%", loc=1, borderpad=3.1) 
         cbar = plt.colorbar(sm,cax=cbaxes, orientation='horizontal')
-        cbar.ax.tick_params(labelsize=f, colors ="w")
-        cbar.set_label(label='Deformation (µm)',fontsize=f, c="w")
+        cbar.ax.tick_params(labelsize=f, colors ="k")
+        cbar.set_label(label='Deformation (µm)',fontsize=f, c="k")
         # ticks
         cbar.set_ticks([0.,color_norm/2,color_norm])
         cbar.set_ticklabels(["0",f"{color_norm/2}",f">{color_norm}"])
