@@ -642,7 +642,7 @@ def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distan
     
     ## to avoid scaling issue for log(0) 
     if pressure[0] == 0:
-        pressure[0] = 0.000001     
+        pressure[0] = 0.01     
    
     # define pressure range
     if log_scale:
@@ -650,10 +650,18 @@ def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distan
     else:
         pressure_list = np.arange(pressure[0],pressure[1], step = (pressure[1]-pressure[0])/n_lines )
       
+       
+      
+    # make cmaps
+    mycmap = cm.get_cmap('viridis')
+    mynorm = colors.LogNorm(vmin=np.min(pressure_list),vmax=np.max(pressure_list))   
+    c = mycmap(mynorm(pressure_list))
+
+    # make a colorbar
+    sm = plt.cm.ScalarMappable(cmap=mycmap, norm= mynorm)
+    sm.set_array(c)
+    # cbar= plt.colorbar(sm, )
         
-    # make cmap
-    pressure_cmap = np.log(pressure_list) #pressure_list   #np.log(pressure_list)
-    c = cm.get_cmap('viridis')((pressure_cmap - np.min(pressure_cmap)) / (np.max(pressure_cmap) - np.min(pressure_cmap))) 
     # create distance list
     distance_list = np.arange(distance[0],distance[1], step =(distance[1]-distance[0]) / 1000 )
     
@@ -680,8 +688,6 @@ def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distan
     plt.xlabel('Normed Distance', fontsize=14)
     plt.ylabel('Normed Deformation', fontsize=14)
     # make a colorbar
-    sm = cm.ScalarMappable(cmap='viridis', norm= colors.Normalize(vmin=np.min(pressure_list),vmax=np.max(pressure_list)))
-    sm.set_array(c)
     cbar= plt.colorbar(sm, )
     cbar.ax.get_yaxis().labelpad = 15
     cbar.ax.set_ylabel('Pressure (Pa)', rotation=270 , fontsize=14)
