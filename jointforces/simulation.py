@@ -683,9 +683,10 @@ def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distan
         plt.ylim(np.nanmin(displacement_list)-(0.8*np.nanmin(displacement_list)),
              np.nanmax(displacement_list)+(0.8*np.nanmax(displacement_list)))
     
-    plt.grid(False)
-    plt.xlabel('Normed Distance', fontsize=14)
-    plt.ylabel('Normed Deformation', fontsize=14)
+    plt.grid(False) 
+    plt.ylabel('Normalized matrix deformations (u/r₀)', fontsize=10)           # plt.ylabel('Normed Deformation', fontsize=14)
+    plt.xlabel('Normalized distance from organoid center (r/r₀)', fontsize=10) # plt.xlabel('Normed Distance', fontsize=14)
+    
     # make a colorbar
     cbar= plt.colorbar(sm, )
     cbar.ax.get_yaxis().labelpad = 15
@@ -699,12 +700,12 @@ def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distan
     return figure
 
 
-def plot_lookup_data(lookup_table, data_folder, timesteps=[10,30,60], distance=[2,50], linewidth=3, 
+def plot_lookup_data(lookup_table, data_folder, timesteps=[10,30,60], distance=[2,50], linewidth=2, 
               color_line="k", color_raw="r", scatter_raw_data = True, marker_size_scatter=0.1,
-              marker_size_mean=10,angle_filter=20, color_list = None, 
+              marker_size_mean=10,angle_filter=20, color_list = None,  
               label_list = None, timesteps_scatter=None ): 
     """
-    plot the pressure for certain timesteps into the lookup table as a dotted line;
+    plot the pressure for certain timesteps into the lookup table as a grey line;
     scatter_raw_data option to vuisualize all deformtation-distance data at that timestep
     
     Use the function after calling "plot_lookup_table" to visualize a certain pressure within the created lookuptable
@@ -753,10 +754,10 @@ def plot_lookup_data(lookup_table, data_folder, timesteps=[10,30,60], distance=[
    
     # draw simulations in uniform color
     for i in range(len(displacement_list)):
-       plt.plot( distance_list , displacement_list[i], c= color_line, linestyle="--",
+       plt.plot( distance_list , displacement_list[i], c= color_line, #linestyle="--",
                 linewidth=linewidth,alpha=0.5,zorder=30)#, label="Simulation") 
        if i==0: # plot label once
-           plt.plot( [] ,[] , c= color_line, linestyle="--",
+           plt.plot( [] ,[] , c= color_line, #linestyle="--",
                     linewidth=linewidth,alpha=0.5,zorder=30, label="Simulations") 
         
     
@@ -772,7 +773,7 @@ def plot_lookup_data(lookup_table, data_folder, timesteps=[10,30,60], distance=[
     
     distance_list_raw = []
     displacement_list_raw = []
-    #pressure_list_raw = []
+    pressure_list_raw = []
     
     # loop over series of PIV results
     for (dis_file, seg_file) in tqdm(zip(dis_files, seg_files)):
@@ -781,7 +782,8 @@ def plot_lookup_data(lookup_table, data_folder, timesteps=[10,30,60], distance=[
 
         x_rav = np.ravel(dis['x'])
         y_rav = np.ravel(dis['y'])
-
+        #print("data_points:"+str(len(x_rav)))
+     
         try:
             u_sum += np.ravel(dis['u'])
             v_sum += np.ravel(dis['v'])
@@ -791,10 +793,13 @@ def plot_lookup_data(lookup_table, data_folder, timesteps=[10,30,60], distance=[
             
         cx, cy = seg['centroid']
         distance_raw, displacement_raw, angle_raw, pressure_raw = infer_pressure(x_rav, y_rav, u_sum, v_sum, cx, cy, r0, get_pressure , angle_filter=angle_filter)
-                       
+        #print (len(distance_raw)) # length of valid datapoints after angle filter      
+          
         # create list with accumulated deformations 
         distance_list_raw.append(distance_raw)
         displacement_list_raw.append(displacement_raw)
+        pressure_list_raw.append(pressure_raw)
+        
         
     # SCATTERED RAW DATA
     #now plot the accumulated raw data at the corresponding timepoints if activated;
@@ -806,6 +811,22 @@ def plot_lookup_data(lookup_table, data_folder, timesteps=[10,30,60], distance=[
             if t == None: #do not plot None elements 
                   continue
             plt.scatter(distance_list_raw[t-1],displacement_list_raw[t-1],s=marker_size_scatter,zorder=20,c = color_list[ci])      
+        
+            ## calculate CoV of pressure values for 72h and add to plot
+            # if t == 3*70-2: #3*72:
+            #     mask = (distance_list_raw[t-1]>=5)&(distance_list_raw[t-1]<=10)
+                
+            #     data_masked = pressure_list_raw[t-1][mask]
+            #     CoV = np.std(data_masked)/np.nanmean(data_masked)
+            #     print (len(data_masked))
+            #     print (len(distance_list_raw[t-1]))
+            #     print (CoV)
+                
+            #     plt.text(0.05,0.93,s=f"CoV (72h; 5-10r): {np.around(CoV,3)}",
+            #              transform=plt.gca().transAxes, zorder=200,
+            #              fontsize=11,c="darkred")
+            
+        
         # else same color for all here
         else: 
            for ci,t in enumerate(timesteps_scatter):
