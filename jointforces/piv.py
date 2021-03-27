@@ -200,7 +200,7 @@ def displacement_plot(img, segmentation, displacements, quiver_scale=1, color_no
                        alpha=0.8,
                        scale=quiver_scale, #headlength =2,
                        units='xy',
-                       pivot='mid',width=7,
+                       pivot='mid', #width=7,
                        **kwargs)      
     else:
         d = (u ** 2 + v ** 2) ** 0.5
