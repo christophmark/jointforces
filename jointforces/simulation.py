@@ -861,7 +861,7 @@ def plot_lookup_data(lookup_table, data_folder, timesteps=[10,30,60], distance=[
                 mean_displacement.append(mean_disp)
             plt.plot(mean_distance,mean_displacement,"o-",ms=marker_size_mean,zorder=2000,
                      linewidth=linewidth, markerfacecolor="w",color ="w",
-                     markeredgecolor='color_raw', markeredgewidth=2)   
+                     markeredgecolor=color_raw, markeredgewidth=2)   
         #plt.xlim(2,20);plt.ylim(1e-4,3) 
 
     return 
