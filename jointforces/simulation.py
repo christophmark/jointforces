@@ -703,7 +703,7 @@ def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distan
 def plot_lookup_data(lookup_table, data_folder, timesteps=[10,30,60], distance=[2,50], linewidth=2, 
               color_line="k", color_raw="r", scatter_raw_data = True, marker_size_scatter=0.1,
               marker_size_mean=10,angle_filter=20, color_list = None,  
-              label_list = None, timesteps_scatter=None ): 
+              label_list = None, timesteps_scatter=None , result_file_name ="result.xlsx"): 
     """
     plot the pressure for certain timesteps into the lookup table as a grey line;
     scatter_raw_data option to vuisualize all deformtation-distance data at that timestep
@@ -736,7 +736,7 @@ def plot_lookup_data(lookup_table, data_folder, timesteps=[10,30,60], distance=[
         timesteps_scatter = timesteps
     
     # read in the data
-    pressure = pd.read_excel(data_folder +"//result.xlsx")["Mean Pressure (Pa)"]
+    pressure = pd.read_excel(os.path.join(data_folder,result_file_name))["Mean Pressure (Pa)"]
     
     # load lookup table
     get_displacement, get_pressure = load_lookup_functions(lookup_table)
