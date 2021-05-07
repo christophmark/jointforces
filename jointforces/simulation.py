@@ -702,7 +702,7 @@ def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distan
 
 def plot_lookup_data(lookup_table, data_folder, timesteps=[10,30,60], distance=[2,50], linewidth=2, 
               color_line="k", color_raw="r", scatter_raw_data = True, marker_size_scatter=0.1,
-              marker_size_mean=10,angle_filter=20, color_list = None,  
+              marker_size_mean=10,angle_filter=20, color_list = None,  plot_means = True,
               label_list = None, timesteps_scatter=None , result_file_name ="result.xlsx"): 
     """
     plot the pressure for certain timesteps into the lookup table as a grey line;
@@ -838,6 +838,8 @@ def plot_lookup_data(lookup_table, data_folder, timesteps=[10,30,60], distance=[
     # PLOT THE MEAN RAW DATA
     if color_list and label_list:
         for ci,t in enumerate(timesteps):
+            if plot_means == False:
+                continue
             # calculate the mean in distance windows for timesteps
             mean_distance = []
             mean_displacement = []
@@ -852,6 +854,8 @@ def plot_lookup_data(lookup_table, data_folder, timesteps=[10,30,60], distance=[
         ax.set_zorder(2000)
     else: 
          for ci,t in enumerate(timesteps):
+            if plot_means == False:
+              continue
             # calculate the mean in distance windows for timesteps
             mean_distance = []
             mean_displacement = []
