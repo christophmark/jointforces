@@ -24,8 +24,6 @@ def custom(K_0, D_0, L_S, D_S):
 # The following material parameters are taken from Steinwachs et al. (2016).
 # See https://www.nature.com/articles/nmeth.3685 for detailed protocols to
 # replicate the bioploymer gels - 
-###  L_S Paramter is now changed according to the saenopy defintion 
-###  ( +1 compared to original saeno definiton making it a strain now)
 
 # 1:1 mixture of Collagen G and Collagen R (0.6mg/ml)
 collagen06 = {'K_0': 447, 'D_0': 0.0008, 'L_S': 0.0075, 'D_S': 0.033}
