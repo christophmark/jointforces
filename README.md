@@ -138,7 +138,9 @@ if __name__ == '__main__':
     meshfile_loc = 'spherical-inclusion.msh'
     out_folder = 'lookup_example'
     out_table = 'lookup_example.pkl'
-
+   
+    #### your material parameters  (here from a collagen 1.2mg/ml Batch)
+    K_0, D_0, L_S, D_S  = 1449 , 0.00215, 0.032, 0.055 
     
     jf.mesh.spherical_inclusion(meshfile_loc,   # not needed if you use the provided mesh 
                               r_inner=100,
