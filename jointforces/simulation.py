@@ -161,7 +161,7 @@ TOTAL_NODES = {}""".format(K_0, D_0, L_S, D_S, pressure, force_per_node, r_inner
     M.save(outfolder + "/solver.npz")
     
   
-def distribute_solver(func, const_args, var_arg='pressure', start=0.1, end=1000, n=120, log_scaling=True, n_cores=None, get_initial=True, max_iter = 600, step = 0.0033, conv_crit = 0.01):
+def distribute_solver(func, const_args, var_arg='pressure', start=0.1, end=1000, n=120, log_scaling=True, n_cores=None, get_initial=True, max_iter = 600, step = 0.0033, conv_crit = 0.01, callback=None):
     # get_intial = True takes the deformationfield from previous simulation as start values for the next simulations, which reduces computation time
     
     # by default use spherical contraction as function
@@ -207,11 +207,15 @@ def distribute_solver(func, const_args, var_arg='pressure', start=0.1, end=1000,
                 
             p.start()
             processes.append(p)
+            if callback is not None:
+                callback(index, len(values))
             index += 1
         sleep(1.)
         
         if len(processes) == 0:
             break
+    if callback is not None:
+        callback(index, len(values))
     return
     
   

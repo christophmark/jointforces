@@ -143,8 +143,8 @@ def compute_displacements(window_size, img0, img1, mask1=None, cutoff=None, drif
 
         # get coordinates corresponding to displacement
         x, y = openpiv.pyprocess.get_coordinates(image_size=img1.shape,
-                                               search_area_size=window_size,
-                                               overlap=window_size // 2)
+                                                 search_area_size=window_size,
+                                                 overlap=window_size // 2)
     # change OpenPiv conversion for matplotlib / python arrays
     y = y[::-1]    # flip y-axis for correct orientation with image
     vt = -vt       # turn y component of deformations for correct orientation 
@@ -284,8 +284,15 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
                                 enhance=True, window_size=70, cutoff=None, drift_correction=True,
                                 plot=True, continous_segmentation = False, quiver_scale=1, color_norm=75., 
                                 draw_mask = False, gamma=None, gauss=False, load_mask=None, thres_segmentation = 0.9,
-                                cut_img = False, cut_img_val = (None,None,None,None), cbar_um_scale = None, dpi=150, dt_min=None, cmap="jet"):
-  
+                                cut_img = False, cut_img_val = (None,None,None,None), cbar_um_scale = None, dpi=150,
+                                dt_min=None, cmap="turbo", callback=None):
+    # see if turbo is installed
+    if cmap == "turbo":
+        try:
+            plt.get_cmap("turbo")
+        except ValueError:
+            cmap = "jet"
+
     img_files = natsorted(glob(folder+'/'+filter))
     
     # mainimal and maximal timesteps for analysis
@@ -304,9 +311,7 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
         img0 = io.imread(img_files[0], as_gray='True')[cut_img_val[0]:cut_img_val[1],  cut_img_val[2]:cut_img_val[3] ] 
     else:
         img0 = io.imread(img_files[0], as_gray='True')
-        
-    
-      
+              
     # segment , draw or load in mask
     if draw_mask == False:  # normal segmentation
         seg0 = segment_spheroid(img0, enhance=enhance, thres=thres_segmentation)
@@ -375,6 +380,9 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
                                        quiver_scale=quiver_scale, color_norm=color_norm,cbar_um_scale=cbar_um_scale,dpi=dpi,cmap=cmap,t=t)
         # next round we update the images        
         img0 = img1.copy()
+        # call callback 
+        if callback is not None:
+            callback(i, len(img_files))
 
 
 
