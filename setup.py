@@ -19,7 +19,7 @@ setup(
                       'matplotlib>=2.2.2',
                       'scipy>=1.1.0',
                       'scikit-image>=0.14.2',
-                      'openpiv>=0.21.8',
+                      'openpiv>=0.23.4',
                       'tqdm>=4.26.0',
                       'natsort>=5.1.0', 
                       'dill>=0.2.9',
