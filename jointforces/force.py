@@ -25,6 +25,9 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2, angle_fil
     deformations where the angle to the spheroid axis is smaller than the specified
     angle (in degree) are taken into account for a more robust evaluation. 
     Default is 20 degree.
+    - continious radii: If set true the spheroid radii is updated at each timepoint for
+    the force reconstruction. Default uses the intial radii for all time points to 
+    reduce errors due to fluctuation of segmentation
     """
     # get filepaths for PIV results
     dis_files = natsorted(glob(folder+'/dis*.npy'))
@@ -148,7 +151,15 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2, angle_fil
         an.to_excel(outfile[:-5]+'_angles.xlsx')
     else:
         an.to_excel(folder+'//result_angles.xlsx')    
-
+        
+    # save parameter file for force calculation
+    parameters_force = { 'folder': [folder], 'lookupfile': [lookupfile], 'muperpixel': [muperpixel], 
+                      'r_min': [str(r_min)], 'r_max': [str(r_max)],
+                      'angle_filter': [str(angle_filter)], 
+                      'continuous_radii': [continuous_radii], 'accumulated': [str(accumulated)] }
+    para_f = pd.DataFrame.from_dict(parameters_force)
+    para_f.to_excel(folder + '/parameters_force.xlsx')    
+        
     return df    
  
 
