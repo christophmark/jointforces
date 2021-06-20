@@ -19,7 +19,7 @@ import openpiv.filters
 from roipoly import RoiPoly
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 import matplotlib as mpl
-
+import pandas as pd
 
 def enhance_contrast(img, gauss=False, gamma=None):
     img = img.astype(np.float)
@@ -322,6 +322,18 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
    
     # save initial segmentation
     np.save(outfolder+'/seg000000.npy', seg0)
+   
+    # save parameter file for PIV calculation
+    parameters_piv = {'folder': [folder], 'filter': [filter], 'outfolder': [outfolder], 
+                      'n_max': [str(n_max)], 'n_min': [str(n_min)], 'enhance': [str(enhance)], 
+                      'window_size': [window_size], 'cutoff': [str(cutoff)], 'drift_correction': [str(drift_correction)], 
+                      'plot': [str(plot)], 'continous_segmentation': [str(continous_segmentation)], 'quiver_scale': [quiver_scale], 
+                      'color_norm': [color_norm], 'draw_mask': [str(draw_mask)], 'gamma': [str(gamma)], 
+                      'gauss': [str(gauss)], 'load_mask': [str(load_mask)], 'thres_segmentation': [thres_segmentation], 
+                      'cut_img': [str(cut_img)], 'cut_img_val': [str(cut_img_val)], 'cbar_um_scale': [cbar_um_scale], 
+                      'dpi': [dpi], 'dt_min': [str(dt_min)], 'cmap': [cmap], 'callback': [str(callback)] }
+    para = pd.DataFrame.from_dict(parameters_piv)
+    para.to_excel(outfolder + '/parameters_piv.xlsx')
 
     u_sum = None
     v_sum = None
