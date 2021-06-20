@@ -46,8 +46,25 @@ def create_strain_maps(folder, delta, outfolder='strain-maps', radius=2, i_max=N
         os.makedirs(os.path.join(outfolder,"plots"))   
         
     
-    dis_files = natsorted(glob(folder+'/dis*.npy'))
+    # load segmentations
     seg_files = natsorted(glob(folder+'/seg*.npy'))
+    
+
+    # load deformations
+    # look for accumulated deformation files (new standard)
+    d_accumulated_files = natsorted(glob(folder+'/def*.npy'))
+    # look also for not-accummulated deformations (old standard)
+    d_notaccumulated_files = natsorted(glob(folder+'/dis*.npy'))   
+    # if not-accumulated deformations are found chose different mode
+    if len(d_notaccumulated_files) > len(d_accumulated_files):
+        accumulated = False
+        dis_files = d_notaccumulated_files
+        print("Found not-accumulated deformation files (old standard) and will conduct calculations accordingly.")
+    # else do the calcualtion with accumulated d eformations already
+    else:
+        accumulated = True
+        dis_files = d_accumulated_files
+    
 
     dis = np.load(dis_files[0], allow_pickle="True").item()
 
@@ -63,8 +80,21 @@ def create_strain_maps(folder, delta, outfolder='strain-maps', radius=2, i_max=N
     for i in tqdm(range(i_max)):
         # get displacement field
         dis = np.load(dis_files[i], allow_pickle="True").item()
-        u_rav += np.ravel(dis['u'])
-        v_rav += np.ravel(dis['v'])
+        
+        # get deformations
+        # sum up if we have not-accummulated deformations (old standard)
+        if accumulated == False:
+            try:
+                u_rav += np.ravel(dis['u'])
+                v_rav += np.ravel(dis['v'])
+            except:
+                u_rav = np.ravel(dis['u'])
+                v_rav = np.ravel(dis['v'])
+        # else read in accummulated deformations directly (new standard)
+        else:
+            u_rav = np.ravel(dis['u'])
+            v_rav = np.ravel(dis['v'])
+        
 
         seg = np.load(seg_files[i], allow_pickle="True").item()
         x_sph, y_sph = seg['centroid']
@@ -213,8 +243,25 @@ def create_stiffness_maps(folder, delta, outfolder='stiffness-maps', k0=1645, ep
     get_stiffness = interpolate.interp1d(x[1:], (y[1:]-y[:-1])/(x[1:]-x[:-1]))
         
     # load in displacement data and ssheroid mask
-    dis_files = natsorted(glob(folder+'/dis*.npy'))
+    # load segmentations
     seg_files = natsorted(glob(folder+'/seg*.npy'))
+
+    # load deformations
+    # look for accumulated deformation files (new standard)
+    d_accumulated_files = natsorted(glob(folder+'/def*.npy'))
+    # look also for not-accummulated deformations (old standard)
+    d_notaccumulated_files = natsorted(glob(folder+'/dis*.npy'))   
+    # if not-accumulated deformations are found chose different mode
+    if len(d_notaccumulated_files) > len(d_accumulated_files):
+        accumulated = False
+        dis_files = d_notaccumulated_files
+        print("Found not-accumulated deformation files (old standard) and will conduct calculations accordingly.")
+    # else do the calcualtion with accumulated d eformations already
+    else:
+        accumulated = True
+        dis_files = d_accumulated_files
+    
+    
 
     dis = np.load(dis_files[0], allow_pickle="True").item()
 
@@ -231,8 +278,21 @@ def create_stiffness_maps(folder, delta, outfolder='stiffness-maps', k0=1645, ep
     for i in tqdm(range(i_max)):
         # get displacement field
         dis = np.load(dis_files[i], allow_pickle="True").item()
-        u_rav += np.ravel(dis['u'])
-        v_rav += np.ravel(dis['v'])
+      
+        # get deformations
+        # sum up if we have not-accummulated deformations (old standard)
+        if accumulated == False:
+            try:
+                u_rav += np.ravel(dis['u'])
+                v_rav += np.ravel(dis['v'])
+            except:
+                u_rav = np.ravel(dis['u'])
+                v_rav = np.ravel(dis['v'])
+        # else read in accummulated deformations directly (new standard)
+        else:
+            u_rav = np.ravel(dis['u'])
+            v_rav = np.ravel(dis['v'])
+   
 
         seg = np.load(seg_files[i], allow_pickle="True").item()
         x_sph, y_sph = seg['centroid']

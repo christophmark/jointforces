@@ -363,24 +363,30 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
         dis = compute_displacements(window_size, img0, img1, mask1=seg1['mask'],
                                 cutoff=cutoff, drift_correction=drift_correction)
         np.save(outfolder + '/seg'+str(i).zfill(6)+'.npy', seg1)
-        np.save(outfolder + '/dis'+str(i).zfill(6)+'.npy', dis)
+        
+        ## old conversion saves current deformation
+        #np.save(outfolder + '/dis'+str(i).zfill(6)+'.npy', dis)  
                      
-        if plot:
-            if u_sum is None:
-                u_sum = dis['u']
-                v_sum = dis['v']
-            else:
-                u_sum += dis['u']
-                v_sum += dis['v']
+        
+        if u_sum is None:
+            u_sum = dis['u']
+            v_sum = dis['v']
+        else:
+            u_sum += dis['u']
+            v_sum += dis['v']
 
-            dis_sum = {'x': dis['x'], 'y': dis['y'], 'u': u_sum, 'v': v_sum}
-            
-            # create timestamp if not None
-            if dt_min is not None:
-                t=dt_min*i
-            else:
-                t= None
-            
+        dis_sum = {'x': dis['x'], 'y': dis['y'], 'u': u_sum, 'v': v_sum}
+        ## new conversion saves cummulative deformations
+        np.save(outfolder + '/def'+str(i).zfill(6)+'.npy', dis_sum)  
+               
+        
+        # create timestamp if not None
+        if dt_min is not None:
+            t=dt_min*i
+        else:
+            t= None
+                     
+        if plot:   
             # plot same mask for all if continous segmentation is False or a custom mask is drawn
             if (draw_mask == False) & (continous_segmentation == True):
                 save_displacement_plot(outfolder+'/plot'+str(i).zfill(6)+'.png', img1, seg1, dis_sum,

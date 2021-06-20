@@ -30,9 +30,25 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2, angle_fil
     reduce errors due to fluctuation of segmentation
     """
     # get filepaths for PIV results
-    dis_files = natsorted(glob(folder+'/dis*.npy'))
+    # load the segmentations
     seg_files = natsorted(glob(folder+'/seg*.npy'))
-
+    
+    # load deformations
+    # look for accumulated deformation files (new standard)
+    d_accumulated_files = natsorted(glob(folder+'/def*.npy'))
+    # look also for not-accummulated deformations (old standard)
+    d_notaccumulated_files = natsorted(glob(folder+'/dis*.npy'))   
+    # if not-accumulated deformations are found chose different mode
+    if len(d_notaccumulated_files) > len(d_accumulated_files):
+        accumulated = False
+        dis_files = d_notaccumulated_files
+        print("Found not-accumulated deformation files (old standard) and will conduct calculations accordingly.")
+    # else do the calcualtion with accumulated d eformations already
+    else:
+        accumulated = True
+        dis_files = d_accumulated_files
+       
+    
     # load lookup table
     get_displacement, get_pressure = load_lookup_functions(lookupfile)
 
@@ -60,13 +76,20 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2, angle_fil
         x_rav = np.ravel(dis['x'])
         y_rav = np.ravel(dis['y'])
 
-        try:
-            u_sum += np.ravel(dis['u'])
-            v_sum += np.ravel(dis['v'])
-        except:
+        #  get deformations - sum up if we have not-accummulated deformations (old standard)
+        if accumulated == False:
+            try:
+                u_sum += np.ravel(dis['u'])
+                v_sum += np.ravel(dis['v'])
+            except:
+                u_sum = np.ravel(dis['u'])
+                v_sum = np.ravel(dis['v'])
+        # else read in accummulated deformations directly (new standard)
+        else:
             u_sum = np.ravel(dis['u'])
             v_sum = np.ravel(dis['v'])
-
+                
+                
         cx, cy = seg['centroid']
         
         # update radius if contious radii option is active

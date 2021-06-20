@@ -764,10 +764,25 @@ def plot_lookup_data(lookup_table, data_folder, timesteps=[10,30,60], distance=[
            plt.plot( [] ,[] , c= color_line, #linestyle="--",
                     linewidth=linewidth,alpha=0.5,zorder=30, label="Simulations") 
         
-    
-    # sum up deformations over time
-    dis_files = natsorted(glob(data_folder+'/dis*.npy'))[:np.nanmax(timesteps)]  # do not calcualte more then the necessary time steps
+    # read in segemntation
     seg_files = natsorted(glob(data_folder+'/seg*.npy'))[:np.nanmax(timesteps)]
+    
+    
+    # load deformations
+    # look for accumulated deformation files (new standard)
+    d_accumulated_files = natsorted(glob(data_folder+'/def*.npy'))[:np.nanmax(timesteps)]  # do not calcualte more then the necessary time steps
+    # look also for not-accummulated deformations (old standard)
+    d_notaccumulated_files = natsorted(glob(data_folder+'/dis*.npy'))[:np.nanmax(timesteps)]  # do not calcualte more then the necessary time steps
+    # if not-accumulated deformations are found chose different mode
+    if len(d_notaccumulated_files) > len(d_accumulated_files):
+        accumulated = False
+        dis_files = d_notaccumulated_files
+        print("Found not-accumulated deformation files (old standard) and will conduct calculations accordingly.")
+    # else do the calcualtion with accumulated d eformations already
+    else:
+        accumulated = True
+        dis_files = d_accumulated_files
+
 
     # initial spheroid radius and surface (used for force estimation)
     r0 = load(seg_files[0])['radius']
@@ -787,14 +802,22 @@ def plot_lookup_data(lookup_table, data_folder, timesteps=[10,30,60], distance=[
         x_rav = np.ravel(dis['x'])
         y_rav = np.ravel(dis['y'])
         #print("data_points:"+str(len(x_rav)))
-     
-        try:
-            u_sum += np.ravel(dis['u'])
-            v_sum += np.ravel(dis['v'])
-        except:
+              
+        # get deformations
+        # sum up if we have not-accummulated deformations (old standard)
+        if accumulated == False:
+            try:
+                u_sum += np.ravel(dis['u'])
+                v_sum += np.ravel(dis['v'])
+            except:
+                u_sum = np.ravel(dis['u'])
+                v_sum = np.ravel(dis['v'])
+        # else read in accummulated deformations directly (new standard)
+        else:
             u_sum = np.ravel(dis['u'])
-            v_sum = np.ravel(dis['v'])
+            v_sum = np.ravel(dis['v'])    
             
+ 
         cx, cy = seg['centroid']
         distance_raw, displacement_raw, angle_raw, pressure_raw = infer_pressure(x_rav, y_rav, u_sum, v_sum, cx, cy, r0, get_pressure , angle_filter=angle_filter)
         #print (len(distance_raw)) # length of valid datapoints after angle filter      
