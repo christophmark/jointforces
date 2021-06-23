@@ -23,7 +23,8 @@ setup(
                       'tqdm>=4.26.0',
                       'natsort>=5.1.0', 
                       'dill>=0.2.9',
-                      'roipoly>=0.5.2'],
+                      'roipoly>=0.5.2',
+                      'pyyml'],
     keywords = ['piv', 'contractility', 'material simulation', 'biophysics'],
     classifiers = [],
     )

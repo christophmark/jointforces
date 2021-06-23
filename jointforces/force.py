@@ -174,14 +174,24 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2, angle_fil
         an.to_excel(outfile[:-5]+'_angles.xlsx')
     else:
         an.to_excel(folder+'//result_angles.xlsx')    
-        
-    # save parameter file for force calculation
-    parameters_force = { 'folder': [folder], 'lookupfile': [lookupfile], 'muperpixel': [muperpixel], 
-                      'r_min': [str(r_min)], 'r_max': [str(r_max)],
-                      'angle_filter': [str(angle_filter)], 
-                      'continuous_radii': [continuous_radii], 'accumulated': [str(accumulated)] }
-    para_f = pd.DataFrame.from_dict(parameters_force)
-    para_f.to_excel(folder + '/parameters_force.xlsx')    
+          
+    # save a copy of the lookup table by default
+    from shutil import copyfile
+    copyname = "AppliedLookupTable.pkl"
+    copyfile(lookupfile, os.path.join(folder,copyname))
+    
+    # save parameter file 
+    import yaml
+    dict_file = {'Force' :   {'folder': [folder], 'lookupfile': [lookupfile], 'muperpixel': [muperpixel], 
+              'r_min': [str(r_min)], 'r_max': [str(r_max)],
+              'angle_filter': [str(angle_filter)], 
+              'continuous_radii': [continuous_radii], 'accumulated': [str(accumulated)],
+              'Copy of applied Lookuptable': [copyname]},     
+          }  
+    with open(os.path.join(folder, 'parameters_force.yml'), 'w') as yaml_file:
+        yaml.dump(dict_file, yaml_file, default_flow_style=False)
+  
+    
         
     return df    
  

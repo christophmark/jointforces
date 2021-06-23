@@ -324,16 +324,20 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
     np.save(outfolder+'/seg000000.npy', seg0)
    
     # save parameter file for PIV calculation
-    parameters_piv = {'folder': [folder], 'filter': [filter], 'outfolder': [outfolder], 
-                      'n_max': [str(n_max)], 'n_min': [str(n_min)], 'enhance': [str(enhance)], 
-                      'window_size': [window_size], 'cutoff': [str(cutoff)], 'drift_correction': [str(drift_correction)], 
-                      'plot': [str(plot)], 'continous_segmentation': [str(continous_segmentation)], 'quiver_scale': [quiver_scale], 
-                      'color_norm': [color_norm], 'draw_mask': [str(draw_mask)], 'gamma': [str(gamma)], 
-                      'gauss': [str(gauss)], 'load_mask': [str(load_mask)], 'thres_segmentation': [thres_segmentation], 
-                      'cut_img': [str(cut_img)], 'cut_img_val': [str(cut_img_val)], 'cbar_um_scale': [cbar_um_scale], 
-                      'dpi': [dpi], 'dt_min': [str(dt_min)], 'cmap': [cmap], 'callback': [str(callback)] }
-    para = pd.DataFrame.from_dict(parameters_piv)
-    para.to_excel(outfolder + '/parameters_piv.xlsx')
+    import yaml
+    dict_file = {'PIV settings': {'folder': [folder], 'filter': [filter], 'outfolder': [outfolder], 
+                  'n_max': [(n_max)], 'n_min': [(n_min)], 'enhance': [(enhance)], 
+                  'window_size': [window_size], 'cutoff': [(cutoff)], 'drift_correction': [(drift_correction)], 
+                  'plot': [(plot)], 'continous_segmentation': [(continous_segmentation)], 'quiver_scale': [quiver_scale], 
+                  'color_norm': [color_norm], 'draw_mask': [(draw_mask)], 'gamma': [(gamma)], 
+                  'gauss': [(gauss)], 'load_mask': [(load_mask)], 'thres_segmentation': [thres_segmentation], 
+                  'cut_img': [(cut_img)], 'cut_img_val': [(cut_img_val)], 'cbar_um_scale': [cbar_um_scale], 
+                  'dpi': [dpi], 'dt_min': [(dt_min)], 'cmap': [cmap], 'callback': [(callback)]},
+                   'Raw_img_files': [img_files]   }
+    with open(os.path.join(outfolder, 'parameters_piv.yml'), 'w') as yaml_file:
+        yaml.dump(dict_file, yaml_file, default_flow_style=False)
+    
+    
 
     u_sum = None
     v_sum = None
