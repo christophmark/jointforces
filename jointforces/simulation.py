@@ -184,36 +184,50 @@ def distribute_solver(func, const_args, var_arg='pressure', start=0.1, end=1000,
     np.savetxt(outfolder+'/'+var_arg+'-values.txt', values)
 
     values = list(values)
-    
-    index = 0
-    processes = []
-    import multiprocessing
-    while True:
-        processes = [p for p in processes if p.is_alive()]
-                
-        if len(processes) < n_cores and index < len(values):
-            v = values[index]
-            U = None
-            if get_initial==True:
-                for i in range(index-3, -1, -1):
-                    name = outfolder+'/simulation'+str(i).zfill(6) + "/solver.npz"
-                    if os.path.exists(name):
-                        M = saenopy.load(name)
-                        U = M.U
-                        break
-            p = multiprocessing.Process(target=func,
-                                        args=(const_args["meshfile"],  outfolder+'/simulation'+str(index).zfill(6), 
-                                              v, const_args["material"], None, None, False, U, max_iter, step, conv_crit))
-                
-            p.start()
-            processes.append(p)
+
+    if n_cores == 1:
+        U = None
+        for index, v in enumerate(values):
+            func(const_args["meshfile"], outfolder + '/simulation' + str(index).zfill(6),
+                    v, const_args["material"], None, None, False, U, max_iter, step, conv_crit)
+            # get the last displacement
+            name = outfolder + '/simulation' + str(index).zfill(6) + "/solver.npz"
+            if os.path.exists(name):
+                M = saenopy.load(name)
+                U = M.U
+            # optionally call the callback
             if callback is not None:
                 callback(index, len(values))
-            index += 1
-        sleep(1.)
-        
-        if len(processes) == 0:
-            break
+    else:
+        index = 0
+        processes = []
+        import multiprocessing
+        while True:
+            processes = [p for p in processes if p.is_alive()]
+
+            if len(processes) < n_cores and index < len(values):
+                v = values[index]
+                U = None
+                if get_initial==True:
+                    for i in range(index-3, -1, -1):
+                        name = outfolder+'/simulation'+str(i).zfill(6) + "/solver.npz"
+                        if os.path.exists(name):
+                            M = saenopy.load(name)
+                            U = M.U
+                            break
+                p = multiprocessing.Process(target=func,
+                                            args=(const_args["meshfile"],  outfolder+'/simulation'+str(index).zfill(6),
+                                                  v, const_args["material"], None, None, False, U, max_iter, step, conv_crit))
+
+                p.start()
+                processes.append(p)
+                if callback is not None:
+                    callback(index, len(values))
+                index += 1
+            sleep(1.)
+
+            if len(processes) == 0:
+                break
     if callback is not None:
         callback(index, len(values))
     return
@@ -671,11 +685,11 @@ def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distan
     
     # get displacements for pressures list
     displacement_list = [get_displacement(distance_list,i) for i in pressure_list]
-   
+
     # create a figure if no figure is specified
     if figure is None:
         figure = plt.figure(figsize=fig_size)
-    
+
     for i in range(len(displacement_list)):
         plt.plot( distance_list , displacement_list[i], c= c[i],linewidth=linewidth,alpha=0.5)
    
@@ -701,7 +715,7 @@ def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distan
     # save plot if specified
     if save_plot is not None:
         plt.savefig(save_plot,dpi=500)  
-    # show figure if specified    
+    # show figure if specified
     if show==True:
         plt.show()
     return figure
