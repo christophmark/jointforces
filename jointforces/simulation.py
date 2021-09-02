@@ -686,9 +686,6 @@ def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distan
     # get displacements for pressures list
     displacement_list = [get_displacement(distance_list,i) for i in pressure_list]
 
-    if figure is None:
-        figure = plt.figure(figsize=fig_size)
-
     # create a figure if no figure is specified
     if figure is None:
         figure = plt.figure(figsize=fig_size)
