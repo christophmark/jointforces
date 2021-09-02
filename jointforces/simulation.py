@@ -624,7 +624,7 @@ def linear_lookup_interpolator(emodulus, output_newtable="new-lin-lookup.pkl", r
 
 
 def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distance=[2,50], linewidth=2, n_lines = 1000, save_plot = None,
-                      fig_size=(5,4)):
+                      fig_size=(5,4), figure=None, show=True):
     """
     Create a figure of your (.pkl) material lookuptable
     
@@ -672,7 +672,9 @@ def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distan
     # get displacements for pressures list
     displacement_list = [get_displacement(distance_list,i) for i in pressure_list]
    
-    figure = plt.figure(figsize=fig_size)
+    # create a figure if no figure is specified
+    if figure is None:
+        figure = plt.figure(figsize=fig_size)
     
     for i in range(len(displacement_list)):
         plt.plot( distance_list , displacement_list[i], c= c[i],linewidth=linewidth,alpha=0.5)
@@ -699,8 +701,9 @@ def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distan
     # save plot if specified
     if save_plot is not None:
         plt.savefig(save_plot,dpi=500)  
-    plt.show()
-    
+    # show figure if specified    
+    if show==True:
+        plt.show()
     return figure
 
 
