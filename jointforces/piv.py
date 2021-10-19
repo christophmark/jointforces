@@ -22,7 +22,7 @@ import matplotlib as mpl
 import pandas as pd
 
 def enhance_contrast(img, gauss=False, gamma=None):
-    img = img.astype(np.float)
+    img = img.astype(float)
     # apply gaussian filter 
     if gauss==True:
         img = gaussian(img, 2)
