@@ -219,7 +219,7 @@ def displacement_plot(img, segmentation, displacements, quiver_scale=1, color_no
                         np.zeros_like(overlay).T,
                         overlay.T]).T
  
-    plt.imshow(overlay.astype(np.float), extent=[0, width, height, 0], zorder=1000)
+    plt.imshow(overlay.astype(float), extent=[0, width, height, 0], zorder=1000)
     plt.scatter([cx], [cy], lw=1, edgecolors='k', c='r', s=s)
     
     plt.xlim((0, width))
