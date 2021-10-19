@@ -24,7 +24,8 @@ setup(
                       'natsort>=5.1.0', 
                       'dill>=0.2.9',
                       'roipoly>=0.5.2',
-                      'pyyml'],
+                      'pyyml',
+					  'matplotlib-scalebar'],
     keywords = ['piv', 'contractility', 'material simulation', 'biophysics'],
     classifiers = [],
     )
