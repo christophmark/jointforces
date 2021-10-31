@@ -281,7 +281,7 @@ def save_displacement_plot(filename, img, segmentation, displacements, quiver_sc
 
 
 def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=None,
-                                enhance=True, window_size=70, cutoff=None, drift_correction=True,
+                                image_list=None, enhance=True, window_size=70, cutoff=None, drift_correction=True,
                                 plot=True, continous_segmentation = False, quiver_scale=1, color_norm=75., 
                                 draw_mask = False, gamma=None, gauss=False, load_mask=None, thres_segmentation = 0.9,
                                 cut_img = False, cut_img_val = (None,None,None,None), cbar_um_scale = None, dpi=150,
@@ -292,9 +292,16 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
             plt.get_cmap("turbo")
         except ValueError:
             cmap = "jet"
-
-    img_files = natsorted(glob(folder+'/'+filter))
     
+    ## read in images
+    ### use glob string of folder & filter by default
+    if image_list is None:
+        img_files = natsorted(glob(folder+'/'+filter))
+    # alternativly use defined input list if specified 
+    # (folder and filter might be set to None here and are ignored)
+    else:
+        img_files = image_list
+            
     # mainimal and maximal timesteps for analysis
     if n_max is not None:
         img_files = img_files[:n_max+1]
@@ -305,8 +312,6 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
     if not os.path.exists(outfolder):
         os.makedirs(outfolder)
     # read in image - (mask certain area in image if specified)    
-    #print(plt.imread(img_files[0]).dtype)
-
     if cut_img:
         img0 = io.imread(img_files[0], as_gray='True')[cut_img_val[0]:cut_img_val[1],  cut_img_val[2]:cut_img_val[3] ] 
     else:
@@ -333,7 +338,7 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
                   'gauss': [(gauss)], 'load_mask': [(load_mask)], 'thres_segmentation': [thres_segmentation], 
                   'cut_img': [(cut_img)], 'cut_img_val': [(cut_img_val)], 'cbar_um_scale': [cbar_um_scale], 
                   'dpi': [dpi], 'dt_min': [(dt_min)], 'cmap': [cmap], 'callback': [(callback)]},
-                   'Raw_img_files': [img_files]   }
+                  'image_list': [image_list], 'Raw_img_files': [img_files], }
     with open(os.path.join(outfolder, 'parameters_piv.yml'), 'w') as yaml_file:
         yaml.dump(dict_file, yaml_file, default_flow_style=False)
     
