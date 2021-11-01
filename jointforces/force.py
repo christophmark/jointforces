@@ -121,7 +121,7 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2, angle_fil
             i_max = np.nanargmax(pr_median)
             alpha_max = pr_angle[i_max]
             pressure_max = pr_median[i_max]
-        # assign nan values if not possible (for example if only same values esixt due to negative/non-simulated strain        
+        # assign nan values if not possible (for example if only same values esixt at all locations due to negative/non-simulated strain        
         except: 
             i_min,alpha_min,pressure_min = np.nan,np.nan,np.nan
             i_max,alpha_max,pressure_max = np.nan,np.nan,np.nan
