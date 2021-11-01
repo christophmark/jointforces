@@ -107,18 +107,25 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2, angle_fil
             mask2 = (angle >= (alpha-5)*np.pi/180.) & (angle < (alpha+5)*np.pi/180.)
             pr_angle.append(alpha)
             pr_median.append(np.nanmedian(pressure[mask & mask2]))
-
-        i_min = np.nanargmin(pr_median)
-        alpha_min = pr_angle[i_min]
-        pressure_min = pr_median[i_min]
-
-        i_max = np.nanargmax(pr_median)
-        alpha_max = pr_angle[i_max]
-        pressure_max = pr_median[i_max]
-
+        
+        # assign pressure values
         pressure_mean = np.nanmean(pressure[mask])
         pressure_median = np.nanmedian(pressure[mask])
-        pressure_std = np.nanstd(pressure[mask], ddof=1)
+        pressure_std = np.nanstd(pressure[mask], ddof=1)    
+        # search maximal / minimal value
+        try:
+            i_min = np.nanargmin(pr_median)
+            alpha_min = pr_angle[i_min]
+            pressure_min = pr_median[i_min]
+    
+            i_max = np.nanargmax(pr_median)
+            alpha_max = pr_angle[i_max]
+            pressure_max = pr_median[i_max]
+        # assign nan values if not possible (for example if only same values esixt due to negative/non-simulated strain        
+        except: 
+            i_min,alpha_min,pressure_min = np.nan,np.nan,np.nan
+            i_max,alpha_max,pressure_max = np.nan,np.nan,np.nan
+
 
         contractility_mean = pressure_mean*A0*(muperpixel**2.)*(10**6)  # unit: µN
         contractility_median = pressure_median*A0*(muperpixel**2.)*(10**6)  # unit: µN
