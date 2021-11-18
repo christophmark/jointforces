@@ -589,11 +589,20 @@ def save_lookup_functions(get_displacement, get_pressure, outfile):
         dill.dump((get_displacement, get_pressure), f)
 
 
+def save_lookup_table(lookup_table, outfile):
+    with open(outfile, 'wb') as f:
+        dill.dump(lookup_table, f)
+
+
 def load_lookup_functions(file):
     with open(file, 'rb') as f:
-        get_displacement, get_pressure = dill.load(f)
+        try:
+            get_displacement, get_pressure = dill.load(f)
+        except:
+            lookup_table = dill.load(f)
+            get_displacement, get_pressure = create_lookup_functions(lookup_table)
+            
     return get_displacement, get_pressure
-
 
 
 def linear_lookup_interpolator(emodulus, output_newtable="new-lin-lookup.pkl", reference_folder=None):
