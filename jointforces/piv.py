@@ -265,7 +265,7 @@ def save_displacement_plot(filename, img, segmentation, displacements, quiver_sc
         cbaxes = inset_axes(ax, width="20%", height="2%", loc=1, borderpad=3.1) 
         cbar = plt.colorbar(sm,cax=cbaxes, orientation='horizontal')
         cbar.ax.tick_params(labelsize=f, colors ="w")
-        cbar.set_label(label='Deformation (µm)',fontsize=f, c="w")
+        cbar.set_label(label='Deformation (µm)',fontsize=f, color="w")
         # ticks
         cbar.set_ticks([0.,color_norm/2,color_norm])
         cbar.set_ticklabels(["0",f"{color_norm/2}",f">{color_norm}"])
