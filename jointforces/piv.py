@@ -255,7 +255,7 @@ def save_displacement_plot(filename, img, segmentation, displacements, quiver_sc
             #from datetime import timedelta
 
             plt.text(0.08, 0.91,  str(int(t/60)).zfill(2)+":"+str(t%60).zfill(2), 
-                     c="w", fontsize=f+8, horizontalalignment='center',
+                     color="w", fontsize=f+8, horizontalalignment='center',
                      verticalalignment='center', transform = ax.transAxes)
         # create a mappable for the colormap with same range
         norm = mpl.colors.Normalize(vmin=0,vmax=color_norm)
