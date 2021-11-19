@@ -49,8 +49,8 @@ Lookup table for 2.4 mg/ml collagen measured for a new batch of collagen as desc
 
 
 
-
-*The following lookup-tables might not be compatible with newer python versions anymore*
+--------------------------------------------------------------------------------------------------------------------------------------------------
+**The following lookup-tables might not be compatible with newer python versions anymore (use *save_lookup_table* instead of *save_lookup_functions* in order to use lookup-tables between different python versions).**
 
 
 
