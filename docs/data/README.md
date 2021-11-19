@@ -9,15 +9,15 @@ Exemplary time-lapse images of a MCF7 spheroid containing 4000 cells (at the tim
 The image series consists of 145 images that are recorded with a 5 minute interval and cover a total time interval of 12 hours. The pixel size is 1.29 µm/pixel. Each image is a minimum projection of a brightfield image stack that covers 100µm across the equatorial plane of the spheroid.
 
 
-## k06_mbioscience_2020_table_v2.pkl
+## [k06_mbioscience_2020_table_v2.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k06_mbioscience_2020_table_v2.pkl)
 
 Lookup table for 0.6 mg/ml collagen measured for a new batch of collagen as described in (unpublished yet). These lookup-tables can be used between different python versions.
 
-## k12_mbioscience_2020_table_v2.pkl
+## [k12_mbioscience_2020_table_v2.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k12_mbioscience_2020_table_v2.pkl)
 
 Lookup table for 1.2 mg/ml collagen measured for a new batch of collagen as described in (unpublished yet). These lookup-tables can be used between different python versions.
 
-## k24_mbioscience_2020_table_v2.pkl
+## [k24_mbioscience_2020_table_v2.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k24_mbioscience_2020_table_v2.pkl)
 
 Lookup table for 2.4 mg/ml collagen measured for a new batch of collagen as described in (unpublished yet). These lookup-tables can be used between different python versions.
 
