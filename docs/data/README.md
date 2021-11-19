@@ -17,6 +17,8 @@ Lookup table for 1.2 mg/ml collagen measured for a new batch of collagen as desc
 
 
 ```python
+    import jointforces as jf
+    
     out_folder = 'k12_mbioscience_2020_v2'
     out_table = 'k12_mbioscience_2020_table_v2.pkl'
     
