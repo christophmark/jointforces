@@ -9,17 +9,45 @@ Exemplary time-lapse images of a MCF7 spheroid containing 4000 cells (at the tim
 The image series consists of 145 images that are recorded with a 5 minute interval and cover a total time interval of 12 hours. The pixel size is 1.29 µm/pixel. Each image is a minimum projection of a brightfield image stack that covers 100µm across the equatorial plane of the spheroid.
 
 
+
+
+## [k12_mbioscience_2020_table_v2.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k12_mbioscience_2020_table_v2.pkl)
+
+Lookup table for 1.2 mg/ml collagen measured for a new batch of collagen as described in (unpublished yet). These lookup-tables can be used between different python versions. The file was created by the following code:
+
+
+```python
+    out_folder = 'k12_mbioscience_2020_v2'
+    out_table = 'k12_mbioscience_2020_table_v2.pkl'
+    
+    K_0 = 1449  
+    D_0 = 0.00215
+    L_S = 0.032
+    D_S = 0.055 
+      
+    jf.simulation.distribute_solver('jf.simulation.spherical_contraction_solver',
+    
+                              const_args={'meshfile': meshfile_loc,     # path to the provided or the new generated mesh
+                                         'outfolder': out_folder,    # output folder to store individual simulations
+                                          'max_iter': 600,
+                                          'step': 0.0033,  # before 0.033
+                                          'material': jf.materials.custom(K_0, D_0, L_S, D_S) },      # Enter your own material parameters here
+                                          var_arg='pressure', start=0.1, end=10000, n=150, log_scaling=True, n_cores=2, get_initial=True)
+      
+    lookup_table = jf.simulation.create_lookup_table_solver(out_folder, x0=1, x1=50, n=100)    # output folder for combining the individual simulations
+    jf.simulation.save_lookup_table(lookup_table,out_table)
+```
+
 ## [k06_mbioscience_2020_table_v2.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k06_mbioscience_2020_table_v2.pkl)
 
 Lookup table for 0.6 mg/ml collagen measured for a new batch of collagen as described in (unpublished yet). These lookup-tables can be used between different python versions.
 
-## [k12_mbioscience_2020_table_v2.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k12_mbioscience_2020_table_v2.pkl)
-
-Lookup table for 1.2 mg/ml collagen measured for a new batch of collagen as described in (unpublished yet). These lookup-tables can be used between different python versions.
-
 ## [k24_mbioscience_2020_table_v2.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k24_mbioscience_2020_table_v2.pkl)
 
 Lookup table for 2.4 mg/ml collagen measured for a new batch of collagen as described in (unpublished yet). These lookup-tables can be used between different python versions.
+
+
+
 
 
 *The following lookup-tables might not be compatible with newer python versions anymore*
