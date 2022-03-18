@@ -269,9 +269,8 @@ def angle_analysis(folder, output, n_max=None,save_plot=True, small_pressure = F
     #second plot with only the left plot
     fb,axb = plt.subplots( figsize=(3,3))  
     # for color norm
-    max_pr = np.nanmax([np.max(np.array(angles[z])[:n_max]) for z in angle_list])  
+    max_pr = np.nanmax([np.nanmax(np.array(angles[z])[:n_max]) for z in angle_list])  
     plt.style.use('dark_background')
-    
     # make result dictionary
     res_angles = {'mean_pr_angles (Pa)': [], 'sd_pr_angles (Pa)': [], 'CoV': []}
     
