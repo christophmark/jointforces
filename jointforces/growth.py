@@ -313,10 +313,9 @@ def plot_growth_and_pressure(folder,  output, n_max=None,file_angulargrowth=None
 
 
     # loop over all timesteps
-    for t in tqdm(range(len(angular_growth[0][:n_max]))):     
+    for t in tqdm(range(len(angular_pressure[0][:n_max]))):   ### angular pressure has one entry less then angular growth since its calculated between images and segementation not
 
-
-              
+         
         ang_g = []
         # go through different angles 
         for z in angle_list:        
@@ -441,7 +440,7 @@ def plot_growth_and_pressure(folder,  output, n_max=None,file_angulargrowth=None
             ax2.set_ylim([-1, 1])
             ax2.axis('off')
             # annotate CoV    
-            ax2.text(0.01, 0.91,'Coefficient of Variation: '+str(CoV), 
+            ax2.text(0.01, 0.91,'Coefficient of Variation: '+str(CoV_pr), 
                      horizontalalignment='center',
                      verticalalignment='center',
                      transform = ax2.transAxes, fontsize=7)  
