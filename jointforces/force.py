@@ -292,7 +292,7 @@ def angle_analysis(folder, output, n_max=None,save_plot=True, small_pressure = F
         # do some statistics
         mean = np.round(np.nanmean(pressures))
         sd = np.round(np.nanstd(pressures))
-        CoV = np.round(sd/mean, 2)
+        CoV = np.round(np.nanstd(pressures)/np.nanmean(pressures), 2)
         res_angles['mean_pr_angles (Pa)'].append(mean)
         res_angles['sd_pr_angles (Pa)'].append(sd)
         res_angles['CoV'].append(CoV)
