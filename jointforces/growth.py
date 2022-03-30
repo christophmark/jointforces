@@ -147,7 +147,7 @@ def plot_growth(folder,  output, n_max=None,file_angulargrowth=None, file_totalg
 
 
     # loop over all timesteps
-    for t in range(len(angular_growth[0][:n_max])):     
+    for t in tqdm(range(len(angular_growth[0][:n_max]))):     
 
 
               
