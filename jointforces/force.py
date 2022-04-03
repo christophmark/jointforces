@@ -256,9 +256,11 @@ def angle_analysis(folder, output, n_max=None,save_plot=True, small_pressure = F
     from datetime import timedelta
     
     # read in angle pressures
-    angles  = pd.read_excel(folder + '//'+ name_of_resultfile)
     if path_of_resultfile:
         angles = pd.read_excel(path_of_resultfile)
+    else:
+        angles  = pd.read_excel(folder + '//'+ name_of_resultfile)
+        
     # read in plots
     plots = glob(folder+'//plot*.png')
     # make folder if not existing
@@ -278,7 +280,7 @@ def angle_analysis(folder, output, n_max=None,save_plot=True, small_pressure = F
     res_angles = {'mean_pr_angles (Pa)': [], 'sd_pr_angles (Pa)': [], 'CoV': []}
     
     # loop over all timesteps
-    for t in range(len(angles[0][:n_max])):                   
+    for t in tqdm(range(len(angles[0][:n_max]))):                   
         pressures = []
         # go through different angles 
         for z in angle_list:        
