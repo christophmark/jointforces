@@ -147,7 +147,9 @@ def plot_growth(folder,  output, n_max=None,file_angulargrowth=None, file_totalg
 
 
     # loop over all timesteps
-    for t in tqdm(range(len(angular_growth[0][:n_max]))):     
+    # -1 as the deformation list is one entry less (between images) compared to
+    # segmentation list
+    for t in tqdm(range(len(angular_growth[0][:n_max]-1))):    
 
 
               
