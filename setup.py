@@ -12,7 +12,7 @@ setup(
     author='Christoph Mark, David Böhringer',
     author_email='christoph.mark@fau.de',
     license='The MIT License (MIT)',
-    install_requires=['saenopy>=0.7.1', 
+    install_requires=['saenopy==0.7.1', 
                       'gmsh-sdk>=4.5.0',
                       'numpy>=1.16.2',
                       'pandas>=1.2.0',
