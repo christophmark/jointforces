@@ -5,7 +5,14 @@ A Python package for conducting 3D traction force microscopy on multicellular ag
 ![Loading GIF...](https://raw.githubusercontent.com/christophmark/jointforces/master/docs/gifs/mcf7-raw.gif)
 
 ## Installation
-The current version of this package can be downloaded as a zip file [here](https://github.com/christophmark/jointforces/zipball/master), or by cloning this repository. After unzipping, run the following command within the unzipped folder: `pip install -e .`. This will automatically download and install all other required packages.
+
+Simply install the jointforces via Pip by running following command in the console:
+
+```python
+pip install jointforces
+```
+
+*Alternatively: The current version of this package can be downloaded as a zip file [here](https://github.com/christophmark/jointforces/zipball/master), or by cloning this repository. After unzipping, run the following command within the unzipped folder: `pip install -e .`. This will automatically download and install all other required packages.*
 
 
 ## Minimal example
