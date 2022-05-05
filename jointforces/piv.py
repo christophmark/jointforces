@@ -4,7 +4,7 @@ import gc
 import numpy as np
 import scipy.ndimage.morphology as scipy_morph
 import scipy.ndimage.measurements as scipy_meas
-from skimage.filters import gaussian, threshold_otsu
+from skimage.filters import gaussian, threshold_otsu, threshold_yen
 from skimage.morphology import remove_small_objects
 from skimage.exposure import adjust_gamma   
 from skimage import io
@@ -39,7 +39,7 @@ def enhance_contrast(img, gauss=False, gamma=None):
         
 
 
-def segment_spheroid(img, enhance=True, thres = 0.9):
+def segment_spheroid(img, enhance=True, thres = 0.9, thres_yen= False):
     """
     Image segmentation function to create spheroid mask, radius, and position of a spheroid in a grayscale image.
 
@@ -59,7 +59,10 @@ def segment_spheroid(img, enhance=True, thres = 0.9):
         
     
     # flip y (to match x/y coordinates) and binarize
-    mask = img[::-1] < threshold_otsu(img) * thres    
+    if thres_yen:
+        mask = img[::-1] < threshold_otsu(img) * thres  
+    else:
+        mask = img[::-1] < threshold_yen(img) * thres    
     
     # remove other objects
     mask = scipy_morph.binary_dilation(mask, iterations=3)
@@ -248,7 +251,7 @@ def save_displacement_plot(filename, img, segmentation, displacements, quiver_sc
         # add scalebar  
         from matplotlib_scalebar.scalebar import ScaleBar
         scalebar = ScaleBar(cbar_um_scale, "µm",length_fraction=0.1, location="lower right", 
-                            box_alpha=0 ,  fixed_value=200,color="w", font_properties={'size':f}) 
+                            box_alpha=0 ,  fixed_value=200,color="w", font_properties={'size':f})   
         plt.gca().add_artist(scalebar)
         # add timestamp if time is specified  as t
         if t is not None:
@@ -263,9 +266,10 @@ def save_displacement_plot(filename, img, segmentation, displacements, quiver_sc
         sm.set_array([])
         # draw the colorbar into plot
         cbaxes = inset_axes(ax, width="20%", height="2%", loc=1, borderpad=3.1) 
+        #cbaxes = inset_axes(ax, width="20%", height="2%", loc=1, borderpad=-6.1)      
         cbar = plt.colorbar(sm,cax=cbaxes, orientation='horizontal')
         cbar.ax.tick_params(labelsize=f, colors ="w")
-        cbar.set_label(label='Deformation (µm)',fontsize=f, color="w")
+        cbar.set_label(label='Deformation (µm)',fontsize=f, color="w")  
         # ticks
         cbar.set_ticks([0.,color_norm/2,color_norm])
         cbar.set_ticklabels(["0",f"{color_norm/2}",f">{color_norm}"])
@@ -285,7 +289,7 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
                                 plot=True, continous_segmentation = False, quiver_scale=1, color_norm=75., 
                                 draw_mask = False, gamma=None, gauss=False, load_mask=None, thres_segmentation = 0.9,
                                 cut_img = False, cut_img_val = (None,None,None,None), cbar_um_scale = None, dpi=150,
-                                dt_min=None, cmap="turbo", callback=None):
+                                dt_min=None, cmap="turbo", callback=None, thres_yen= False):
     # see if turbo is installed
     if cmap == "turbo":
         try:
@@ -319,7 +323,7 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
               
     # segment , draw or load in mask
     if draw_mask == False:  # normal segmentation
-        seg0 = segment_spheroid(img0, enhance=enhance, thres=thres_segmentation)
+        seg0 = segment_spheroid(img0, enhance=enhance, thres=thres_segmentation, thres_yen= thres_yen)
     else:                   # draw manual
         seg0 = custom_mask(img0)
     if load_mask is not None:   # load in mask
