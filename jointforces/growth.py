@@ -544,8 +544,12 @@ def eval_angular_shape(folder, outfile=None, scale=None):
             mask2 = (angle >= (alpha-5)*np.pi/180.) & (angle < (alpha+5)*np.pi/180.) & (mask==1)  
                    
             angular_sections.append(alpha)
-            distance_angular_sections.append(np.nanmax(distance[mask2]))  #### growth per angle section
-              
+
+            try:
+                distance_angular_sections.append(np.nanmax(distance[mask2]))  #### growth per angle section
+            except:
+                distance_angular_sections.append(np.nan)
+                
         # append pressures for all angle data
         for i,a in enumerate(angles_dict):
             angles_dict[a].append(distance_angular_sections[i])
