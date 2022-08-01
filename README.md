@@ -72,10 +72,10 @@ jf.mesh.show_mesh('spherical-inclusion.msh')
 Having created the mesh geometry, we define appropriate boundary conditions and material parameters to emulate the contracting multicellular aggregate *in silico*. Here, we assume a constant in-bound pressure on the surface of the spherical inclusion (emulating the cells pulling on the surrounding matrix), and no material displacements on the outer boundary of the bulk material (emulating a hard boundary such a the walls of a Petri dish). The goal of the simulation is to obtain the displacements in the surrounding material that are the effect of the pressure exerted by the multicellular aggregate. The following command executes a simulation assuming a pressure of 100Pa and 1.2mg/ml collagen matrix as described in [Steinwachs et al. (2016)](https://www.nature.com/articles/nmeth.3685). After successful optimization, the results are stored in the output folder `simu`:
 
 ```python
-jf.simulation.spherical_contraction('test.msh', 'simu', 100, jf.materials.collagen12)
+jf.simulation.spherical_contraction_solver('test.msh', 'simu', pressure=100, material=jf.materials.collagen12)
 ```
 
-More detailed information about the output files of a simulation can be found the [documentation of the `saenopy` project](https://saenopy.readthedocs.io/). The file `parameters.txt` contains all parameters used int he simulation. Note that `jointforces` provides functions that read in the resulting files of material simulations again to facilitate a comparison of simulated and measured deformation fields, as detailed below.
+More detailed information about the output files of a simulation can be found the [documentation of the `saenopy` project](https://saenopy.readthedocs.io/).  
 
 #### Material parameters
 `jointforces` provides "pre-configured" material types for collagen gels of three different concentrations (0.6, 1.2, and 2.4mg/ml). Detailed protocols for reproducing these gels can be found in [Steinwachs et al. (2016)](https://www.nature.com/articles/nmeth.3685) and [Condor et al. (2017)](https://currentprotocols.onlinelibrary.wiley.com/doi/abs/10.1002/cpcb.24). Furthermore, one can define a linear elastic material with a specified `stiffness` (in Pa) with:
@@ -101,10 +101,11 @@ A full description of the non-linear material model and the parameters can be fo
 To be able to estimate the contractility of a multicellular aggregate by relating the measured deformation field to simulated ones, we need to execute a set of simulations that cover a wide range of contractile pressures. To speed up this process, `jointforces` provides a parallelization method that distributes individual instances of the `SAENO` optimizer across different CPU cores. The following code snippet runs 150 simulations ranging from pressure values of 0.1Pa to 10000Pa (logarithmically spaced):
 
 ```python
-jf.simulation.distribute('jf.simulation.spherical_contraction',
-                         const_args={'meshfile': 'spherical-contraction.msh', 'outfolder': 'simu',
-                         'material': jf.materials.collagen12},
-                         var_arg='pressure', start=0.1, end=10000, n=150, log_scaling=True)
+if __name__ == '__main__':
+  jf.simulation.distribute_solver('jf.simulation.spherical_contraction_solver',
+                                  const_args={'meshfile': 'spherical-contraction.msh', 'outfolder': 'simu',
+                                  'material': jf.materials.collagen12},
+                                  var_arg='pressure', start=0.1, end=10000, n=150, log_scaling=True, n_cores=2)
 ```
 
 The method automatically creates subfolders within the output-folder `simu`, called `simulation000000`, `simulation000001`, and so on, plus a file `pressure-values.txt` that contains the list of pressure values used in the simulations.
@@ -113,7 +114,7 @@ The method automatically creates subfolders within the output-folder `simu`, cal
 To compare a measured deformation field to a set of simulated ones, we need to create a lookup table that output the expected pressure for a given strain at a given distance from the spheroid (or the expected strain for a given pressure at a given distance). First, we convert the 3D displacement fields into a set of radial displacement curves:
 
 ```python
-lookup_table = jf.simulation.create_lookup_table('simu')
+lookup_table = jf.simulation.create_lookup_table_solver('simu')
 ```
 
 Now we can interpolate between individual simulations to create lookup functions for pressure values and strain values:
@@ -162,7 +163,7 @@ if __name__ == '__main__':
                                           'max_iter': 600,   # maximal iterationts for convergence
                                           'step': 0.0033,  # step size of iteration 
                                           'material': jf.materials.custom(K_0, D_0, L_S, D_S) },      # Enter your own material parameters here
-                                          var_arg='pressure', start=0.1, end=1000, n=150, log_scaling=True, n_cores=3, get_initial=True)
+                                          var_arg='pressure', start=0.1, end=1000, n=150, log_scaling=True, n_cores=2, get_initial=True)
       
     lookup_table = jf.simulation.create_lookup_table_solver(out_folder, x0=1, x1=50, n=100)    # output folder for combining the individual simulations
     get_displacement, get_pressure = jf.simulation.create_lookup_functions(lookup_table)
