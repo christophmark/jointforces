@@ -15,7 +15,7 @@ setup(
     install_requires=['saenopy==0.7.4', 
                       'gmsh-sdk>=4.5.0',
                       'numpy>=1.16.2',
-                      'pandas>=1.2.0',
+                      'pandas>=1.1.5',
                       'matplotlib>=2.2.2',
                       'scipy>=1.1.0',
                       'scikit-image>=0.14.2',
