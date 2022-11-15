@@ -17,7 +17,7 @@ setup(
                       'numpy>=1.16.2',
                       'pandas>=1.1.5',
                       'matplotlib>=2.2.2',
-                      'scipy>=1.8.0',
+                      'scipy>=1.7.0',
                       'scikit-image>=0.14.2',
                       'openpiv>=0.23.4',
                       'tqdm>=4.26.0',
