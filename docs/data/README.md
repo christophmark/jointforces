@@ -11,7 +11,7 @@ The image series consists of 145 images that are recorded with a 5 minute interv
 
 
 
-## [k12_mbioscience_2020_table_v2.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k12_mbioscience_2020_table_v2.pkl)
+## [k12_BatchA.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k12_BatchA.pkl)
 
 Lookup table for 1.2 mg/ml collagen measured for a new batch of collagen as described in (unpublished yet). These lookup-tables can be used between different python versions. The file was created by the following code:
 
@@ -40,11 +40,11 @@ Lookup table for 1.2 mg/ml collagen measured for a new batch of collagen as desc
     jf.simulation.save_lookup_table(lookup_table,out_table)
 ```
 
-## [k06_mbioscience_2020_table_v2.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k06_mbioscience_2020_table_v2.pkl)
+## [k06_BatchA.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k06_BatchA.pkl)
 
 Lookup table for 0.6 mg/ml collagen measured for a new batch of collagen as described in (unpublished yet). These lookup-tables can be used between different python versions.
 
-## [k24_mbioscience_2020_table_v2.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k24_mbioscience_2020_table_v2.pkl)
+## [k24_BatchA.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k24_BatchA.pkl)
 
 Lookup table for 2.4 mg/ml collagen measured for a new batch of collagen as described in (unpublished yet). These lookup-tables can be used between different python versions.
 
