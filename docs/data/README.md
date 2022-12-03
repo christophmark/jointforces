@@ -51,6 +51,17 @@ Lookup table for 2.4 mg/ml collagen of a collagen batch (A) as described in [Dyn
 
 
 
+## Lookup Tables for linear elastic fiber materials
+
+Lookup tables for arbitrary linear elastic material of different stiffness can be easily created using an interpolation function based on a pre-calculated lookuptable as follows:
+
+```python
+jf.simulation.linear_lookup_interpolator(emodulus=250, output_newtable="linear-lookup-emodul-250Pa.pkl", 
+```
+
+
+
+
 
 --------------------------------------------------------------------------------------------------------------------------------------------------
 **The following lookup-tables might not be compatible with newer python versions anymore (use *save_lookup_table* instead of *save_lookup_functions* in order to use lookup-tables between different python versions).**
@@ -102,10 +113,9 @@ Lookup table for 10.0 mg/ml Matrigel as described in [Steinwachs et al. (2016)](
 
 ## Further Lookup Tables
 
-For individual nonlinear materials, the material properties can be determined by using [saenopy](https://saenopy.readthedocs.io/en/latest/fit_material_parameters.html) and can then be used to create a new lookup table. Lookup tables for arbitrary linear elastic material of different stiffness can be easily created using an interpolation function as follows:
+For individual nonlinear materials, the material properties can be determined by using [saenopy](https://saenopy.readthedocs.io/en/latest/fit_material_parameters.html) and can then be used to create a new lookup table. 
 
-```python
-jf.simulation.linear_lookup_interpolator(emodulus=250, output_newtable="linear-lookup-emodul-250Pa.pkl", 
-```
+
+
 
 
