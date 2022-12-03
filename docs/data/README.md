@@ -13,14 +13,14 @@ The image series consists of 145 images that are recorded with a 5 minute interv
 
 ## [k12_BatchA.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k12_BatchA.pkl)
 
-Lookup table for 1.2 mg/ml collagen measured for a new batch of collagen as described in (unpublished yet). These lookup-tables can be used between different python versions. The file was created by the following code:
+Lookup table for 1.2 mg/ml collagen of a collagen batch (A) as described in [Dynamic traction force measurements of migrating immune cells in 3D matrices](https://doi.org/10.1101/2022.11.16.516758). 
 
 
 ```python
     import jointforces as jf
     
-    out_folder = 'k12_mbioscience_2020_v2'
-    out_table = 'k12_mbioscience_2020_table_v2.pkl'
+    out_folder = 'k12_BatchA'
+    out_table = 'k12_BatchA.pkl'
     
     K_0 = 1449  
     D_0 = 0.00215
@@ -42,11 +42,12 @@ Lookup table for 1.2 mg/ml collagen measured for a new batch of collagen as desc
 
 ## [k06_BatchA.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k06_BatchA.pkl)
 
-Lookup table for 0.6 mg/ml collagen measured for a new batch of collagen as described in (unpublished yet). These lookup-tables can be used between different python versions.
+Lookup table for 0.6 mg/ml collagen of a collagen batch (A) as described in [Dynamic traction force measurements of migrating immune cells in 3D matrices](https://doi.org/10.1101/2022.11.16.516758). 
+
 
 ## [k24_BatchA.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k24_BatchA.pkl)
 
-Lookup table for 2.4 mg/ml collagen measured for a new batch of collagen as described in (unpublished yet). These lookup-tables can be used between different python versions.
+Lookup table for 2.4 mg/ml collagen of a collagen batch (A) as described in [Dynamic traction force measurements of migrating immune cells in 3D matrices](https://doi.org/10.1101/2022.11.16.516758). 
 
 
 
