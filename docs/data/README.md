@@ -13,7 +13,7 @@ The image series consists of 145 images that are recorded with a 5 minute interv
 
 ## [k12_BatchA.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k12_BatchA.pkl)
 
-Lookup table for 1.2 mg/ml collagen of a collagen batch (A) as described in [Dynamic traction force measurements of migrating immune cells in 3D matrices](https://doi.org/10.1101/2022.11.16.516758). 
+Lookup table for 1.2 mg/ml collagen of a collagen batch (A) as described in [Dynamic traction force measurements of migrating immune cells in 3D matrices](https://doi.org/10.1101/2022.11.16.516758). The file was created by the following code:
 
 
 ```python
