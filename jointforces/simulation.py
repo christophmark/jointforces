@@ -648,7 +648,7 @@ def linear_lookup_interpolator(emodulus, output_newtable="new-lin-lookup.pkl", r
 
 
 def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distance=[2,50], linewidth=2, n_lines = 1000, save_plot = None,
-                      fig_size=(5,4), figure=None, show=True):
+                      fig_size=(5,4), figure=None, show=True, colorlegend = 'Pressure (Pa)'):
     """
     Create a figure of your (.pkl) material lookuptable
     
@@ -720,7 +720,7 @@ def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distan
     # make a colorbar
     cbar= plt.colorbar(sm, )
     cbar.ax.get_yaxis().labelpad = 15
-    cbar.ax.set_ylabel('Pressure (Pa)', rotation=270 , fontsize=14)
+    cbar.ax.set_ylabel(colorlegend, rotation=270 , fontsize=10)
     plt.tight_layout()
     # save plot if specified
     if save_plot is not None:
