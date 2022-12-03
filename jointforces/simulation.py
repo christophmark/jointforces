@@ -714,8 +714,8 @@ def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distan
              np.nanmax(displacement_list)+(0.8*np.nanmax(displacement_list)))
     
     plt.grid(False) 
-    plt.ylabel('Normalized matrix deformations (u/r₀)', fontsize=10)           # plt.ylabel('Normed Deformation', fontsize=14)
-    plt.xlabel('Normalized distance to center (r/r₀)', fontsize=10) # plt.xlabel('Normed Distance', fontsize=14)
+    plt.ylabel('Normalized deformations (u/r₀)', fontsize=10)           # plt.ylabel('Normed Deformation', fontsize=14)
+    plt.xlabel('Normalized distance (r/r₀)', fontsize=10) # plt.xlabel('Normed Distance', fontsize=14)
     
     # make a colorbar
     cbar= plt.colorbar(sm, )
