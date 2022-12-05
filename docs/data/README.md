@@ -83,6 +83,23 @@ jf.simulation.linear_lookup_interpolator(emodulus=250, output_newtable="linear-l
 ```
 
 
+## Further Lookup Tables
+
+For individual nonlinear materials, the material properties can be determined by using [saenopy](https://saenopy.readthedocs.io/en/latest/fit_material_parameters.html) and can then be used to create a new lookup table. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -134,12 +151,6 @@ Lookup table for 4.0 mg/ml fibrin as described in [Steinwachs et al. (2016)](htt
 ## [matri10.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/matri10.pkl)
 
 Lookup table for 10.0 mg/ml Matrigel as described in [Steinwachs et al. (2016)](https://www.nature.com/articles/nmeth.3685).
-
-## Further Lookup Tables
-
-For individual nonlinear materials, the material properties can be determined by using [saenopy](https://saenopy.readthedocs.io/en/latest/fit_material_parameters.html) and can then be used to create a new lookup table. 
-
-
 
 
 
