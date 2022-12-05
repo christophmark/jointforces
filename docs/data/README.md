@@ -51,6 +51,29 @@ Lookup table for 2.4 mg/ml collagen of a collagen batch (A) as described in [Dyn
 
 
 
+
+## [k06_BatchC.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k06_BatchC.pkl)
+
+Lookup table for 0.6 mg/ml collagen of a collagen batch (C) as described in [Dynamic traction force measurements of migrating immune cells in 3D matrices](https://doi.org/10.1101/2022.11.16.516758). 
+
+
+## [k12_BatchC.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k12_BatchC.pkl)
+
+Lookup table for 1.2 mg/ml collagen of a collagen batch (C) as described in [Dynamic traction force measurements of migrating immune cells in 3D matrices](https://doi.org/10.1101/2022.11.16.516758). 
+
+## [k24_BatchC.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k24_BatchC.pkl)
+
+Lookup table for 2.4 mg/ml collagen of a collagen batch (C) as described in [Dynamic traction force measurements of migrating immune cells in 3D matrices](https://doi.org/10.1101/2022.11.16.516758). 
+
+
+
+
+
+
+
+
+
+
 ## Lookup Tables for linear elastic fiber materials
 
 Lookup tables for arbitrary linear elastic material of different stiffness can be easily created using an interpolation function based on a pre-calculated lookuptable as follows:
@@ -58,6 +81,7 @@ Lookup tables for arbitrary linear elastic material of different stiffness can b
 ```python
 jf.simulation.linear_lookup_interpolator(emodulus=250, output_newtable="linear-lookup-emodul-250Pa.pkl", 
 ```
+
 
 
 
