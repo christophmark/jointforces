@@ -13,7 +13,12 @@ from saenopy import Solver
 import saenopy
 from saenopy.materials import SemiAffineFiberMaterial
 import pandas as pd
-
+try: 
+    # if new saenopy format use this function
+    from saenopy.solver import load_solver
+except:
+    # if not rename the load function from the old saenopy version
+    import saenopy.load as load_solver
 
 def read_meshfile(meshfile, r_inner=None, r_outer=None):
     # open mesh file
@@ -167,6 +172,15 @@ def distribute_solver(func, const_args, var_arg='pressure', start=0.1, end=1000,
     # by default use spherical contraction as function
     func = spherical_contraction_solver
     
+    # set values if we have constant arguments here instead of default
+    if "max_iter" in const_args:
+        max_iter = const_args["max_iter"]    
+    if "step" in const_args:
+        step = const_args["step"]   
+    if "conv_crit" in const_args:
+        conv_crit = const_args["conv_crit"] 
+        
+  
     if n_cores is None:
         n_cores = os.cpu_count()
 
@@ -189,11 +203,11 @@ def distribute_solver(func, const_args, var_arg='pressure', start=0.1, end=1000,
         U = None
         for index, v in enumerate(values):
             func(const_args["meshfile"], outfolder + '/simulation' + str(index).zfill(6),
-                    v, const_args["material"], None, None, False, U, max_iter, step, conv_crit)
+                    v, const_args["material"], None, None, False,  U, max_iter, step, conv_crit)
             # get the last displacement
             name = outfolder + '/simulation' + str(index).zfill(6) + "/solver.npz"
             if os.path.exists(name):
-                M = saenopy.load(name)
+                M = load_solver(name)
                 U = M.U
             # optionally call the callback
             if callback is not None:
@@ -212,12 +226,12 @@ def distribute_solver(func, const_args, var_arg='pressure', start=0.1, end=1000,
                     for i in range(index-3, -1, -1):
                         name = outfolder+'/simulation'+str(i).zfill(6) + "/solver.npz"
                         if os.path.exists(name):
-                            M = saenopy.load(name)
+                            M = load_solver(name)
                             U = M.U
                             break
                 p = multiprocessing.Process(target=func,
                                             args=(const_args["meshfile"],  outfolder+'/simulation'+str(index).zfill(6),
-                                                  v, const_args["material"], None, None, False, U, max_iter, step, conv_crit))
+                                                  v, const_args["material"], None, None, False, U,  max_iter, step, conv_crit))
 
                 p.start()
                 processes.append(p)
@@ -250,7 +264,7 @@ def extract_deformation_curve_solver(folder, x):
             pass
 
     # load coordinates
-    M = saenopy.load(folder + "/solver.npz")
+    M = load_solver(folder + "/solver.npz")
     coords = M.R 
     # load displacements
     displ = M.U
