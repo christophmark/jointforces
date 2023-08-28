@@ -74,16 +74,22 @@ def segment_spheroid(img, enhance=True, thres = 0.9, thres_yen= False):
     # identify spheroid as the most centered object
     labeled_mask, max_lbl = scipy_meas.label(mask)
     center_of_mass = np.array(scipy_meas.center_of_mass(mask, labeled_mask, range(1, max_lbl + 1)))
-    distance_to_center = np.sqrt(np.sum((center_of_mass - np.array([height / 2, width / 2])) ** 2, axis=1))
+    
+    try:
+        distance_to_center = np.sqrt(np.sum((center_of_mass - np.array([height / 2, width / 2])) ** 2, axis=1))
 
-    mask = (labeled_mask == distance_to_center.argmin() + 1)
-
-    # determine radius of spheroid
-    radius = np.sqrt(np.sum(mask) / np.pi)
-
-    # determine center position of spheroid
-    cy, cx = center_of_mass[distance_to_center.argmin()]
-
+        mask = (labeled_mask == distance_to_center.argmin() + 1)
+        
+        # determine radius of spheroid
+        radius = np.sqrt(np.sum(mask) / np.pi)
+        
+        # determine center position of spheroid
+        cy, cx = center_of_mass[distance_to_center.argmin()]
+    except:
+        print ("Error: Could not detect spheroid. You might adjust the segmentation." )
+        import sys
+        sys.exit(1)
+        
     # return dictionary containing spheroid information
     return {'mask': mask, 'radius': radius, 'centroid': (cx, cy)}
 
