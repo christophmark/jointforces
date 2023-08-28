@@ -20,6 +20,8 @@ from roipoly import RoiPoly
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 import matplotlib as mpl
 import pandas as pd
+from skimage.registration import phase_cross_correlation
+from scipy.ndimage import shift
 
 def enhance_contrast(img, gauss=False, gamma=None):
     img = img.astype(float)
@@ -125,10 +127,19 @@ def custom_mask(img):
     return {'mask': mask, 'radius': radius, 'centroid': (cx, cy)} 
 
 
-def compute_displacements(window_size, img0, img1, mask1=None, cutoff=None, drift_correction=True):
+def compute_displacements(window_size, img0, img1, mask1=None, cutoff=None, drift_correction=True, drift_correction_raw_img=False):
     # get image size
     height = img1.shape[0]
     width = img1.shape[1]
+    
+    # drift correct raw images if activated
+    if drift_correction_raw_img:
+     shiftvalue = phase_cross_correlation(img0,img1) 
+     #np.array(Image.open(series[n-1])), np.array(Image.open(series[n]))) #, upsample_factor=10)
+     img1 =  shift(img1, shiftvalue[0], mode='nearest')
+     #saveim = Image.fromarray(new_im)
+
+
 
     # ignore ubiquitous warning messages from OpenPIV
     with warnings.catch_warnings():
@@ -292,6 +303,7 @@ def save_displacement_plot(filename, img, segmentation, displacements, quiver_sc
 
 def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=None,
                                 image_list=None, enhance=True, window_size=70, cutoff=None, drift_correction=True,
+                                drift_correction_raw_img =False,
                                 plot=True, continous_segmentation = False, quiver_scale=1, color_norm=75., 
                                 draw_mask = False, gamma=None, gauss=False, load_mask=None, thres_segmentation = 0.9,
                                 cut_img = False, cut_img_val = (None,None,None,None), cbar_um_scale = None, dpi=150,
@@ -343,6 +355,7 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
     dict_file = {'PIV settings': {'folder': [folder], 'filter': [filter], 'outfolder': [outfolder], 
                   'n_max': [(n_max)], 'n_min': [(n_min)], 'enhance': [(enhance)], 
                   'window_size': [window_size], 'cutoff': [(cutoff)], 'drift_correction': [(drift_correction)], 
+                  'drift_correction_raw_img': [(drift_correction_raw_img)], 
                   'plot': [(plot)], 'continous_segmentation': [(continous_segmentation)], 'quiver_scale': [quiver_scale], 
                   'color_norm': [color_norm], 'draw_mask': [(draw_mask)], 'gamma': [(gamma)], 
                   'gauss': [(gauss)], 'load_mask': [(load_mask)], 'thres_segmentation': [thres_segmentation], 
@@ -380,7 +393,7 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
         
         # compute and save the matrx deformations and mask    
         dis = compute_displacements(window_size, img0, img1, mask1=seg1['mask'],
-                                cutoff=cutoff, drift_correction=drift_correction)
+                                cutoff=cutoff, drift_correction=drift_correction, drift_correction_raw_img=drift_correction_raw_img)
         np.save(outfolder + '/seg'+str(i).zfill(6)+'.npy', seg1)
         
         ## old conversion saves current deformation
