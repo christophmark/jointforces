@@ -254,7 +254,7 @@ def displacement_plot(img, segmentation, displacements, quiver_scale=1, color_no
 
 
 def save_displacement_plot(filename, img, segmentation, displacements, quiver_scale=1, color_norm=75., cmap=cm.jet,
-                           s=50,cbar_um_scale = None,dpi=150,t=None, **kwargs):
+                           s=50,cbar_um_scale = None,dpi=150,t=None, colorlegend="w", **kwargs):
     height = img.shape[0]
     width = img.shape[1]
     fig = plt.figure(figsize=(10 * (width / height), 10))
@@ -268,14 +268,17 @@ def save_displacement_plot(filename, img, segmentation, displacements, quiver_sc
         # add scalebar  
         from matplotlib_scalebar.scalebar import ScaleBar
         scalebar = ScaleBar(cbar_um_scale, "µm",length_fraction=0.1, location="lower right", 
-                            box_alpha=0 ,  fixed_value=200,color="w", font_properties={'size':f})   
+                            box_alpha=0 ,  color=colorlegend, font_properties={'size':f}) #fixed_value=200,
+        # scalebar = ScaleBar(cbar_um_scale, "µm", location="lower right", 
+        #                     box_alpha=0 ,  fixed_value=500,color="k",
+        #                     scale_loc="none",label_loc="none",font_properties={'size':f}) 
         plt.gca().add_artist(scalebar)
         # add timestamp if time is specified  as t
         if t is not None:
             #from datetime import timedelta
 
             plt.text(0.08, 0.91,  str(int(t/60)).zfill(2)+":"+str(t%60).zfill(2), 
-                     color="w", fontsize=f+8, horizontalalignment='center',
+                     color=colorlegend, fontsize=f+8, horizontalalignment='center',
                      verticalalignment='center', transform = ax.transAxes)
         # create a mappable for the colormap with same range
         norm = mpl.colors.Normalize(vmin=0,vmax=color_norm)
@@ -285,8 +288,8 @@ def save_displacement_plot(filename, img, segmentation, displacements, quiver_sc
         cbaxes = inset_axes(ax, width="20%", height="2%", loc=1, borderpad=3.1) 
         #cbaxes = inset_axes(ax, width="20%", height="2%", loc=1, borderpad=-6.1)      
         cbar = plt.colorbar(sm,cax=cbaxes, orientation='horizontal')
-        cbar.ax.tick_params(labelsize=f, colors ="w")
-        cbar.set_label(label='Deformation (µm)',fontsize=f, color="w")  
+        cbar.ax.tick_params(labelsize=f, colors =colorlegend)
+        cbar.set_label(label='Deformation (µm)',fontsize=f, color=colorlegend)  
         # ticks
         cbar.set_ticks([0.,color_norm/2,color_norm])
         cbar.set_ticklabels(["0",f"{color_norm/2}",f">{color_norm}"])
@@ -307,7 +310,7 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
                                 plot=True, continous_segmentation = False, quiver_scale=1, color_norm=75., 
                                 draw_mask = False, gamma=None, gauss=False, load_mask=None, thres_segmentation = 0.9,
                                 cut_img = False, cut_img_val = (None,None,None,None), cbar_um_scale = None, dpi=150,
-                                dt_min=None, cmap="turbo", callback=None, thres_yen= False):
+                                dt_min=None, cmap="turbo", colorlegend="w", callback=None, thres_yen= False, invert_segmentation=False):
     # see if turbo is installed
     if cmap == "turbo":
         try:
@@ -422,12 +425,12 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
             # plot same mask for all if continous segmentation is False or a custom mask is drawn
             if (draw_mask == False) & (continous_segmentation == True):
                 save_displacement_plot(outfolder+'/plot'+str(i).zfill(6)+'.png', img1, seg1, dis_sum,
-                                       quiver_scale=quiver_scale, color_norm=color_norm,cbar_um_scale=cbar_um_scale,dpi=dpi,cmap=cmap,t=t)
+                                       quiver_scale=quiver_scale, color_norm=color_norm, colorlegend = colorlegend, cbar_um_scale=cbar_um_scale,dpi=dpi,cmap=cmap,t=t)
             # plot individual mask for each timestep ( however for forcereconstruction later we do use
             # the first timestep only to avoid errornous force fluctuations)    
             else:
                 save_displacement_plot(outfolder+'/plot'+str(i).zfill(6)+'.png', img1, seg0, dis_sum,
-                                       quiver_scale=quiver_scale, color_norm=color_norm,cbar_um_scale=cbar_um_scale,dpi=dpi,cmap=cmap,t=t)
+                                       quiver_scale=quiver_scale, color_norm=color_norm, colorlegend = colorlegend, cbar_um_scale=cbar_um_scale,dpi=dpi,cmap=cmap,t=t)
         # next round we update the images        
         img0 = img1.copy()
         # call callback 
