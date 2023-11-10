@@ -310,7 +310,7 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
                                 plot=True, continous_segmentation = False, quiver_scale=1, color_norm=75., 
                                 draw_mask = False, gamma=None, gauss=False, load_mask=None, thres_segmentation = 0.9,
                                 cut_img = False, cut_img_val = (None,None,None,None), cbar_um_scale = None, dpi=150,
-                                dt_min=None, cmap="turbo", colorlegend="w", callback=None, thres_yen= False, invert_segmentation=False):
+                                dt_min=None, cmap="turbo", colorlegend="w", callback=None, thres_yen= False):
     # see if turbo is installed
     if cmap == "turbo":
         try:
