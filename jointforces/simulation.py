@@ -13,6 +13,7 @@ from saenopy import Solver
 import saenopy
 from saenopy.materials import SemiAffineFiberMaterial
 import pandas as pd
+from pathlib import Path
 try: 
     # if new saenopy format use this function
     from saenopy.solver import load_solver
@@ -59,7 +60,7 @@ def read_meshfile(meshfile, r_inner=None, r_outer=None):
 
     coords = np.zeros((n_nodes, 3))
     for i in range(n_nodes):
-        coords[i] = np.array([np.float(x) for x in lines[i + index_nodes + 2].split()[1:]])
+        coords[i] = np.array([float(x) for x in lines[i + index_nodes + 2].split()[1:]])
         
       
     # connections
@@ -97,9 +98,9 @@ def spherical_contraction_solver(meshfile, outfolder, pressure, material, r_inne
     # Initialize saenopy solver opbject
     M = Solver()
     material_saenopy = SemiAffineFiberMaterial(K_0, D_0, L_S, D_S)
-    M.setMaterialModel(material_saenopy)
-    M.setNodes(coords)
-    M.setTetrahedra(tets)
+    M.set_material_model(material_saenopy)
+    M.set_nodes(coords)
+    M.set_tetrahedra(tets)
      
     # define boundary conditions
     distance = np.sqrt(np.sum(coords ** 2., axis=1))
@@ -138,10 +139,10 @@ def spherical_contraction_solver(meshfile, outfolder, pressure, material, r_inne
     bcond_forces[mask_inner, :3] *= force_per_node
     
     # give the boundary conditions to the solver
-    M.setBoundaryCondition(bcond_displacement, bcond_forces)
+    M.set_boundary_condition(bcond_displacement, bcond_forces)
 
     if initial_displacenemts is not None:
-        M.setInitialDisplacements(initial_displacenemts)
+        M.set_initial_displacements(initial_displacenemts)
 
     # create info file with all relevant parameters of the simulation
     parameters = r"""K_0 = {}
@@ -162,8 +163,8 @@ TOTAL_NODES = {}""".format(K_0, D_0, L_S, D_S, pressure, force_per_node, r_inner
         f.write(parameters)
         
     # solve the boundary problem
-    M.solve_boundarycondition(stepper=step, i_max=max_iter, rel_conv_crit=conv_crit, relrecname=outfolder + "/relrec.txt") #, verbose=True
-    M.save(outfolder + "/solver.npz")
+    M.solve_boundarycondition(step_size=step, max_iterations=max_iter, rel_conv_crit=conv_crit, relrecname=outfolder + "/relrec.txt") #, verbose=True
+    M.save(outfolder + "/solver.saenopy")
     
   
 def distribute_solver(func, const_args, var_arg='pressure', start=0.1, end=1000, n=120, log_scaling=True, n_cores=None, get_initial=True, max_iter = 600, step = 0.0033, conv_crit = 0.01, callback=None):
@@ -639,7 +640,7 @@ def linear_lookup_interpolator(emodulus, output_newtable="new-lin-lookup.pkl", r
     # if not specified differently we find the correct reference files automatically
     if not reference_folder:
         import jointforces
-        reference_folder = os.path.join(jointforces.__file__,"..","..","docs","data","linear_reference_table")
+        reference_folder = Path(jointforces.__file__).parent / ".." / "docs" / "data" / "linear_reference_table"
         
     # load in  reference lookuptable to for a simulated k2364 (emodul ~394 Pa) up to 10 000 Pa 
     get_displacement_ref, get_pressure_ref = load_lookup_functions(os.path.join(reference_folder,'linear-ref-functions-k2364.pkl'))
