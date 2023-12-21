@@ -275,7 +275,7 @@ def extract_deformation_curve_solver(folder, x):
 
     # load data
     try:
-        M = load_solver(folder + "/solver.npz")
+        M = load_solver(folder + "/solver.saenopy")
         coords = M.mesh.nodes 
         displ  = M.mesh.displacements
     # Support older saenopy versions
