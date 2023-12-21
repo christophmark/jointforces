@@ -5,7 +5,7 @@ from setuptools import setup
 setup(
     name='jointforces',
     packages=['jointforces'],
-    version='1.0.2',
+    version='1.0.3',
     description='A Python package to conduct 3D Traction Force Microcopy on multicelluar aggregates (spheroids).',
     url='',
     download_url = '',
