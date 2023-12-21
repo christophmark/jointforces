@@ -11,7 +11,7 @@ The image series consists of 145 images that are recorded with a 5 minute interv
 
 
 
-## [k12_BatchA.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k12_BatchA.pkl)
+## [k12_BatchA.npy](https://github.com/christophmark/jointforces/blob/master/docs/data/k12_BatchA.npy)
 
 Lookup table for 1.2 mg/ml collagen of a collagen batch (A) as described in [Dynamic traction force measurements of migrating immune cells in 3D matrices](https://doi.org/10.1101/2022.11.16.516758). The file was created by the following code:
 
@@ -19,8 +19,8 @@ Lookup table for 1.2 mg/ml collagen of a collagen batch (A) as described in [Dyn
 ```python
     import jointforces as jf
     
-    out_folder = 'k12_BatchA'
-    out_table = 'k12_BatchA.pkl'
+    out_folder = 'Collagen12_BatchA'
+    out_table = 'Collagen12_BatchA.npy'
     
     K_0 = 1449  
     D_0 = 0.00215
@@ -40,28 +40,28 @@ Lookup table for 1.2 mg/ml collagen of a collagen batch (A) as described in [Dyn
     jf.simulation.save_lookup_table(lookup_table,out_table)
 ```
 
-## [k06_BatchA.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k06_BatchA.pkl)
+## [Collagen06_BatchA.npy](https://github.com/christophmark/jointforces/blob/master/docs/data/Collagen06_BatchA.npy)
 
 Lookup table for 0.6 mg/ml collagen of a collagen batch (A) as described in [Dynamic traction force measurements of migrating immune cells in 3D matrices](https://doi.org/10.1101/2022.11.16.516758). 
 
 
-## [k24_BatchA.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k24_BatchA.pkl)
+## [Collagen24_BatchA.npy](https://github.com/christophmark/jointforces/blob/master/docs/data/Collagen24_BatchA.npy)
 
 Lookup table for 2.4 mg/ml collagen of a collagen batch (A) as described in [Dynamic traction force measurements of migrating immune cells in 3D matrices](https://doi.org/10.1101/2022.11.16.516758). 
 
 
 
 
-## [k06_BatchC.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k06_BatchC.pkl)
+## [Collagen06_BatchC.npy](https://github.com/christophmark/jointforces/blob/master/docs/data/Collagen06_BatchC.npy)
 
 Lookup table for 0.6 mg/ml collagen of a collagen batch (C) as described in [Dynamic traction force measurements of migrating immune cells in 3D matrices](https://doi.org/10.1101/2022.11.16.516758). 
 
 
-## [k12_BatchC.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k12_BatchC.pkl)
+## [Collagen12_BatchC.npy](https://github.com/christophmark/jointforces/blob/master/docs/data/Collagen12_BatchC.npy)
 
 Lookup table for 1.2 mg/ml collagen of a collagen batch (C) as described in [Dynamic traction force measurements of migrating immune cells in 3D matrices](https://doi.org/10.1101/2022.11.16.516758). 
 
-## [k24_BatchC.pkl](https://github.com/christophmark/jointforces/blob/master/docs/data/k24_BatchC.pkl)
+## [Collagen24_BatchC.npy](https://github.com/christophmark/jointforces/blob/master/docs/data/Collagen24_BatchC.npy)
 
 Lookup table for 2.4 mg/ml collagen of a collagen batch (C) as described in [Dynamic traction force measurements of migrating immune cells in 3D matrices](https://doi.org/10.1101/2022.11.16.516758). 
 
