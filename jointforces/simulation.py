@@ -8,6 +8,7 @@ from subprocess import Popen
 from subprocess import PIPE
 from time import sleep
 from tqdm import tqdm
+import matplotlib
 from scipy.interpolate import LinearNDInterpolator
 from saenopy import Solver
 import saenopy
@@ -770,7 +771,7 @@ def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distan
        
       
     # make cmaps
-    mycmap = cm.get_cmap('viridis')
+    mycmap = matplotlib.colormaps.get_cmap('viridis')
     mynorm = colors.LogNorm(vmin=np.min(pressure_list),vmax=np.max(pressure_list))   
     c = mycmap(mynorm(pressure_list))
 
@@ -807,7 +808,7 @@ def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distan
     plt.xlabel('Normalized distance (r/r₀)', fontsize=10) # plt.xlabel('Normed Distance', fontsize=14)
     
     # make a colorbar
-    cbar= plt.colorbar(sm, )
+    cbar= plt.colorbar(sm, ax=plt.gca())
     cbar.ax.get_yaxis().labelpad = 15
     cbar.ax.set_ylabel(colorlegend, rotation=270 , fontsize=10)
     plt.tight_layout()
