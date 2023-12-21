@@ -2,8 +2,8 @@ import warnings
 import os
 import gc
 import numpy as np
-import scipy.ndimage.morphology as scipy_morph
-import scipy.ndimage.measurements as scipy_meas
+from scipy.ndimage import binary_erosion, binary_dilation, binary_fill_holes, binary_opening, binary_closing
+from scipy.ndimage import label, center_of_mass
 from skimage.filters import gaussian, threshold_otsu, threshold_yen
 from skimage.morphology import remove_small_objects
 from skimage.exposure import adjust_gamma   
@@ -67,18 +67,18 @@ def segment_spheroid(img, enhance=True, thres = 0.9, thres_yen= False):
         mask = img[::-1] < threshold_yen(img) * thres    
     
     # remove other objects
-    mask = scipy_morph.binary_dilation(mask, iterations=3)
-    mask = scipy_morph.binary_fill_holes(mask)
+    mask = binary_dilation(mask, iterations=3)
+    mask = binary_fill_holes(mask)
     mask = remove_small_objects(mask, min_size=1000)
-    mask = scipy_morph.binary_closing(mask, iterations=3)
-    mask = scipy_morph.binary_fill_holes(mask)
+    mask = binary_closing(mask, iterations=3)
+    mask = binary_fill_holes(mask)
 
     # identify spheroid as the most centered object
-    labeled_mask, max_lbl = scipy_meas.label(mask)
-    center_of_mass = np.array(scipy_meas.center_of_mass(mask, labeled_mask, range(1, max_lbl + 1)))
+    labeled_mask, max_lbl = label(mask)
+    center = np.array(center_of_mass(mask, labeled_mask, range(1, max_lbl + 1)))
     
     try:
-        distance_to_center = np.sqrt(np.sum((center_of_mass - np.array([height / 2, width / 2])) ** 2, axis=1))
+        distance_to_center = np.sqrt(np.sum((center - np.array([height / 2, width / 2])) ** 2, axis=1))
 
         mask = (labeled_mask == distance_to_center.argmin() + 1)
         
@@ -86,7 +86,7 @@ def segment_spheroid(img, enhance=True, thres = 0.9, thres_yen= False):
         radius = np.sqrt(np.sum(mask) / np.pi)
         
         # determine center position of spheroid
-        cy, cx = center_of_mass[distance_to_center.argmin()]
+        cy, cx = center[distance_to_center.argmin()]
     except:
         print ("Error: Could not detect spheroid. You might adjust the segmentation." )
         import sys
@@ -120,7 +120,7 @@ def custom_mask(img):
     # determine radius of spheroid
     radius = np.sqrt(np.sum(mask) / np.pi)
     # determine center of mass
-    cy, cx = scipy_meas.center_of_mass(mask)
+    cy, cx = center_of_mass(mask)
     # hide pop-up windows   
     plt.ioff()
     # return dictionary containing spheroid information
@@ -233,7 +233,7 @@ def displacement_plot(img, segmentation, displacements, quiver_scale=1, color_no
                        pivot='mid',
                        **kwargs)
         
-    overlay = mask.astype(int) - scipy_morph.binary_erosion(mask, iterations=4).astype(int)
+    overlay = mask.astype(int) - binary_erosion(mask, iterations=4).astype(int)
     overlay = np.array([overlay.T,
                         np.zeros_like(overlay).T,
                         np.zeros_like(overlay).T,
