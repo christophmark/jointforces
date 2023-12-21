@@ -35,7 +35,7 @@ jf.piv.compute_displacement_series('MCF7-time-lapse',  # image folder
                                    cutoff=650)         # PIV cutoff
 
 jf.force.reconstruct('MCF7-piv',        # PIV output folder
-                     'collagen12.pkl',  # lookup table
+                     'collagen12.npy',  # lookup table
                      1.29,              # pixel size (µm)
                      'results.xlsx')    # output file
 
@@ -103,7 +103,7 @@ To be able to estimate the contractility of a multicellular aggregate by relatin
 ```python
 if __name__ == '__main__':
   jf.simulation.distribute_solver('jf.simulation.spherical_contraction_solver',
-                                  const_args={'meshfile': 'spherical-contraction.msh', 'outfolder': 'simu',
+                                  const_args={'meshfile': 'spherical-contraction.msh', 'outfolder': 'out_folder',
                                   'material': jf.materials.collagen12},
                                   var_arg='pressure', start=0.1, end=10000, n=150, log_scaling=True, n_cores=2)
 ```
@@ -111,25 +111,18 @@ if __name__ == '__main__':
 The method automatically creates subfolders within the output-folder `simu`, called `simulation000000`, `simulation000001`, and so on, plus a file `pressure-values.txt` that contains the list of pressure values used in the simulations.
 
 ### 3. Pressure lookup tables
-To compare a measured deformation field to a set of simulated ones, we need to create a lookup table that output the expected pressure for a given strain at a given distance from the spheroid (or the expected strain for a given pressure at a given distance). First, we convert the 3D displacement fields into a set of radial displacement curves:
+To compare a measured deformation field to a set of simulated ones, we need to create a lookup table that output the expected pressure for a given strain at a given distance from the spheroid (or the expected strain for a given pressure at a given distance). We convert the 3D displacement fields into a set of radial displacement curves and save our material specific lookup-table:
 
 ```python
-lookup_table = jf.simulation.create_lookup_table_solver('simu')
-```
 
-Now we can interpolate between individual simulations to create lookup functions for pressure values and strain values:
+lookup_table = jf.simulation.create_lookup_table_solver(out_folder, x0=1, x1=50, n=100)  
+jf.simulation.save_lookup_table(lookup_table,"my_lookup_table.npy")
+```
+We can use it to interpolate between individual simulations to create lookup functions for pressure values and strain values:
 
 ```python
-get_displacement, get_pressure = jf.simulation.create_lookup_functions(lookup_table)
+get_displacement, get_pressure = jf.simulation.load_lookup_functions("my_lookup_table.npy")
 ```
-
-Finally, we may save these functions to file, e.g. to load them again in another script:
-
-```python
-jf.simulation.save_lookup_functions(get_displacement, get_pressure, 'collagen12.pkl')
-get_displacement, get_pressure = jf.simulation.load_lookup_functions('collagen12.pkl')
-```
-
 For example, we may now ask for the estimated pressure of a spheroid with radius `r` that induces a deformation of `0.2*r` at a distance of `2*r`:
 
 ```python
@@ -138,25 +131,20 @@ print(get_pressure(2, 0.2))
 ```
 
 
-In brief, we can create a custom material lookup table by following the code below. Instead of creating an individual mesh, you might simply use the provided mesh file [here](https://github.com/christophmark/jointforces/blob/master/docs/data/spherical-inclusion.msh) (with r_inner=100, r_outer=10000; in this case the function *jf.mesh.spherical_inclusion* can be removed from the following code). 
+In brief, we can create a custom material lookup table by following the code below. Here, instead of creating an individual mesh, we simply use the provided mesh file [here](https://github.com/christophmark/jointforces/blob/master/docs/data/spherical-inclusion.msh) (with r_inner=100, r_outer=10000; in this case we do not need to call the function *jf.mesh.spherical_inclusion*). 
 
 ```python
 import jointforces as jf
 
 if __name__ == '__main__':
-        
-    meshfile_loc = 'spherical-inclusion.msh'
-    out_folder = 'lookup_example'
-    out_table = 'lookup_example.pkl'
+  
+    meshfile_loc = r'C:\Users\spherical-inclusion.msh'
+    out_folder =   r'C:\Users\lookup_example_folder'
+    out_table =   r'C:\Users\lookup_table.npy'
    
     #### your material parameters  (here from a collagen 1.2mg/ml Batch)
     K_0, D_0, L_S, D_S  = 1449 , 0.00215, 0.032, 0.055 
-    
-    jf.mesh.spherical_inclusion(meshfile_loc,   # not needed if you use the provided mesh 
-                              r_inner=100,
-                              r_outer=10000,
-                              length_factor=0.06)
-    
+     
     jf.simulation.distribute_solver(  'jf.simulation.spherical_contraction_solver',  
                               const_args={'meshfile': meshfile_loc,     # path to the provided or the new generated mesh
                                           'outfolder': out_folder,    # output folder to store individual simulations
@@ -164,17 +152,18 @@ if __name__ == '__main__':
                                           'step': 0.0033,  # step size of iteration 
                                           'material': jf.materials.custom(K_0, D_0, L_S, D_S) },      # Enter your own material parameters here
                                           var_arg='pressure', start=0.1, end=1000, n=150, log_scaling=True, n_cores=2, get_initial=True)
-      
+       
     lookup_table = jf.simulation.create_lookup_table_solver(out_folder, x0=1, x1=50, n=100)    # output folder for combining the individual simulations
-    get_displacement, get_pressure = jf.simulation.create_lookup_functions(lookup_table)
-    jf.simulation.save_lookup_functions(get_displacement, get_pressure, out_table)
+    jf.simulation.save_lookup_table(lookup_table,out_table)
+
+
 
 ```
 
 The material lookup-tables can be visualized by using the following function. The shown material was simulated up to 10.000 Pa and we visualize the relative matrix deformations within exactly this pressure range for distances from 2 to 50 spheroid radii (distance and deformation both relative to spheroid size).
 
 ```python
-jf.simulation.plot_lookup_table("material.pkl", pressure=[0,10000], distance=[2,50])
+jf.simulation.plot_lookup_table("lookup_table.npy", pressure=[0,10000], distance=[2,50])
 ````
 
 <img src="https://raw.githubusercontent.com/christophmark/jointforces/master/docs/images/Lookup.png" width="400" />
@@ -184,9 +173,9 @@ Analog to the following code, the raw data can be plotted into the material look
 
 
 ```python
-jf.simulation.plot_lookup_table(lookup_table=r"material.pkl", pressure=[0,10000],distance=[2,50])  
+jf.simulation.plot_lookup_table(lookup_table=r"lookup_table.npy", pressure=[0,10000],distance=[2,50])  
 
-jf.simulation.plot_lookup_data(r"material.pkl",  # path to lookuptable 
+jf.simulation.plot_lookup_data(r"lookup_table.npy",  # path to lookuptable 
               data_folder = r"pos01_eval", # path to result folder after piv&force-reconstuction containing result.xlsx and piv output
               color_list=["C0","C1","C2","C3","C4"],           # colors for the different times
               timesteps=[2,6, 12*1,12*3,12*20],                # timesteps to plot
@@ -229,7 +218,7 @@ The command performs PIV on all `*.tif` files in the the folder `MCF7-time-lapse
 Finally, we may use the lookup functions we have created above and use them to assign the best-fit pressure to each time step of the image series. Additionally, the user supplies the size of one pixel in the image in micrometers. With this information, the surface are of the spheroid is calculated to obtain the total contractility. The output is a [`Pandas`](https://pandas.pydata.org/) Dataframe containing mean values, median values and standard deviation of both pressure and contractility. If a filename is provided, the results are also saved as an Excel file:
 
 ```python
-res = jf.force.reconstruct('MCF7-piv', 'collagen12.pkl', 6.45/5, 'MCF7-recon.xlsx')
+res = jf.force.reconstruct('MCF7-piv', "lookup_table.npy", 6.45/5, 'MCF7-recon.xlsx')
 
 t = np.arange(len(res))*5/60
 mu = res['Mean Contractility (µN)']
