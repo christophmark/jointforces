@@ -438,6 +438,95 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
             callback(i, len(img_files))
 
 
+def compute_displacement_series_gui(result, n_max=None, n_min=None,
+                                enhance=True, window_size=70, cutoff=None, drift_correction=True,
+                                drift_correction_raw_img=False,
+                                continous_segmentation=False,
+                                draw_mask=False, load_mask=None, thres_segmentation=0.9,
+                                cut_img=False, cut_img_val=(None, None, None, None),
+                                callback=None, thres_yen=False):
+    folder, file = os.path.split(result.template)
+
+    img_files = result.images
+
+    # mainimal and maximal timesteps for analysis
+    if n_max is not None and n_max != "None":
+        img_files = img_files[:n_max + 1]
+
+    if n_min is not None and n_min != "None":
+        img_files = img_files[n_min:]
+
+    # read in image - (mask certain area in image if specified)
+    if cut_img:
+        img0 = io.imread(img_files[0], as_gray='True')[cut_img_val[0]:cut_img_val[1], cut_img_val[2]:cut_img_val[3]]
+    else:
+        img0 = io.imread(img_files[0], as_gray='True')
+
+    # segment , draw or load in mask
+    if draw_mask == False:  # normal segmentation
+        seg0 = segment_spheroid(img0, enhance=enhance, thres=thres_segmentation, thres_yen=thres_yen)
+    else:  # draw manual
+        seg0 = custom_mask(img0)
+    if load_mask is not None:  # load in mask
+        seg0 = np.load(load_mask, allow_pickle=True).item()
+
+    # save initial segmentation
+    result.segmentations = [seg0]
+
+    u_sum = None
+    v_sum = None
+
+    result.displacements = []
+
+    # loop through all images
+    for i in tqdm(range(1, len(img_files))):
+        # read in new image (and cut if specified)
+        if cut_img:
+            img1 = io.imread(img_files[i], as_gray='True')[cut_img_val[0]:cut_img_val[1], cut_img_val[2]:cut_img_val[3]]
+        else:
+            img1 = io.imread(img_files[i], as_gray='True')
+
+        # take the mask of the current timestep if continous_segmentation is active -
+        # if not always take the mask from t0
+        # both options have advantages and disadvantages: continous_segmentation might
+        # determine the center over time more accurately and offers information over growth,
+        # however wrongly detected masks here may lead to force fluctuations
+        # and can reduce the FoV too much. Since the standard approach for the
+        # later force reconstruction is unsing the initial timestep anyway,
+        # the approach of always using the t0 mask here as well is quite robust
+        if (draw_mask == False) & (continous_segmentation == True):
+            seg1 = segment_spheroid(img1, enhance=enhance, thres=thres_segmentation)
+            result.segmentations.append(seg1)
+        else:
+            seg1 = seg0.copy()
+
+        # compute and save the matrx deformations and mask
+        dis = compute_displacements(window_size, img0, img1, mask1=seg1['mask'],
+                                    cutoff=cutoff, drift_correction=drift_correction,
+                                    drift_correction_raw_img=drift_correction_raw_img)
+        #np.save(outfolder + '/seg' + str(i).zfill(6) + '.npy', seg1)
+
+        ## old conversion saves current deformation
+        # np.save(outfolder + '/dis'+str(i).zfill(6)+'.npy', dis)
+
+        if u_sum is None:
+            u_sum = dis['u']
+            v_sum = dis['v']
+        else:
+            u_sum += dis['u']
+            v_sum += dis['v']
+
+        dis_sum = {'x': dis['x'].copy(), 'y': dis['y'].copy(), 'u': u_sum.copy(), 'v': v_sum.copy()}
+        ## new conversion saves cummulative deformations
+        result.displacements.append(dis_sum)
+        #np.save(outfolder + '/def' + str(i).zfill(6) + '.npy', dis_sum)
+
+        # next round we update the images
+        img0 = img1.copy()
+        # call callback
+        if callback is not None:
+            callback(i, len(img_files))
+
 
 def compute_noise_level(folder, filter, n_max=10, enhance=True,
                         window_size=70, cutoff=None, drift_correction=True):
