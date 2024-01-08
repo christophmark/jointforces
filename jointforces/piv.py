@@ -89,8 +89,8 @@ def segment_spheroid(img, enhance=True, thres = 0.9, thres_yen= False):
         cy, cx = center[distance_to_center.argmin()]
     except:
         print ("Error: Could not detect spheroid. You might adjust the segmentation." )
-        import sys
-        sys.exit(1)
+        #import sys
+        #sys.exit(1)
         
     # return dictionary containing spheroid information
     return {'mask': mask, 'radius': radius, 'centroid': (cx, cy)}
