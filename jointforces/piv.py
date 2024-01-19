@@ -306,7 +306,7 @@ def save_displacement_plot(filename, img, segmentation, displacements, quiver_sc
 
 def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=None,
                                 image_list=None, enhance=True, window_size=70, cutoff=None, drift_correction=True,
-                                drift_correction_raw_img =False,
+                                drift_correction_raw_img =True,
                                 plot=True, continous_segmentation = False, quiver_scale=1, color_norm=75., 
                                 draw_mask = False, gamma=None, gauss=False, load_mask=None, thres_segmentation = 0.9,
                                 cut_img = False, cut_img_val = (None,None,None,None), cbar_um_scale = None, dpi=150,
@@ -440,7 +440,7 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
 
 def compute_displacement_series_gui(result, n_max=None, n_min=None,
                                 enhance=True, window_size=70, cutoff=None, drift_correction=True,
-                                drift_correction_raw_img=False,
+                                drift_correction_raw_img=True,
                                 continous_segmentation=False,
                                 draw_mask=False, load_mask=None, thres_segmentation=0.9,
                                 cut_img=False, cut_img_val=(None, None, None, None),
