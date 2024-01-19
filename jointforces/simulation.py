@@ -771,7 +771,7 @@ def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distan
        
       
     # make cmaps
-    mycmap = matplotlib.colormaps.get_cmap('viridis')
+    mycmap = plt.get_cmap('viridis')
     mynorm = colors.LogNorm(vmin=np.min(pressure_list),vmax=np.max(pressure_list))   
     c = mycmap(mynorm(pressure_list))
 
