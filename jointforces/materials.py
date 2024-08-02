@@ -39,8 +39,3 @@ fibrin40 = {'K_0': 2091, 'D_0': 0.002, 'L_S': 1e30, 'D_S': 1e30}
 
 # Matrigel (10mg/ml)
 matrigel100 = {'K_0': 2364, 'D_0': 1e30, 'L_S': 1e30, 'D_S': 1e30}
-
-
-# The following material parameters   ToDo add new collagen
-#
-

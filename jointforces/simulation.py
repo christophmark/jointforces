@@ -956,43 +956,20 @@ def plot_lookup_data(lookup_table, data_folder, timesteps=[10,30,60], distance=[
                   continue
             plt.scatter(distance_list_raw[t-1],displacement_list_raw[t-1],s=marker_size_scatter,zorder=20,c = color_list[ci])      
         
-            #calculate CoV of pressure values for 48h and add to plot
-            if t == 72: #3*72:
-                mask = (distance_list_raw[t-1]>=5)&(distance_list_raw[t-1]<=10)
+            ## calculate CoV of pressure values for 72h and add to plot
+            # if t == 3*70-2: #3*72:
+            #     mask = (distance_list_raw[t-1]>=5)&(distance_list_raw[t-1]<=10)
                 
-                data_masked = pressure_list_raw[t-1][mask]
-                CoV = np.std(data_masked)/np.nanmean(data_masked)
-                print (len(data_masked))
-                print (len(distance_list_raw[t-1]))
-                print (CoV)
+            #     data_masked = pressure_list_raw[t-1][mask]
+            #     CoV = np.std(data_masked)/np.nanmean(data_masked)
+            #     print (len(data_masked))
+            #     print (len(distance_list_raw[t-1]))
+            #     print (CoV)
                 
-                plt.text(0.05,0.95,s=f"CoV (72; 5-10r): {np.around(CoV,3)}",
-                          transform=plt.gca().transAxes, zorder=1e10,
-                          fontsize=10,c="darkred")
-            if t == 24: #3*72:
-                  mask = (distance_list_raw[t-1]>=5)&(distance_list_raw[t-1]<=10)
-                 
-                  data_masked = pressure_list_raw[t-1][mask]
-                  CoV = np.std(data_masked)/np.nanmean(data_masked)
-                  print (len(data_masked))
-                  print (len(distance_list_raw[t-1]))
-                  print (CoV)
-                 
-                  plt.text(0.05,0.90,s=f"CoV (24; 5-10r): {np.around(CoV,3)}",
-                            transform=plt.gca().transAxes, zorder=1e10,
-                            fontsize=10,c="darkred")
-            if t == 48: #3*72:
-                  mask = (distance_list_raw[t-1]>=5)&(distance_list_raw[t-1]<=10)
-                 
-                  data_masked = pressure_list_raw[t-1][mask]
-                  CoV = np.std(data_masked)/np.nanmean(data_masked)
-                  print (len(data_masked))
-                  print (len(distance_list_raw[t-1]))
-                  print (CoV)
-                 
-                  plt.text(0.05,0.85,s=f"CoV (48; 5-10r): {np.around(CoV,3)}",
-                            transform=plt.gca().transAxes, zorder=1e10,
-                            fontsize=10,c="darkred")
+            #     plt.text(0.05,0.93,s=f"CoV (72h; 5-10r): {np.around(CoV,3)}",
+            #              transform=plt.gca().transAxes, zorder=200,
+            #              fontsize=11,c="darkred")
+            
         
         # else same color for all here
         else: 
@@ -1010,11 +987,7 @@ def plot_lookup_data(lookup_table, data_folder, timesteps=[10,30,60], distance=[
             # calculate the mean in distance windows for timesteps
             mean_distance = []
             mean_displacement = []
-            for i in range(distance[0],int(np.max(distance_list_raw[t-1]))): # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            #x = np.linspace(distance[0], int(np.max(distance_list_raw[t-1])), 10)
-            #dx = x[1]-x[0]
-            #for i in x:
-                #mean_distance.append(i+0.5*dx)
+            for i in range(distance[0],int(np.max(distance_list_raw[t-1]))):
                 mean_distance.append(i+0.5)
                 mean_disp = np.nanmean(displacement_list_raw[t-1][(distance_list_raw[t-1]>=i) & (distance_list_raw[t-1]<i+1)])
                 mean_displacement.append(mean_disp)
