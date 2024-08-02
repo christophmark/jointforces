@@ -116,7 +116,10 @@ def custom_mask(img):
     plt.text(0.5, 1.05,'Click Polygon Mask with left click, finish with right click',  fontsize=12,
          horizontalalignment='center',
          verticalalignment='center',c='darkred', transform= plt.gca().transAxes)#     transform = ax.transAxes)
-    my_roi = RoiPoly(color='r')
+    # click the mask here
+    print("Clicking the mask manual:")
+    print(" // In spyder this function may freeze and cause the software to stop. A solution is going to the spyder settings and changing the Ipython Console Graphics Backend to Tkinter")
+    my_roi = RoiPoly(color='r')   
     # Extract mask and segementation details
     mask = np.flipud(my_roi.get_mask(img))   # flip mask due to imshow 
     # determine radius of spheroid
