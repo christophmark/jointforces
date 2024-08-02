@@ -23,6 +23,7 @@ import pandas as pd
 from skimage.registration import phase_cross_correlation
 from scipy.ndimage import shift
 
+
 def enhance_contrast(img, gauss=False, gamma=None):
     img = img.astype(float)
     # apply gaussian filter 
@@ -106,10 +107,11 @@ def custom_mask(img):
     Returns:
         dict: Dictionary with keys: mask, radius, centroid (x/y)
     """
+
     height = img.shape[0]
     width  = img.shape[1]
     # click polygon mask interactive
-    plt.ion()
+    plt.ion()  
     plt.imshow(img, extent=[0, width, height, 0])
     plt.text(0.5, 1.05,'Click Polygon Mask with left click, finish with right click',  fontsize=12,
          horizontalalignment='center',
