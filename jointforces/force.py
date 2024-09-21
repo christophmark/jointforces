@@ -418,8 +418,8 @@ def infer_pressure(x_rav, y_rav, u_rav, v_rav, x_sph, y_sph, r_sph, get_pressure
 
 
 # Evaluate Angle dependet Pressures
-def angle_analysis(folder, output, n_max=None,save_plot=True, small_pressure = False, fontsize=7, name_of_resultfile='result_angles.xlsx', dt=None, angle_legend=False, 
-                   path_of_resultfile=None,extra_large_pressure = False):
+def angle_analysis(folder, output, n_max=None,save_plot=True, fontsize=7, name_of_resultfile='result_angles.xlsx', dt=None, angle_legend=False, 
+                   path_of_resultfile=None,small_pressure = False, extra_large_pressure = False, extra_extra_large_pressure=False):
     """
     Evaluate angles over time for an spheroid (needs folder where 'reconstruct' function was used) and stores 
     the results in the output folder.
@@ -662,27 +662,87 @@ def angle_analysis(folder, output, n_max=None,save_plot=True, small_pressure = F
                 ax2.cla()
 				
 				# single figure
-				# plot circles       
-                circle_a = plt.Circle((0, 0), 10/ 100 , color=colorcycle, zorder=10, fill=False, linestyle='--')
-                circle_b = plt.Circle((0, 0), 25/ 100 , color=colorcycle, zorder=10, fill=False, linestyle='--')
-                circle_c = plt.Circle((0, 0), 50/ 100 , color=colorcycle, zorder=10, fill=False, linestyle='--')
-				#circle_750pa = plt.Circle((0, 0), 100/ 300 , color=colorcycle, zorder=10, fill=False, linestyle='--')
-                axb.text(0.5, 0.57, '10 Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=axb.transAxes,fontsize=fontsize)
-                axb.text(0.5, 0.65, '25 Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=axb.transAxes,fontsize=fontsize)
-                axb.text(0.5, 0.77, '50 Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=axb.transAxes,fontsize=fontsize)
-                axb.add_artist(circle_a)
-                axb.add_artist(circle_b)
-                axb.add_artist(circle_c)
-                axb.axis('equal')  
-                axb.scatter(x,y, s=22, c=colors)
-                axb.set_xlim([-1, 1])
-                axb.set_ylim([-1, 1])
-                axb.axis('off')
-                plt.savefig(output+'//single_{}.png'.format(str(t).zfill(4)), dpi=200)
-                axb.cla()
-             
-             
-             
+# 				# plot circles       
+#                 circle_a = plt.Circle((0, 0), 10/ 100 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+#                 circle_b = plt.Circle((0, 0), 25/ 100 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+#                 circle_c = plt.Circle((0, 0), 50/ 100 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+# 				#circle_750pa = plt.Circle((0, 0), 100/ 300 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+#                 axb.text(0.5, 0.57, '10 Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=axb.transAxes,fontsize=fontsize)
+#                 axb.text(0.5, 0.65, '25 Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=axb.transAxes,fontsize=fontsize)
+#                 axb.text(0.5, 0.77, '50 Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=axb.transAxes,fontsize=fontsize)
+#                 axb.add_artist(circle_a)
+#                 axb.add_artist(circle_b)
+#                 axb.add_artist(circle_c)
+#                 axb.axis('equal')  
+#                 axb.scatter(x,y, s=22, c=colors)
+#                 axb.set_xlim([-1, 1])
+#                 axb.set_ylim([-1, 1])
+#                 axb.axis('off')
+#                 plt.savefig(output+'//single_{}.png'.format(str(t).zfill(4)), dpi=200)
+#                 axb.cla()
+            if extra_extra_large_pressure == True:
+                # now use 100 as maximum
+                x = [np.cos(i*np.pi/180) for i in angle_list] * (pressures / np.array([4000]*len(pressures)) ) 
+                y = [np.sin(i*np.pi/180) for i in angle_list] * (pressures / np.array([4000] *len(pressures)) ) 
+    # combined figure
+    # plot circles
+                circle_a = plt.Circle((0, 0), 1000/ 4000 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+                circle_b = plt.Circle((0, 0), 2000/ 4000 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+                circle_c = plt.Circle((0, 0), 3000/ 4000 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+                ax1.text(0.5, 0.89, '3000Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=ax1.transAxes,fontsize=fontsize)
+                ax1.text(0.5, 0.643, '1000Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=ax1.transAxes,fontsize=fontsize)
+                ax1.text(0.5, 0.77, '2000Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=ax1.transAxes,fontsize=fontsize)
+                ax1.add_artist(circle_a)
+                ax1.add_artist(circle_b)
+                ax1.add_artist(circle_c)
+                ax1.axis('equal')  
+                ax1.scatter(x,y, s=22, c=colors)
+                ax1.set_xlim([-1, 1])
+                ax1.set_ylim([-1, 1])
+                ax1.axis('off')
+    # annotate CoV    
+                ax1.text(0.01, 0.91,'Coefficient of Variation: '+str(CoV), 
+                         horizontalalignment='center',
+                             verticalalignment='center',
+                            transform = ax1.transAxes, fontsize=9.2)  
+    
+    # annotate time if timestep is given
+                if dt is not None:
+                    ax1.text(0.03, 0.98,str(timedelta(seconds=t*dt)), 
+                             horizontalalignment='center',
+                             verticalalignment='center',
+                             transform = ax1.transAxes, fontsize=12)  
+    # show quiver plot on the right side
+                plot = plt.imread(plots[t])
+                ax2.imshow(plot)
+                plt.axis('off')
+                ax2.axis('off')
+    # save figure
+                f.savefig(output+'//plot_{}.png'.format(str(t).zfill(4)), dpi=200)
+                ax1.cla()
+                ax2.cla()
+    
+    # single figure
+    # # plot circles       
+    #             circle_a = plt.Circle((0, 0), 10/ 100 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+    #             circle_b = plt.Circle((0, 0), 25/ 100 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+    #             circle_c = plt.Circle((0, 0), 50/ 100 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+    # #circle_750pa = plt.Circle((0, 0), 100/ 300 , color=colorcycle, zorder=10, fill=False, linestyle='--')
+    #             axb.text(0.5, 0.57, '10 Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=axb.transAxes,fontsize=fontsize)
+    #             axb.text(0.5, 0.65, '25 Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=axb.transAxes,fontsize=fontsize)
+    #             axb.text(0.5, 0.77, '50 Pa', color = colorcycle ,horizontalalignment='center', verticalalignment='center', transform=axb.transAxes,fontsize=fontsize)
+    #             axb.add_artist(circle_a)
+    #             axb.add_artist(circle_b)
+    #             axb.add_artist(circle_c)
+    #             axb.axis('equal')  
+    #             axb.scatter(x,y, s=22, c=colors)
+    #             axb.set_xlim([-1, 1])
+    #             axb.set_ylim([-1, 1])
+    #             axb.axis('off')
+    #             plt.savefig(output+'//single_{}.png'.format(str(t).zfill(4)), dpi=200)
+    #             axb.cla()     
+                 
+                 
 
 
     # save excel file     
