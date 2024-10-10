@@ -132,7 +132,7 @@ def custom_mask(img):
     return {'mask': mask, 'radius': radius, 'centroid': (cx, cy)} 
 
 
-def compute_displacements(window_size, img0, img1, mask1=None, cutoff=None, drift_correction=True, drift_correction_raw_img=False):
+def compute_displacements(window_size, img0, img1, mask1=None, cutoff=None, drift_correction=True, drift_correction_raw_img=False,overlap=0.5):
     # get image size
     height = img1.shape[0]
     width = img1.shape[1]
@@ -155,7 +155,7 @@ def compute_displacements(window_size, img0, img1, mask1=None, cutoff=None, drif
                                                   img1,
                                                   window_size=window_size,
                                                   search_area_size = window_size,
-                                                  overlap=window_size // 2,
+                                                  overlap=int(window_size*overlap),  #window_size//2
                                                   dt=1,
                                                   sig2noise_method='peak2peak')
 
@@ -169,7 +169,7 @@ def compute_displacements(window_size, img0, img1, mask1=None, cutoff=None, drif
         # get coordinates corresponding to displacement
         x, y = openpiv.pyprocess.get_coordinates(image_size=img1.shape,
                                                  search_area_size=window_size,
-                                                 overlap=window_size // 2)
+                                                 overlap=int(window_size*overlap) )  #window_size//2
     # change OpenPiv conversion for matplotlib / python arrays
     y = y[::-1]    # flip y-axis for correct orientation with image
     vt = -vt       # turn y component of deformations for correct orientation 
@@ -312,7 +312,7 @@ def save_displacement_plot(filename, img, segmentation, displacements, quiver_sc
 def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=None,
                                 image_list=None, enhance=True, window_size=70, cutoff=None, drift_correction=True,
                                 drift_correction_raw_img =True,
-                                plot=True, continous_segmentation = False, quiver_scale=1, color_norm=75., 
+                                plot=True, continous_segmentation = False, quiver_scale=1, color_norm=75.,  overlap=0.5,
                                 draw_mask = False, gamma=None, gauss=False, load_mask=None, thres_segmentation = 0.9,
                                 cut_img = False, cut_img_val = (None,None,None,None), cbar_um_scale = None, dpi=150,
                                 dt_min=None, cmap="turbo", colorlegend="w", callback=None, thres_yen= False):
@@ -368,7 +368,7 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
                   'color_norm': [color_norm], 'draw_mask': [(draw_mask)], 'gamma': [(gamma)], 
                   'gauss': [(gauss)], 'load_mask': [(load_mask)], 'thres_segmentation': [thres_segmentation], 
                   'cut_img': [(cut_img)], 'cut_img_val': [(cut_img_val)], 'cbar_um_scale': [cbar_um_scale], 
-                  'dpi': [dpi], 'dt_min': [(dt_min)], 'cmap': [cmap], 'callback': [(callback)]},
+                  'dpi': [dpi], 'dt_min': [(dt_min)], 'cmap': [cmap], 'overlap': [overlap],'callback': [(callback)]},
                   'image_list': [image_list], 'Raw_img_files': [img_files], }
     with open(os.path.join(outfolder, 'parameters_piv.yml'), 'w') as yaml_file:
         yaml.dump(dict_file, yaml_file, default_flow_style=False)
@@ -400,7 +400,7 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
             seg1 = seg0.copy()
         
         # compute and save the matrx deformations and mask    
-        dis = compute_displacements(window_size, img0, img1, mask1=seg1['mask'],
+        dis = compute_displacements(window_size, img0, img1, mask1=seg1['mask'], overlap=overlap,
                                 cutoff=cutoff, drift_correction=drift_correction, drift_correction_raw_img=drift_correction_raw_img)
         np.save(outfolder + '/seg'+str(i).zfill(6)+'.npy', seg1)
         
