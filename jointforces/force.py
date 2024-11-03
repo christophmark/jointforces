@@ -10,9 +10,6 @@ from .simulation import load_lookup_functions
 from .utils import load
 
 
-
-
-
 def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2, angle_filter=20, r_max=None,  continuous_radii = False):
     """
     - folder: contains PIV results
@@ -64,6 +61,7 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2, angle_fil
 
     # create dict with all angles
     angles_dict = {str(a): [] for a in range(-180, 180, 5)}
+    angles_dict_f = {str(a): [] for a in range(-180, 180, 5)}
     
     u_sum = None
     v_sum = None
@@ -102,25 +100,27 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2, angle_fil
             mask = (r_max > distance) & (distance > r_min)
 
         pr_angle = []
-        pr_median = []
+        pr_mean = []
+        ctr_mean = []
         for alpha in range(-180, 180, 5):
             mask2 = (angle >= (alpha-5)*np.pi/180.) & (angle < (alpha+5)*np.pi/180.)
             pr_angle.append(alpha)
-            pr_median.append(np.nanmedian(pressure[mask & mask2]))
-        
+            pr_mean.append(np.nanmean(pressure[mask & mask2]))
+            ctr_mean.append(np.nanmean(pressure[mask & mask2])*A0*(muperpixel**2.)*(10**6))   # in µN  
+     
         # assign pressure values
         pressure_mean = np.nanmean(pressure[mask])
         pressure_median = np.nanmedian(pressure[mask])
         pressure_std = np.nanstd(pressure[mask], ddof=1)    
         # search maximal / minimal value
         try:
-            i_min = np.nanargmin(pr_median)
+            i_min = np.nanargmin(pr_mean)
             alpha_min = pr_angle[i_min]
-            pressure_min = pr_median[i_min]
+            pressure_min = pr_mean[i_min]
     
-            i_max = np.nanargmax(pr_median)
+            i_max = np.nanargmax(pr_mean)
             alpha_max = pr_angle[i_max]
-            pressure_max = pr_median[i_max]
+            pressure_max = pr_mean[i_max]
         # assign nan values if not possible (for example if only same values esixt at all locations due to negative/non-simulated strain        
         except: 
             i_min,alpha_min,pressure_min = np.nan,np.nan,np.nan
@@ -153,7 +153,11 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2, angle_fil
         
         # append pressures for all angle data
         for i,a in enumerate(angles_dict):
-            angles_dict[a].append(pr_median[i])
+            angles_dict[a].append(pr_mean[i])
+        # append contractility for all angle data
+        for i,a in enumerate(angles_dict_f):
+            angles_dict_f[a].append(ctr_mean[i])
+            
 
     df = pd.DataFrame.from_dict(results)
     df.columns = ['Mean Pressure (Pa)',
@@ -178,10 +182,18 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2, angle_fil
     an = pd.DataFrame.from_dict(angles_dict)
     an.columns = [a for a in range(-180, 180, 5)]
     if outfile is not None:
-        an.to_excel(outfile[:-5]+'_angles.xlsx')
+        an.to_excel(outfile[:-5]+'_angles_pressure.xlsx')
     else:
-        an.to_excel(folder+'//result_angles.xlsx')    
-          
+        an.to_excel(folder+'//result_angles_pressure.xlsx')   
+    # save angular contractility
+    an2 = pd.DataFrame.from_dict(angles_dict_f)
+    an2.columns = [a for a in range(-180, 180, 5)]
+    if outfile is not None:
+        an2.to_excel(outfile[:-5]+'_angles_contractility.xlsx')
+    else:
+        an2.to_excel(folder+'//result_angles_contractility.xlsx')    
+        
+   
     # save a copy of the lookup table by default
     from shutil import copyfile
     copyname = "AppliedLookupTable.pkl"
@@ -373,7 +385,7 @@ def reconstruct_gui(result, lookupfile, muperpixel, r_min=2, angle_filter=20, r_
     else:
         an.to_excel(folder+'//result_angles.xlsx')
 
-        # save a copy of the lookup table by default
+    # save a copy of the lookup table by default
     from shutil import copyfile
     copyname = "AppliedLookupTable.pkl"
     copyfile(lookupfile, os.path.join(folder,copyname))
@@ -418,7 +430,7 @@ def infer_pressure(x_rav, y_rav, u_rav, v_rav, x_sph, y_sph, r_sph, get_pressure
 
 
 # Evaluate Angle dependet Pressures
-def angle_analysis(folder, output, n_max=None,save_plot=True, fontsize=7, name_of_resultfile='result_angles.xlsx', dt=None, angle_legend=False, 
+def angle_analysis(folder, output, n_max=None,save_plot=True, fontsize=7, name_of_resultfile='result_angles_pressure.xlsx', dt=None, angle_legend=False, 
                    path_of_resultfile=None,small_pressure = False, large_pressure=False, extra_large_pressure = False, extra_extra_large_pressure=False):
     """
     Evaluate angles over time for an spheroid (needs folder where 'reconstruct' function was used) and stores 
