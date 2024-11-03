@@ -431,7 +431,7 @@ def infer_pressure(x_rav, y_rav, u_rav, v_rav, x_sph, y_sph, r_sph, get_pressure
 
 # Evaluate Angle dependet Pressures
 def angle_analysis(folder, output, n_max=None,save_plot=True, fontsize=7, name_of_resultfile='result_angles_pressure.xlsx', dt=None, angle_legend=False, 
-                   path_of_resultfile=None,small_pressure = False, medium_pressure=False, large_pressure=False, extra_large_pressure = False, extra_extra_large_pressure=False):
+                   path_of_resultfile=None,small_pressure = False, medium_pressure=True, large_pressure=False, extra_large_pressure = False, extra_extra_large_pressure=False):
     """
     Evaluate angles over time for an spheroid (needs folder where 'reconstruct' function was used) and stores 
     the results in the output folder.
