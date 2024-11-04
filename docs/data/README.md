@@ -11,7 +11,7 @@ The image series consists of 145 images that are recorded with a 5 minute interv
 
 
 
-## [k12_BatchA.npy](https://github.com/christophmark/jointforces/blob/master/docs/data/k12_BatchA.npy)
+## [Collagen12_BatchA.npy](https://github.com/christophmark/jointforces/blob/master/docs/data/k12_BatchA.npy)
 
 Lookup table for 1.2 mg/ml collagen of a collagen batch (A) as described in [Dynamic traction force measurements of migrating immune cells in 3D biopolymer matrices
 ](https://www.nature.com/articles/s41567-024-02632-8). The file was created by the following code:
