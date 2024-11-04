@@ -13,7 +13,8 @@ The image series consists of 145 images that are recorded with a 5 minute interv
 
 ## [k12_BatchA.npy](https://github.com/christophmark/jointforces/blob/master/docs/data/k12_BatchA.npy)
 
-Lookup table for 1.2 mg/ml collagen of a collagen batch (A) as described in [Dynamic traction force measurements of migrating immune cells in 3D matrices](https://doi.org/10.1101/2022.11.16.516758). The file was created by the following code:
+Lookup table for 1.2 mg/ml collagen of a collagen batch (A) as described in [Dynamic traction force measurements of migrating immune cells in 3D biopolymer matrices
+](https://www.nature.com/articles/s41567-024-02632-8). The file was created by the following code:
 
 
 ```python
@@ -42,40 +43,42 @@ Lookup table for 1.2 mg/ml collagen of a collagen batch (A) as described in [Dyn
 
 ## [Collagen06_BatchA.npy](https://github.com/christophmark/jointforces/blob/master/docs/data/Collagen06_BatchA.npy)
 
-Lookup table for 0.6 mg/ml collagen of a collagen batch (A) as described in [Dynamic traction force measurements of migrating immune cells in 3D biopolymer matrices](https://doi.org/10.1101/2022.11.16.516758](https://doi.org/10.1038/s41567-024-02632-8). 
-
-
-## [Collagen06_BatchA.npy](https://github.com/christophmark/jointforces/blob/master/docs/data/Collagen12_BatchA.npy)
-
-Lookup table for 1.2 mg/ml collagen of a collagen batch (A) as described in [Dynamic traction force measurements of migrating immune cells in 3D biopolymer matrices](https://doi.org/10.1101/2022.11.16.516758](https://doi.org/10.1038/s41567-024-02632-8 ). 
+Lookup table for 0.6 mg/ml collagen of a collagen batch (A) as described in [Dynamic traction force measurements of migrating immune cells in 3D biopolymer matrices
+](https://www.nature.com/articles/s41567-024-02632-8)
 
 ## [Collagen24_BatchA.npy](https://github.com/christophmark/jointforces/blob/master/docs/data/Collagen24_BatchA.npy)
 
-Lookup table for 2.4 mg/ml collagen of a collagen batch (A) as described in [Dynamic traction force measurements of migrating immune cells in 3D biopolymer matrices](https://doi.org/10.1101/2022.11.16.516758](https://doi.org/10.1038/s41567-024-02632-8 ). 
+Lookup table for 2.4 mg/ml collagen of a collagen batch (A) as described in [Dynamic traction force measurements of migrating immune cells in 3D biopolymer matrices
+](https://www.nature.com/articles/s41567-024-02632-8).
 
 
 
 ## [Collagen06_BatchC.npy](https://github.com/christophmark/jointforces/blob/master/docs/data/Collagen06_BatchC.npy)
 
-Lookup table for 0.6 mg/ml collagen of a collagen batch (C) as described in [Dynamic traction force measurements of migrating immune cells in 3D biopolymer matrices](https://doi.org/10.1101/2022.11.16.516758](https://doi.org/10.1038/s41567-024-02632-8 ). 
+Lookup table for 0.6 mg/ml collagen of a collagen batch (C) as described in [Dynamic traction force measurements of migrating immune cells in 3D biopolymer matrices
+](https://www.nature.com/articles/s41567-024-02632-8).
 
 ## [Collagen12_BatchC.npy](https://github.com/christophmark/jointforces/blob/master/docs/data/Collagen12_BatchC.npy)
 
-Lookup table for 1.2 mg/ml collagen of a collagen batch (C) as described in [Dynamic traction force measurements of migrating immune cells in 3D biopolymer matrices](https://doi.org/10.1101/2022.11.16.516758](https://doi.org/10.1038/s41567-024-02632-8 ). 
+Lookup table for 1.2 mg/ml collagen of a collagen batch (C) as described in [Dynamic traction force measurements of migrating immune cells in 3D biopolymer matrices
+](https://www.nature.com/articles/s41567-024-02632-8).
 ## [Collagen24_BatchC.npy](https://github.com/christophmark/jointforces/blob/master/docs/data/Collagen24_BatchC.npy)
 
-Lookup table for 2.4 mg/ml collagen of a collagen batch (C) as described in [Dynamic traction force measurements of migrating immune cells in 3D biopolymer matrices](https://doi.org/10.1101/2022.11.16.516758](https://doi.org/10.1038/s41567-024-02632-8 ). 
+Lookup table for 2.4 mg/ml collagen of a collagen batch (C) as described in [Dynamic traction force measurements of migrating immune cells in 3D biopolymer matrices
+](https://www.nature.com/articles/s41567-024-02632-8).
 
 
 ## [Collagen_1mgml_BatchD.npy](https://github.com/christophmark/jointforces/blob/master/docs/data/Collagen_1mgml_BatchD.npy)
-Lookup table for 1.0 mg/ml collagen of a collagen batch (D) as described in [Dynamic traction force measurements of migrating immune cells in 3D biopolymer matrices](https://doi.org/10.1101/2022.11.16.516758](https://doi.org/10.1038/s41567-024-02632-8 ). 
+Lookup table for 1.0 mg/ml collagen of a collagen batch (D) as described in [Dynamic traction force measurements of migrating immune cells in 3D biopolymer matrices
+](https://www.nature.com/articles/s41567-024-02632-8).
 
 ## [Collagen_2mgml_BatchD.npy](https://github.com/christophmark/jointforces/blob/master/docs/data/Collagen_2mgml_BatchD.npy)
-Lookup table for 2.0 mg/ml collagen of a collagen batch (D) as described in [Dynamic traction force measurements of migrating immune cells in 3D biopolymer matrices](https://doi.org/10.1101/2022.11.16.516758](https://doi.org/10.1038/s41567-024-02632-8 ). 
+Lookup table for 2.0 mg/ml collagen of a collagen batch (D) as described in [Dynamic traction force measurements of migrating immune cells in 3D biopolymer matrices
+](https://www.nature.com/articles/s41567-024-02632-8).
 
 ## [Collagen_3mgml_BatchD.npy](https://github.com/christophmark/jointforces/blob/master/docs/data/Collagen_3mgml_BatchD.npy)
-Lookup table for 3.0 mg/ml collagen of a collagen batch (D) as described in [Dynamic traction force measurements of migrating immune cells in 3D biopolymer matrices](https://doi.org/10.1101/2022.11.16.516758](https://doi.org/10.1038/s41567-024-02632-8 ). 
-
+Lookup table for 3.0 mg/ml collagen of a collagen batch (D) as described in [Dynamic traction force measurements of migrating immune cells in 3D biopolymer matrices
+](https://www.nature.com/articles/s41567-024-02632-8).
 
 
 
