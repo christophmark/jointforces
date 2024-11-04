@@ -42,7 +42,7 @@ Lookup table for 1.2 mg/ml collagen of a collagen batch (A) as described in [Dyn
 
 ## [Collagen06_BatchA.npy](https://github.com/christophmark/jointforces/blob/master/docs/data/Collagen06_BatchA.npy)
 
-Lookup table for 0.6 mg/ml collagen of a collagen batch (A) as described in [Dynamic traction force measurements of migrating immune cells in 3D biopolymer matrices](https://doi.org/10.1101/2022.11.16.516758](https://doi.org/10.1038/s41567-024-02632-8 ). 
+Lookup table for 0.6 mg/ml collagen of a collagen batch (A) as described in [Dynamic traction force measurements of migrating immune cells in 3D biopolymer matrices](https://doi.org/10.1101/2022.11.16.516758](https://doi.org/10.1038/s41567-024-02632-8). 
 
 
 ## [Collagen06_BatchA.npy](https://github.com/christophmark/jointforces/blob/master/docs/data/Collagen12_BatchA.npy)
