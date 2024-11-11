@@ -446,7 +446,7 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
 def compute_displacement_series_gui(result, n_max=None, n_min=None,
                                 enhance=True, window_size=70, cutoff=None, drift_correction=True,
                                 drift_correction_raw_img=True,
-                                continous_segmentation=False,
+                                continous_segmentation=False,overlap=0.5,
                                 draw_mask=False, load_mask=None, thres_segmentation=0.9,
                                 cut_img=False, cut_img_val=(None, None, None, None),
                                 callback=None, thres_yen=False):
@@ -507,7 +507,7 @@ def compute_displacement_series_gui(result, n_max=None, n_min=None,
 
         # compute and save the matrx deformations and mask
         dis = compute_displacements(window_size, img0, img1, mask1=seg1['mask'],
-                                    cutoff=cutoff, drift_correction=drift_correction,
+                                    cutoff=cutoff, drift_correction=drift_correction, overlap=overlap,
                                     drift_correction_raw_img=drift_correction_raw_img)
         #np.save(outfolder + '/seg' + str(i).zfill(6) + '.npy', seg1)
 
