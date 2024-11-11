@@ -342,7 +342,7 @@ def create_stiffness_maps(folder, delta, outfolder='stiffness-maps', k0=1645, ep
         width = log_stiffness.shape[1]
         plt.imshow(log_stiffness, vmin=2, vmax=4, cmap='inferno', extent=[0, width, height, 0], origin='lower')
         cb = plt.colorbar(fraction=0.025, label='Matrix stiffness', ticks=np.log10([100, 250, 500, 1000, 2500, 5000, 10000]))
-        cb.ax.set_yticklabels(['$\mathregular{\leq}$ 100 Pa', '250 Pa', '500 Pa', '1.0 kPa', '2.5 kPa', '5.0 kPa', '$\mathregular{\geq}$ 10.0 kPa'])
+        cb.ax.set_yticklabels([r'$\mathregular{\leq}$ 100 Pa', '250 Pa', '500 Pa', '1.0 kPa', '2.5 kPa', '5.0 kPa', r'$\mathregular{\geq}$ 10.0 kPa'])
         plt.xlim((0, width))
         plt.ylim((0, height))
         plt.axis('off')
