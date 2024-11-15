@@ -431,7 +431,7 @@ def infer_pressure(x_rav, y_rav, u_rav, v_rav, x_sph, y_sph, r_sph, get_pressure
 
 # Evaluate Angle dependet Pressures
 def angle_analysis(folder, output, n_max=None,save_plot=True, fontsize=7, name_of_resultfile='result_angles_pressure.xlsx', dt=None, angle_legend=False, 
-                   path_of_resultfile=None,small_pressure = False, medium_pressure=True, large_pressure=False, extra_large_pressure = False, extra_extra_large_pressure=False):
+                   path_of_resultfile=None,small_pressure = False, fileformat = "png", dark_mode = True, medium_pressure=True, large_pressure=False, extra_large_pressure = False, extra_extra_large_pressure=False):
     """
     Evaluate angles over time for an spheroid (needs folder where 'reconstruct' function was used) and stores 
     the results in the output folder.
@@ -450,7 +450,7 @@ def angle_analysis(folder, output, n_max=None,save_plot=True, fontsize=7, name_o
         angles  = pd.read_excel(folder + '//'+ name_of_resultfile)
         
     # read in plots
-    plots = glob(folder+'//plot*.png')
+    plots = glob(folder+f'//plot*.png')
     # make folder if not existing
     if not os.path.exists(output):
         os.makedirs(output)
@@ -463,7 +463,8 @@ def angle_analysis(folder, output, n_max=None,save_plot=True, fontsize=7, name_o
     fb,axb = plt.subplots( figsize=(3,3))  
     # for color norm
     max_pr = np.nanmax([np.nanmax(np.array(angles[z])[:n_max]) for z in angle_list])  
-    plt.style.use('dark_background')
+    if dark_mode == True:
+        plt.style.use('dark_background')
     # make result dictionary
     res_angles = {'mean_pr_angles (Pa)': [], 'sd_pr_angles (Pa)': [], 'CoV': []}
     
@@ -544,7 +545,7 @@ def angle_analysis(folder, output, n_max=None,save_plot=True, fontsize=7, name_o
                 plt.axis('off')
                 ax2.axis('off')
 				# save figure
-                f.savefig(output+'//plot_{}.png'.format(str(t).zfill(4)), dpi=200)
+                f.savefig(output+'//plot_{}.{}'.format(str(t).zfill(4), fileformat), dpi=200)
                 ax1.cla()
                 ax2.cla()
 				# Single figure
@@ -566,7 +567,7 @@ def angle_analysis(folder, output, n_max=None,save_plot=True, fontsize=7, name_o
                 axb.set_xlim([-1, 1])
                 axb.set_ylim([-1, 1])
                 axb.axis('off')
-                plt.savefig(output+'//single_{}.png'.format(str(t).zfill(4)), dpi=200)
+                plt.savefig(output+'//single_{}.fileformat'.format(str(t).zfill(4), fileformat), dpi=200)
                 axb.cla()
             if medium_pressure == True:	
 				# now use 1000 as maximum
@@ -608,7 +609,7 @@ def angle_analysis(folder, output, n_max=None,save_plot=True, fontsize=7, name_o
                 plt.axis('off')
                 ax2.axis('off')
 				# save figure
-                f.savefig(output+'//plot_{}.png'.format(str(t).zfill(4)), dpi=200)
+                f.savefig(output+'//plot_{}.{}'.format(str(t).zfill(4), fileformat), dpi=200)
                 ax1.cla()
                 ax2.cla()
 				# Single figure
@@ -630,7 +631,7 @@ def angle_analysis(folder, output, n_max=None,save_plot=True, fontsize=7, name_o
                 axb.set_xlim([-1, 1])
                 axb.set_ylim([-1, 1])
                 axb.axis('off')
-                plt.savefig(output+'//single_{}.png'.format(str(t).zfill(4)), dpi=200)
+                plt.savefig(output+'//single_{}.{}'.format(str(t).zfill(4), fileformat), dpi=200)
                 axb.cla()     
                # that shows and norms up to 100 Pa
                
@@ -674,7 +675,7 @@ def angle_analysis(folder, output, n_max=None,save_plot=True, fontsize=7, name_o
                 plt.axis('off')
                 ax2.axis('off')
 				# save figure
-                f.savefig(output+'//plot_{}.png'.format(str(t).zfill(4)), dpi=200)
+                f.savefig(output+'//plot_{}.{}'.format(str(t).zfill(4), fileformat), dpi=200)
                 ax1.cla()
                 ax2.cla()
 				
@@ -695,7 +696,7 @@ def angle_analysis(folder, output, n_max=None,save_plot=True, fontsize=7, name_o
                 axb.set_xlim([-1, 1])
                 axb.set_ylim([-1, 1])
                 axb.axis('off')
-                plt.savefig(output+'//single_{}.png'.format(str(t).zfill(4)), dpi=200)
+                plt.savefig(output+'//single_{}.{}'.format(str(t).zfill(4), fileformat), dpi=200)
                 axb.cla()
             if large_pressure == True:
                 
@@ -736,7 +737,7 @@ def angle_analysis(folder, output, n_max=None,save_plot=True, fontsize=7, name_o
                 plt.axis('off')
                 ax2.axis('off')
                 # save figure
-                f.savefig(output+'//plot_{}.png'.format(str(t).zfill(4)), dpi=200)
+                f.savefig(output+'//plot_{}.{}'.format(str(t).zfill(4), fileformat), dpi=200)
                 ax1.cla()
                 ax2.cla()
             
@@ -757,7 +758,7 @@ def angle_analysis(folder, output, n_max=None,save_plot=True, fontsize=7, name_o
                 axb.set_xlim([-1, 1])
                 axb.set_ylim([-1, 1])
                 axb.axis('off')
-                plt.savefig(output+'//single_{}.png'.format(str(t).zfill(4)), dpi=200)
+                plt.savefig(output+'//single_{}.{}'.format(str(t).zfill(4), fileformat), dpi=200)
                 axb.cla()     
                  
 
@@ -801,7 +802,7 @@ def angle_analysis(folder, output, n_max=None,save_plot=True, fontsize=7, name_o
                 plt.axis('off')
                 ax2.axis('off')
                 # save figure
-                f.savefig(output+'//plot_{}.png'.format(str(t).zfill(4)), dpi=200)
+                f.savefig(output+'//plot_{}.{}'.format(str(t).zfill(4), fileformat), dpi=200)
                 ax1.cla()
                 ax2.cla()
             
@@ -825,7 +826,7 @@ def angle_analysis(folder, output, n_max=None,save_plot=True, fontsize=7, name_o
                 axb.set_xlim([-1, 1])
                 axb.set_ylim([-1, 1])
                 axb.axis('off')
-                plt.savefig(output+'//single_{}.png'.format(str(t).zfill(4)), dpi=200)
+                plt.savefig(output+'//single_{}.{}'.format(str(t).zfill(4), fileformat), dpi=200)
                 axb.cla()     
                  
      
