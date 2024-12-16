@@ -95,7 +95,10 @@ def reconstruct(folder, lookupfile, muperpixel, outfile=None, r_min=2, angle_fil
             r0 = seg['radius']
         # else use always the intiial timepoint          
         distance, displacement, angle, pressure = infer_pressure(x_rav, y_rav, u_sum, v_sum, cx, cy, r0, get_pressure , angle_filter=angle_filter)
-        mask = distance > r_min
+        if r_min==None:
+            mask = distance > 0
+        else:
+            mask = distance > r_min
         if r_max:
             mask = (r_max > distance) & (distance > r_min)
 
