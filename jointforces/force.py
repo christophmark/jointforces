@@ -570,7 +570,7 @@ def angle_analysis(folder, output, n_max=None,save_plot=True, fontsize=7, name_o
                 axb.set_xlim([-1, 1])
                 axb.set_ylim([-1, 1])
                 axb.axis('off')
-                plt.savefig(output+'//single_{}.fileformat'.format(str(t).zfill(4), fileformat), dpi=200)
+                plt.savefig(output+'//single_{}.{}'.format(str(t).zfill(4), fileformat), dpi=200)
                 axb.cla()
             if medium_pressure == True:	
 				# now use 1000 as maximum
