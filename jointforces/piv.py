@@ -393,11 +393,13 @@ def compute_displacement_series(folder, filter, outfolder, n_max=None, n_min=Non
         # however wrongly detected masks here may lead to force fluctuations 
         # and can reduce the FoV too much. Since the standard approach for the 
         # later force reconstruction is unsing the initial timestep anyway, 
-        # the approach of always using the t0 mask here as well is quite robust 
+        # the approach of always using the t0 mask here as well is quite robust            
         if (draw_mask == False) & (continous_segmentation == True):
-            seg1 = segment_spheroid(img1, enhance=enhance, thres=thres_segmentation)
+            seg1 = segment_spheroid(img1, enhance=enhance, thres=thres_segmentation, thres_yen=thres_yen)
         else:
             seg1 = seg0.copy()
+                    
+            
         
         # compute and save the matrx deformations and mask    
         dis = compute_displacements(window_size, img0, img1, mask1=seg1['mask'], overlap=overlap,
@@ -500,7 +502,7 @@ def compute_displacement_series_gui(result, n_max=None, n_min=None,
         # later force reconstruction is unsing the initial timestep anyway,
         # the approach of always using the t0 mask here as well is quite robust
         if (draw_mask == False) & (continous_segmentation == True):
-            seg1 = segment_spheroid(img1, enhance=enhance, thres=thres_segmentation)
+            seg1 = segment_spheroid(img1, enhance=enhance, thres=thres_segmentation, thres_yen=thres_yen)
             result.segmentations.append(seg1)
         else:
             seg1 = seg0.copy()
