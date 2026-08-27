@@ -738,7 +738,7 @@ def linear_lookup_interpolator(emodulus, output_newtable="new-lin-lookup.npy", r
 
 
 def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distance=[2,50], linewidth=2, n_lines = 1000, save_plot = None,
-                      fig_size=(5,4), figure=None, show=True, colorlegend = 'Pressure (Pa)', rasterized=True):
+                      fig_size=(5,4), figure=None, show=True, colorlegend = 'Pressure (Pa)'):
     """
     Create a figure of your (.pkl) material lookuptable
     
@@ -791,7 +791,7 @@ def plot_lookup_table(lookup_table, pressure=[0,10000], log_scale = True, distan
         figure = plt.figure(figsize=fig_size)
 
     for i in range(len(displacement_list)):
-        plt.plot( distance_list , displacement_list[i], c= c[i],linewidth=linewidth,alpha=0.5, rasterized=rasterized)
+        plt.plot( distance_list , displacement_list[i], c= c[i],linewidth=linewidth,alpha=0.5)
    
     # set x,y limit - go a bit above minimum and maximum
     plt.ylim(np.nanmin(displacement_list)-(0.1*np.nanmin(displacement_list)),
@@ -873,182 +873,170 @@ def plot_lookup_data(lookup_table, data_folder, timesteps=[10,30,60], distance=[
     # get displacements for pressures list
     displacement_list = [get_displacement(distance_list,i) for i in pressure_list]
    
+    # draw simulations in uniform color
+    for i in range(len(displacement_list)):
+       plt.plot( distance_list , displacement_list[i], c= color_line, #linestyle="--",
+                linewidth=linewidth,alpha=0.5,zorder=30)#, label="Simulation") 
+       if i==0: # plot label once
+           plt.plot( [] ,[] , c= color_line, #linestyle="--",
+                    linewidth=linewidth,alpha=0.5,zorder=30, label="Simulations") 
+        
+    # read in segemntation
+    seg_files = natsorted(glob(data_folder+'/seg*.npy'))[:np.nanmax(timesteps)]
     
-    x = np.arange(0,10000,step =(distance[1]-distance[0]) / 1000 )
-    for pp in [200,2000]:
-        plt.plot( x , get_displacement(x, pp), c= color_line, #linestyle="--",
-                 linewidth=linewidth,alpha=0.5,zorder=30)#, label="Simulation") 
     
-    
-    if 1==1:
+    # load deformations
+    # look for accumulated deformation files (new standard)
+    d_accumulated_files = natsorted(glob(data_folder+'/def*.npy'))[:np.nanmax(timesteps)]  # do not calcualte more then the necessary time steps
+    # look also for not-accummulated deformations (old standard)
+    d_notaccumulated_files = natsorted(glob(data_folder+'/dis*.npy'))[:np.nanmax(timesteps)]  # do not calcualte more then the necessary time steps
+    # if not-accumulated deformations are found chose different mode
+    if len(d_notaccumulated_files) > len(d_accumulated_files):
+        accumulated = False
+        dis_files = d_notaccumulated_files
+        print("Found not-accumulated deformation files (old standard) and will conduct calculations accordingly.")
+    # else do the calcualtion with accumulated d eformations already
+    else:
+        accumulated = True
+        dis_files = d_accumulated_files
 
+
+    # initial spheroid radius and surface (used for force estimation)
+    r0 = load(seg_files[0])['radius']
+   
+    u_sum = None
+    v_sum = None
     
+    distance_list_raw = []
+    displacement_list_raw = []
+    pressure_list_raw = []
     
-    
-        # draw simulations in uniform color
-        for i in range(len(displacement_list)):
-           plt.plot( distance_list , displacement_list[i], c= color_line, #linestyle="--",
-                    linewidth=linewidth,alpha=0.5,zorder=30)#, label="Simulation") 
-           if i==0: # plot label once
-               plt.plot( [] ,[] , c= color_line, #linestyle="--",
-                        linewidth=linewidth,alpha=0.5,zorder=30, label="Simulations") 
-            
-        # read in segemntation
-        seg_files = natsorted(glob(data_folder+'/seg*.npy'))[:np.nanmax(timesteps)]
-        
-        
-        # load deformations
-        # look for accumulated deformation files (new standard)
-        d_accumulated_files = natsorted(glob(data_folder+'/def*.npy'))[:np.nanmax(timesteps)]  # do not calcualte more then the necessary time steps
-        # look also for not-accummulated deformations (old standard)
-        d_notaccumulated_files = natsorted(glob(data_folder+'/dis*.npy'))[:np.nanmax(timesteps)]  # do not calcualte more then the necessary time steps
-        # if not-accumulated deformations are found chose different mode
-        if len(d_notaccumulated_files) > len(d_accumulated_files):
-            accumulated = False
-            dis_files = d_notaccumulated_files
-            print("Found not-accumulated deformation files (old standard) and will conduct calculations accordingly.")
-        # else do the calcualtion with accumulated d eformations already
-        else:
-            accumulated = True
-            dis_files = d_accumulated_files
-    
-    
-        # initial spheroid radius and surface (used for force estimation)
-        r0 = load(seg_files[0])['radius']
-       
-        u_sum = None
-        v_sum = None
-        
-        distance_list_raw = []
-        displacement_list_raw = []
-        pressure_list_raw = []
-        
-        # loop over series of PIV results
-        for (dis_file, seg_file) in tqdm(zip(dis_files, seg_files)):
-            dis = load(dis_file)
-            seg = load(seg_file)
-    
-            x_rav = np.ravel(dis['x'])
-            y_rav = np.ravel(dis['y'])
-            #print("data_points:"+str(len(x_rav)))
-                  
-            # get deformations
-            # sum up if we have not-accummulated deformations (old standard)
-            if accumulated == False:
-                try:
-                    u_sum += np.ravel(dis['u'])
-                    v_sum += np.ravel(dis['v'])
-                except:
-                    u_sum = np.ravel(dis['u'])
-                    v_sum = np.ravel(dis['v'])
-            # else read in accummulated deformations directly (new standard)
-            else:
-                u_sum = np.ravel(dis['u'])
-                v_sum = np.ravel(dis['v'])    
-                
-     
-            cx, cy = seg['centroid']
-            distance_raw, displacement_raw, angle_raw, pressure_raw = infer_pressure(x_rav, y_rav, u_sum, v_sum, cx, cy, r0, get_pressure , angle_filter=angle_filter)
-            #print (len(distance_raw)) # length of valid datapoints after angle filter      
+    # loop over series of PIV results
+    for (dis_file, seg_file) in tqdm(zip(dis_files, seg_files)):
+        dis = load(dis_file)
+        seg = load(seg_file)
+
+        x_rav = np.ravel(dis['x'])
+        y_rav = np.ravel(dis['y'])
+        #print("data_points:"+str(len(x_rav)))
               
-            # create list with accumulated deformations 
-            distance_list_raw.append(distance_raw)
-            displacement_list_raw.append(displacement_raw)
-            pressure_list_raw.append(pressure_raw)
+        # get deformations
+        # sum up if we have not-accummulated deformations (old standard)
+        if accumulated == False:
+            try:
+                u_sum += np.ravel(dis['u'])
+                v_sum += np.ravel(dis['v'])
+            except:
+                u_sum = np.ravel(dis['u'])
+                v_sum = np.ravel(dis['v'])
+        # else read in accummulated deformations directly (new standard)
+        else:
+            u_sum = np.ravel(dis['u'])
+            v_sum = np.ravel(dis['v'])    
             
-            
-        # SCATTERED RAW DATA
-        #now plot the accumulated raw data at the corresponding timepoints if activated;
-        # deformation and image data have a length difference of 1
-        if scatter_raw_data:
-            # in case colors and labels are defined; 
-            if color_list and label_list:
-              for ci,t in enumerate(timesteps_scatter):
-                if t == None: #do not plot None elements 
-                      continue
-                plt.scatter(distance_list_raw[t-1],displacement_list_raw[t-1],s=marker_size_scatter,zorder=20,c = color_list[ci])      
-            
-                #calculate CoV of pressure values for 48h and add to plot
-                if t == 72: #3*72:
-                    mask = (distance_list_raw[t-1]>=5)&(distance_list_raw[t-1]<=10)
-                    
-                    data_masked = pressure_list_raw[t-1][mask]
-                    CoV = np.std(data_masked)/np.nanmean(data_masked)
-                    print (len(data_masked))
-                    print (len(distance_list_raw[t-1]))
-                    print (CoV)
-                    
-                    plt.text(0.05,0.95,s=f"CoV (72; 5-10r): {np.around(CoV,3)}",
-                              transform=plt.gca().transAxes, zorder=1e10,
-                              fontsize=10,c="darkred")
-                if t == 24: #3*72:
-                      mask = (distance_list_raw[t-1]>=5)&(distance_list_raw[t-1]<=10)
-                     
-                      data_masked = pressure_list_raw[t-1][mask]
-                      CoV = np.std(data_masked)/np.nanmean(data_masked)
-                      print (len(data_masked))
-                      print (len(distance_list_raw[t-1]))
-                      print (CoV)
-                     
-                      plt.text(0.05,0.90,s=f"CoV (24; 5-10r): {np.around(CoV,3)}",
-                                transform=plt.gca().transAxes, zorder=1e10,
-                                fontsize=10,c="darkred")
-                if t == 48: #3*72:
-                      mask = (distance_list_raw[t-1]>=5)&(distance_list_raw[t-1]<=10)
-                     
-                      data_masked = pressure_list_raw[t-1][mask]
-                      CoV = np.std(data_masked)/np.nanmean(data_masked)
-                      print (len(data_masked))
-                      print (len(distance_list_raw[t-1]))
-                      print (CoV)
-                     
-                      plt.text(0.05,0.85,s=f"CoV (48; 5-10r): {np.around(CoV,3)}",
-                                transform=plt.gca().transAxes, zorder=1e10,
-                                fontsize=10,c="darkred")
-            
-            # else same color for all here
-            else: 
-               for ci,t in enumerate(timesteps_scatter):
-                if t == None: #do not plot None elements
-                      continue
-                plt.scatter(distance_list_raw[t-1],displacement_list_raw[t-1],s=marker_size_scatter,zorder=20,c = color_raw) # deformation and image data have a length difference of 1
-            
-            
-        # PLOT THE MEAN RAW DATA
+ 
+        cx, cy = seg['centroid']
+        distance_raw, displacement_raw, angle_raw, pressure_raw = infer_pressure(x_rav, y_rav, u_sum, v_sum, cx, cy, r0, get_pressure , angle_filter=angle_filter)
+        #print (len(distance_raw)) # length of valid datapoints after angle filter      
+          
+        # create list with accumulated deformations 
+        distance_list_raw.append(distance_raw)
+        displacement_list_raw.append(displacement_raw)
+        pressure_list_raw.append(pressure_raw)
+        
+        
+    # SCATTERED RAW DATA
+    #now plot the accumulated raw data at the corresponding timepoints if activated;
+    # deformation and image data have a length difference of 1
+    if scatter_raw_data:
+        # in case colors and labels are defined; 
         if color_list and label_list:
-            for ci,t in enumerate(timesteps):
-                if plot_means == False:
-                    continue
-                # calculate the mean in distance windows for timesteps
-                mean_distance = []
-                mean_displacement = []
-                for i in range(distance[0],int(np.max(distance_list_raw[t-1]))): # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                #x = np.linspace(distance[0], int(np.max(distance_list_raw[t-1])), 10)
-                #dx = x[1]-x[0]
-                #for i in x:
-                    #mean_distance.append(i+0.5*dx)
-                    mean_distance.append(i+0.5)
-                    mean_disp = np.nanmean(displacement_list_raw[t-1][(distance_list_raw[t-1]>=i) & (distance_list_raw[t-1]<i+1)])
-                    mean_displacement.append(mean_disp)
-                plt.plot(mean_distance,mean_displacement,"o-",ms=marker_size_mean, zorder=2000, 
-                         linewidth=linewidth,  markerfacecolor="w",  markeredgecolor=color_list[ci], 
-                         markeredgewidth=2 , label=label_list[ci], color="w" )     
-            ax = plt.legend( markerscale=0.4, fontsize=6.5,loc="upper right")
-            ax.set_zorder(2000)
-        else: 
-             for ci,t in enumerate(timesteps):
-                if plot_means == False:
+          for ci,t in enumerate(timesteps_scatter):
+            if t == None: #do not plot None elements 
                   continue
-                # calculate the mean in distance windows for timesteps
-                mean_distance = []
-                mean_displacement = []
-                for i in range(distance[0],int(np.max(distance_list_raw[t-1]))):
-                    mean_distance.append(i+0.5)
-                    mean_disp = np.nanmean(displacement_list_raw[t-1][(distance_list_raw[t-1]>=i) & (distance_list_raw[t-1]<i+1)])
-                    mean_displacement.append(mean_disp)
-                plt.plot(mean_distance,mean_displacement,"o-",ms=marker_size_mean,zorder=2000,
-                         linewidth=linewidth, markerfacecolor="w",color ="w",
-                         markeredgecolor=color_raw, markeredgewidth=2)   
-            #plt.xlim(2,20);plt.ylim(1e-4,3) 
+            plt.scatter(distance_list_raw[t-1],displacement_list_raw[t-1],s=marker_size_scatter,zorder=20,c = color_list[ci])      
+        
+            #calculate CoV of pressure values for 48h and add to plot
+            if t == 72: #3*72:
+                mask = (distance_list_raw[t-1]>=5)&(distance_list_raw[t-1]<=10)
+                
+                data_masked = pressure_list_raw[t-1][mask]
+                CoV = np.std(data_masked)/np.nanmean(data_masked)
+                print (len(data_masked))
+                print (len(distance_list_raw[t-1]))
+                print (CoV)
+                
+                plt.text(0.05,0.95,s=f"CoV (72; 5-10r): {np.around(CoV,3)}",
+                          transform=plt.gca().transAxes, zorder=1e10,
+                          fontsize=10,c="darkred")
+            if t == 24: #3*72:
+                  mask = (distance_list_raw[t-1]>=5)&(distance_list_raw[t-1]<=10)
+                 
+                  data_masked = pressure_list_raw[t-1][mask]
+                  CoV = np.std(data_masked)/np.nanmean(data_masked)
+                  print (len(data_masked))
+                  print (len(distance_list_raw[t-1]))
+                  print (CoV)
+                 
+                  plt.text(0.05,0.90,s=f"CoV (24; 5-10r): {np.around(CoV,3)}",
+                            transform=plt.gca().transAxes, zorder=1e10,
+                            fontsize=10,c="darkred")
+            if t == 48: #3*72:
+                  mask = (distance_list_raw[t-1]>=5)&(distance_list_raw[t-1]<=10)
+                 
+                  data_masked = pressure_list_raw[t-1][mask]
+                  CoV = np.std(data_masked)/np.nanmean(data_masked)
+                  print (len(data_masked))
+                  print (len(distance_list_raw[t-1]))
+                  print (CoV)
+                 
+                  plt.text(0.05,0.85,s=f"CoV (48; 5-10r): {np.around(CoV,3)}",
+                            transform=plt.gca().transAxes, zorder=1e10,
+                            fontsize=10,c="darkred")
+        
+        # else same color for all here
+        else: 
+           for ci,t in enumerate(timesteps_scatter):
+            if t == None: #do not plot None elements
+                  continue
+            plt.scatter(distance_list_raw[t-1],displacement_list_raw[t-1],s=marker_size_scatter,zorder=20,c = color_raw) # deformation and image data have a length difference of 1
+        
+        
+    # PLOT THE MEAN RAW DATA
+    if color_list and label_list:
+        for ci,t in enumerate(timesteps):
+            if plot_means == False:
+                continue
+            # calculate the mean in distance windows for timesteps
+            mean_distance = []
+            mean_displacement = []
+            for i in range(distance[0],int(np.max(distance_list_raw[t-1]))): # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            #x = np.linspace(distance[0], int(np.max(distance_list_raw[t-1])), 10)
+            #dx = x[1]-x[0]
+            #for i in x:
+                #mean_distance.append(i+0.5*dx)
+                mean_distance.append(i+0.5)
+                mean_disp = np.nanmean(displacement_list_raw[t-1][(distance_list_raw[t-1]>=i) & (distance_list_raw[t-1]<i+1)])
+                mean_displacement.append(mean_disp)
+            plt.plot(mean_distance,mean_displacement,"o-",ms=marker_size_mean, zorder=2000, 
+                     linewidth=linewidth,  markerfacecolor="w",  markeredgecolor=color_list[ci], 
+                     markeredgewidth=2 , label=label_list[ci], color="w" )     
+        ax = plt.legend( markerscale=0.4, fontsize=6.5,loc="upper right")
+        ax.set_zorder(2000)
+    else: 
+         for ci,t in enumerate(timesteps):
+            if plot_means == False:
+              continue
+            # calculate the mean in distance windows for timesteps
+            mean_distance = []
+            mean_displacement = []
+            for i in range(distance[0],int(np.max(distance_list_raw[t-1]))):
+                mean_distance.append(i+0.5)
+                mean_disp = np.nanmean(displacement_list_raw[t-1][(distance_list_raw[t-1]>=i) & (distance_list_raw[t-1]<i+1)])
+                mean_displacement.append(mean_disp)
+            plt.plot(mean_distance,mean_displacement,"o-",ms=marker_size_mean,zorder=2000,
+                     linewidth=linewidth, markerfacecolor="w",color ="w",
+                     markeredgecolor=color_raw, markeredgewidth=2)   
+        #plt.xlim(2,20);plt.ylim(1e-4,3) 
 
     return 
